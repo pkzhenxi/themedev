@@ -17,9 +17,6 @@ function searchForComponents()
 	foreach (glob(dirname(__FILE__).'/../extensions/wsshipping/*', GLOB_ONLYDIR) as $moduleDirectory)
 		$arr[basename($moduleDirectory)] = array('class'=>'ext.wsshipping.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
 
-	$arr['wstheme'] = array('class'=>'ext.wstheme.WsTheme');
-	$arr['themeManager']=array('themeClass'=>'Theme');
-
 	if (file_exists(dirname(__FILE__).'/../../../config/wslogging.php'))
 		$arr['log']=require(dirname(__FILE__).'/../../../config/wslogging.php');
 	else

@@ -68,13 +68,19 @@ class ShoppingCart extends CApplicationComponent
 			} else {
 
 				$objCart = Cart::model()->findByPk($intCartId);
-				if (!$objCart || ($objCart->cart_type  != CartType::cart && $objCart->cart_type != CartType::awaitpayment)) {
+				if (!($objCart instanceof Cart))
+				{
 					//something has happened to the database object
 					Yii::log("Could not find cart ".$intCartId.", creating new one.", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
 					$objCart = Cart::InitializeCart();
 					Yii::app()->user->setState('cartid',$objCart->id);
 				}
-
+				elseif($objCart->cart_type != CartType::cart && $objCart->cart_type != CartType::awaitpayment)
+				{
+					Yii::log("Found cart ".$intCartId." but ".$objCart->cart_type." is not editable type, so generate a new one", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+					$objCart = Cart::InitializeCart();
+					Yii::app()->user->setState('cartid',$objCart->id);
+				}
 
 			}
 			$this->_model = $objCart;
@@ -263,16 +269,6 @@ class ShoppingCart extends CApplicationComponent
 	public function getName()
 	{
 		return $this->model->name;
-	}
-
-
-	public function getCartQty()
-	{
-
-		$count=0;
-		foreach ($this->cartItems as $item)
-			$count += $item->qty;
-		return $count;
 	}
 
 	public function setTaxCodeId($id)
@@ -500,7 +496,7 @@ class ShoppingCart extends CApplicationComponent
 
 		if($this->model->id>0)
 		{
-			if($this->model->taxCode->IsNoTax()) return false;
+			if(is_object($this->model->taxCode) && $this->model->taxCode->IsNoTax()) return false;
 			if (Yii::app()->params['TAX_INCLUSIVE_PRICING']) return true;
 
 			return false;

@@ -36,7 +36,7 @@
 					}',
 			))); ?>
 	</span>
-	<?php echo CHtml::endForm(); ?>
+	</form>
 </div>
 <div class="span1">
 	<span class="search_advanced right"><a href="<?php echo _xls_site_url('/search'); ?>"><img class="spyglass" src="<?= Yii::app()->theme->baseUrl; ?>/css/images/adv_search.png"></a></span>

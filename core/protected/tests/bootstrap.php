@@ -4,7 +4,7 @@
 //ob_start("logit");
 // change the following paths if necessary
 $yiit='/Volumes/dev/copper/core/framework/yiit.php';
-$config='Volumes/dev/copper/core/protected/config/test.php';
+$config='/Volumes/dev/copper/core/protected/config/test.php';
 
 $_SERVER['SCRIPT_FILENAME'] = '/Volumes/dev/copper/index.php';
 $_SERVER['SCRIPT_NAME'] = "/".basename($_SERVER['SCRIPT_FILENAME']);

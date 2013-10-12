@@ -9,7 +9,6 @@ class WsExtension extends CComponent
 	const SHIPPING = 'shipping';
 	const PAYMENT = 'payment';
 	const SIDEBAR = 'sidebar';
-	const THEME = 'theme';
 
 	/**
 	 * shipping or billing extension
@@ -22,10 +21,10 @@ class WsExtension extends CComponent
 	 */
 	protected $strModuleName = "Web Store Module";
 	/**
-	 * Extension version number (note whole numbers only)
-	 * @var int
+	 * Extension version number
+	 * @var float
 	 */
-	protected $version = 1;
+	protected $Version = 1.0;
 	/**
 	 * For billing extensions, does it redirect offsite (Simple Integration a la Paypal)
 	 * @var bool
@@ -269,7 +268,7 @@ class WsExtension extends CComponent
 
 	public function getVersion()
 	{
-		return $this->version;
+		return $this->Version;
 	}
 	public function getAdminNameNormal()
 	{

@@ -36,6 +36,7 @@ return CMap::mergeArray(
 		// preloading 'log' component
 		'preload'=>array(
 			'log',
+			'bootstrap',
 		),
 
 		// autoloading model and component classes
@@ -118,6 +119,11 @@ return CMap::mergeArray(
 				//This is our own Web Store shopping cart component
 				'shoppingcart'=>array(
 					'class'=>'ShoppingCart',
+				),
+				//Twitter bootstrap
+				'bootstrap'=>array(
+					'class'=>'ext.bootstrap.components.Bootstrap',
+					'responsiveCss'=>true,
 				),
 
 				'urlManager'=>array(

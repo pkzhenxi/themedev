@@ -52,13 +52,15 @@ class WsMenu extends CMenu {
 					echo CHtml::image(Yii::app()->theme->baseUrl.'/css/images/arrow-down.png','',array('class'=>'arrow'));
 				echo '<ul class="dropspace">';
 
-
+						if(_xls_get_conf('ENABLE_FAMILIES', 0)==2)
+							$this->renderFamilies();
 						 foreach($this->categories as $category) {
 							echo '<li><a href="'.$category['link'].'">'.Yii::t('category',$category['label']);
 							 if(!_xls_is_idevice()) self::renderChildren($category); else echo "</a>";
 							 echo '</li>';
 							 }
-
+						if(_xls_get_conf('ENABLE_FAMILIES', 0)==1)
+							$this->renderFamilies();
 		echo '
 					</ul>
 				</li>

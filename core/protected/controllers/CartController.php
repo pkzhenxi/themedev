@@ -1369,9 +1369,7 @@ class CartController extends Controller
 						WishlistItem::model()->updateByPk($intWishId,array('cart_item_id'=>$intRowId));
 
 					$arrReturn['action'] = "success";
-					$strCartfile = Yii::app()->getRequest()->getParam('cart');
-					$strCartfile = empty($strCartfile) ? "_sidecart" : $strCartfile;
-					$arrReturn['shoppingcart'] = $this->renderPartial('/site/'.$strCartfile,null, true);
+					$arrReturn['shoppingcart'] = $this->renderPartial('/site/_sidecart',null, true);
 
 				}
 

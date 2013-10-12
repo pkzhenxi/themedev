@@ -54,17 +54,10 @@ function _xls_site_url($strUrlPath =  '') {
 	return _xls_site_dir($usessl) . '/' . $strUrlPath;
 }
 
-function _xls_theme_config($strThemeName)
+function _xls_theme_config($theme)
 {
+	$fnOptions = YiiBase::getPathOfAlias('webroot')."/themes/".$theme."/config.xml";
 
-	if(Theme::hasAdminForm($strThemeName))
-		return Yii::app()->getComponent('wstheme')->getAdminModel($strThemeName);
-
-
-
-
-
-	$fnOptions = YiiBase::getPathOfAlias('webroot')."/themes/".$strThemeName."/config.xml";
 	if (file_exists($fnOptions))
 	{
 		$strXml = file_get_contents($fnOptions);
@@ -1443,7 +1436,7 @@ function _xls_is_idevice() {
 function _xls_is_ipad() {
 
 	if(isset($_SERVER['HTTP_USER_AGENT']))
-		return (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPad');
+	return (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPad');
 	else return false;
 }
 
@@ -1502,9 +1495,19 @@ function _xls_check_version($releasenotes = false)
 	$storeurl = str_replace("http://","",$storeurl);
 	$storeurl = str_replace("https://","",$storeurl);
 
-	$strTheme = Yii::app()->theme->name;
-	$strThemeVersion =
-		(Yii::app()->theme->info->noupdate ? "noupdate" : Yii::app()->theme->info->version);
+	$oXML = _xls_theme_config(Yii::app()->theme->name);
+
+	if(!is_null($oXML))
+	{
+		$strTheme = Yii::app()->theme->name;
+		$strThemeVersion = _xls_number_only((string)$oXML->version);
+		if(isset($oXML->noupdate) && $oXML->noupdate=='true' && $strTheme != "brooklyn")
+			$strThemeVersion="noupdate";
+
+	} else {
+		$strTheme = "unknown";
+		$strThemeVersion="noupdate";
+	}
 
 	if(isset($_SERVER['SERVER_SOFTWARE']))
 		$serversoftware=$_SERVER['SERVER_SOFTWARE'];
@@ -1902,14 +1905,4 @@ function rcopy($src, $dst) {
 				rcopy ( "$src/$file", "$dst/$file" );
 	} else if (file_exists ( $src ))
 		copy ( $src, $dst );
-}
-
-function RemoveEmptySubFolders($path)
-{
-	$empty=true;
-	foreach (glob($path.DIRECTORY_SEPARATOR."*") as $file)
-	{
-		$empty &= is_dir($file) && RemoveEmptySubFolders($file);
-	}
-	return $empty && @rmdir($path);
 }

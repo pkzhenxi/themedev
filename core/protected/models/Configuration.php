@@ -99,14 +99,24 @@ class Configuration extends BaseConfiguration
 			if(is_array($x)) $success=true;
 		} catch (Exception $objExc) {
 			//our config wasn't successful
+			Yii::log('generating wsconfig array failed '.$strConfigArray, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
 			$success = false;
 		}
 
 		if($success){
 			$str = "<?php"."\n".$strConfigArray;
-			file_put_contents(YiiBase::getPathOfAlias('config')."/".$randName,$str);
-			@unlink(YiiBase::getPathOfAlias('config')."/wsconfig.php");
+			//Yii::log('config being defined as '.YiiBase::getPathOfAlias('config'), 'info', 'application.'.__CLASS__.".".__FUNCTION__);
+			$result = file_put_contents(YiiBase::getPathOfAlias('config')."/".$randName,$str);
+			if($result === false) {
+				Yii::log('error file_put_contents to '.YiiBase::getPathOfAlias('config')."/".$randName, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+				return false;
+			}
+
+			if(file_exists(YiiBase::getPathOfAlias('config')."/wsconfig.php"))
+				unlink(YiiBase::getPathOfAlias('config')."/wsconfig.php");
+
 			rename(YiiBase::getPathOfAlias('config')."/".$randName,YiiBase::getPathOfAlias('config')."/wsconfig.php");
+
 			return true;
 		} else {
 			Yii::log('error writing wsconfig.php', 'error', 'application.'.__CLASS__.".".__FUNCTION__);
@@ -324,9 +334,7 @@ return array(
 				);
 
 			case 'ENABLE_FAMILIES':
-				return array(0 => _sp("Off") , 1 => _sp("Bottom of Products Menu") , 2 => _sp("Top of Products Menu"),
-					3 => _sp("Blended into Products Menu")
-				);
+				return array(0 => _sp("Off") , 1 => _sp("Bottom of Products Menu") , 2 => _sp("Top of Products Menu"));
 
 			case 'EMAIL_SMTP_SECURITY_MODE':
 				return array(0 => _sp("Autodetect") , 1 => _sp("Force No Security") , 2 => _sp("Force SSL"));

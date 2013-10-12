@@ -4,7 +4,7 @@ class cheque extends WsPayment
 {
 
 	protected $defaultName = "Cheque";
-	protected $version = 1;
+	protected $version = "1.0";
 
 	//Define a subform
 	public $subform = "chequeform";

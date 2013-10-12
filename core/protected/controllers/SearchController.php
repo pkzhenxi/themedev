@@ -33,8 +33,6 @@ class SearchController extends Controller
 	public function actionIndex()
 	{
 
-
-
 		$model = new AdvancedSearchForm();
 
 		if (isset($_POST['AdvancedSearchForm']))
@@ -76,7 +74,6 @@ class SearchController extends Controller
 		$strC = Yii::app()->getRequest()->getQuery('cat');
 		$strB = Yii::app()->getRequest()->getQuery('brand');
 		$strS = Yii::app()->getRequest()->getQuery('class_name');
-
 		$strInv='';
 
 		//If we haven't passed any criteria, we just query the database
@@ -223,27 +220,11 @@ class SearchController extends Controller
 
 		if (empty($this->strBreadcrumbCat))
 			$this->breadcrumbs = array(
-				Yii::t('global','Searching for "{terms}"',array('{terms}'=>$strQ))=>'',
-			);
+			Yii::t('global','Searching for "{terms}"',array('{terms}'=>$strQ))=>'',
+		);
 		else $this->breadcrumbs = array(
 			Yii::t('global','Searching for "{terms}" in category "{category}"',array('{terms}'=>$strQ,'{category}'=>$this->strBreadcrumbCat))=>'',
 		);
-
-		if(isset($_GET['cpc']))
-		{
-			//We have been sent over Custom Page Content
-			$objCustomPage = CustomPage::model()->findByPk($_GET['cpc']);
-			if($objCustomPage)
-			{
-				$this->pageTitle=$objCustomPage->PageTitle;
-				$this->pageDescription=$objCustomPage->meta_description;
-				$this->pageImageUrl = '';
-				$this->breadcrumbs = array($objCustomPage->title=>$objCustomPage->RequestUrl);
-				$this->custom_page_content = $objCustomPage->page;
-				$this->pageHeader = $objCustomPage->title;
-			}
-		}
-
 		$this->CanonicalUrl = $this->createAbsoluteUrl('/search/results',$formModel->attributes,'',"&amp;");
 
 
@@ -324,7 +305,6 @@ class SearchController extends Controller
 					case 'endprice':        $strInv .= " AND sell_web <= :endprice ";   break;
 					case 'product_size':    $strInv .= " AND product_size = :product_size "; break;
 					case 'product_color':   $strInv .= " AND product_color = :product_color "; break;
-					case 'tag':             $strInv .= " AND tag = :tag "; break;
 				}
 			}
 

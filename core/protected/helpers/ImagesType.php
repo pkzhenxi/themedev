@@ -84,8 +84,8 @@ class ImagesType {
 		$strCfgWidth = $strCfg . '_WIDTH';
 		$strCfgHeight = $strCfg . '_HEIGHT';
 
-		$intWidth = Yii::app()->theme->config->$strCfgWidth; //_xls_get_conf($strCfgWidth, $intDefWidth);
-		$intHeight = Yii::app()->theme->config->$strCfgHeight; //_xls_get_conf($strCfgHeight, $intDefHeight);
+		$intWidth = _xls_get_conf($strCfgWidth, $intDefWidth);
+		$intHeight = _xls_get_conf($strCfgHeight, $intDefHeight);
 
 		return array($intWidth, $intHeight);
 	}

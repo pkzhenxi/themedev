@@ -29,7 +29,7 @@ class moneris extends WsPayment
 
 		$type='purchase';
 		$cust_id='';
-		$order_id=$this->objCart->id_str;
+		$order_id=$this->objCart->id_str.date("YmdHis");
 		$amount=number_format(round($this->objCart->total,2),2, '.', '');
 		$pan=_xls_number_only($this->CheckoutForm->cardNumber);
 		$expiry_date=$this->CheckoutForm->cardExpiryMonth.substr($this->CheckoutForm->cardExpiryYear,2,2);

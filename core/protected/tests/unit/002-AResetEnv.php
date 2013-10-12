@@ -27,6 +27,8 @@ class ResetEnvironment extends PHPUnit_Framework_TestCase
 			TRUNCATE TABLE `xlsws_customer_address`;
 			TRUNCATE TABLE `xlsws_sessions`;
 			TRUNCATE TABLE `xlsws_destination`;
+			TRUNCATE TABLE `xlsws_stringsource`;
+			TRUNCATE TABLE `xlsws_stringtranslate`;
 			TRUNCATE TABLE `xlsws_log`;
 			TRUNCATE TABLE `xlsws_modules`;
 			TRUNCATE TABLE `xlsws_category_integration`;
@@ -254,6 +256,81 @@ VALUES
 		_dbx("update xlsws_product set inventory_reserved=0, inventory_avail=0 where web=0");
 		while (Product::RecalculateInventory()>0)
 		{}
+
+
+
+		_dbx("INSERT INTO `xlsws_stringsource` (`id`, `category`, `message`)
+VALUES
+	(1, 'unittest', 'Sample Text'),
+	(2, 'CheckoutForm', 'First Name'),
+	(3, 'CheckoutForm', 'Last Name'),
+	(6, 'CheckoutForm', 'Email Address'),
+	(7, 'checkout', 'Shopping Cart'),
+	(8, 'cart', 'Qty'),
+	(9, 'cart', 'SubTotal'),
+	(10, 'cart', 'Checkout'),
+	(11, 'cart', 'Edit Cart'),
+	(12, 'global', 'Order Lookup'),
+	(13, 'global', 'Wish Lists'),
+	(14, 'global', 'View all my wish lists'),
+	(15, 'global', 'Create a Wish List'),
+	(16, 'global', 'Search for a wish list'),
+	(17, 'global', 'Logout'),
+	(18, 'tabs', 'Products'),
+	(19, 'global', 'SEARCH'),
+	(20, 'global', 'About Us'),
+	(21, 'global', 'Terms and Conditions'),
+	(22, 'global', 'Privacy Policy'),
+	(23, 'global', 'Sitemap'),
+	(24, 'global', 'Copyright'),
+	(25, 'global', 'All Rights Reserved'),
+	(26, 'global', '{name} : {storename}'),
+	(27, 'global', 'Login'),
+	(28, 'global', 'Register'),
+	(29, 'CheckoutForm', 'Password'),
+	(30, 'global', 'Forgot Password?'),
+	(31, 'global', 'Contact Us'),
+	(32, 'global', 'Fields with {*} are required.'),
+	(33, 'email', 'Contact Us:'),
+	(34, 'email', 'Message sent. Thank you for contacting us. We will respond to you as soon as possible.'),
+	(35, 'global', 'Error'),
+	(36, 'global', 'Wish List Search'),
+	(37, 'wishlist', 'Click on the wish list name to view.'),
+	(38, 'global', 'Name'),
+	(39, 'global', 'Contains'),
+	(40, 'global', 'Description'),
+	(41, 'global', '{items} item|{items} items'),
+	(42, 'global', 'Search for a wish list by email address'),
+	(43, 'category', 'Beverages'),
+	(44, 'category', 'Non-Carbonated'),
+	(45, 'category', 'Carbonated'),
+	(46, 'category', 'Beverage supplies including bar supplies'),
+	(47, 'category', 'Snacks'),
+	(48, 'category', 'Cupcakes'),
+	(49, 'category', 'Fruits & Nuts'),
+	(50, 'category', 'Sandwiches'),
+	(51, 'category', 'Cards'),
+	(52, 'category', 'Clothing'),
+	(53, 'category', 'Women\'s Shoes'),
+	(54, 'global', 'We\'re sorry, an error has occurred with this site. The error has been logged and the administrators have been notified. For additional help, please contact {email}'),
+	(55, 'global', 'My Wish Lists');
+");
+
+		_dbx("INSERT INTO `xlsws_stringtranslate` (`id`, `language`, `translation`)
+VALUES
+	(1, 'de', 'Beispieltext'),
+	(1, 'fr', 'Exemple de texte'),
+	(2, 'fr', 'Nom'),
+	(3, 'fr', 'Nom de famille'),
+	(6, 'fr', 'Adresse Courriel'),
+	(36, '', 'Wish List Search'),
+	(37, '', 'Click on the wish list name to view.'),
+	(38, '', 'Name'),
+	(39, '', 'Contains'),
+	(40, '', 'Description'),
+	(41, '', '{items} item|{items} items'),
+	(55, '', 'My Wish Lists');
+");
 
 
 	}

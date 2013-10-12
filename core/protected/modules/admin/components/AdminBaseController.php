@@ -74,9 +74,6 @@ class AdminBaseController extends CController
           };
       ',CClientScript::POS_HEAD);
 
-
-		$this->registerAsset("js/bootbox.min.js");
-
 		if (_xls_get_conf('STORE_OFFLINE')>1)
 			Yii::app()->user->setFlash('warning',Yii::t('admin','Your store is currently set offline for maintenance -- you can access it via the url {url}',
 			array('{url}'=>Yii::app()->createAbsoluteUrl('site/index',array('offline'=>_xls_get_conf('STORE_OFFLINE'))))));
@@ -156,12 +153,7 @@ class AdminBaseController extends CController
 	public function actionModule()
 	{
 		$id = Yii::app()->getRequest()->getQuery('id');
-
-		if(Yii::app()->controller->id=="theme" && Yii::app()->controller->action->id == "module")
-			$id = "wstheme";
-
 		$objComponent = Yii::app()->getComponent($id);
-
 		if (!$objComponent)
 			throw new CHttpException(404,'The requested page does not exist.');
 
@@ -173,14 +165,11 @@ class AdminBaseController extends CController
 			//Get form elements (Admin panel configuration) and add our layout formatting so the form looks nice within Admin Panel
 			$this->editSectionInstructions = $this->getInstructions(get_class($this))."<p>".$this->editSectionInstructions;
 
-			$adminModelName = Yii::app()->getComponent($id)->getAdminModelName();
+			$objModule = Modules::LoadByName($id);
 
-			$objModule = ($id == "wstheme" ? Modules::LoadByName(Yii::app()->theme->name) : Modules::LoadByName($id));
-
-			if($id == "wstheme") $objModule->active=1;
-			if(isset($_POST[$adminModelName]))
+			if(isset($_POST[Yii::app()->getComponent($id)->getAdminModelName()]))
 			{
-				$model->attributes = $_POST[$adminModelName];
+				$model->attributes = $_POST[Yii::app()->getComponent($id)->getAdminModelName()];
 				$this->registerOnOff($objModule->id,'Modules_active',_xls_number_only($_POST['Modules']['active']));
 				if ($model->validate())
 				{
@@ -199,6 +188,11 @@ class AdminBaseController extends CController
 						//If we happen to be updating a module that includes a promo code, we need to throw that to our restrictions
 						if (isset($model->promocode))
 							Yii::app()->getComponent($id)->syncPromoCode();
+//						&& !empty($model->promocode))
+//							$strPromoCode = $model->promocode;
+//						else $strPromoCode = $id.":";
+//						$formDefinition = $model->getAdminForm();
+//						PromoCode::model()->updateAll(array('code'=>$strPromoCode),'module=:module',array(':module'=>$id));
 
 						$this->updateMenuAfterEdit($id);
 
@@ -218,7 +212,7 @@ class AdminBaseController extends CController
 			{
 				//Load current attributes
 				$this->registerOnOff($objModule->id,'Modules_active',$objModule->active);
-				$model->attributes = $objModule->getConfigValues();
+				$model->attributes = Yii::app()->getComponent($id)->getConfigValues();
 
 			}
 
@@ -237,7 +231,7 @@ class AdminBaseController extends CController
 			$this->render('admin.views.default.moduleedit', array('objModule'=>$objModule,'model'=>$model,'form'=>new CForm($formDefinition,$model)));
 		}
 		else
-			$this->render('admin.views.default.noconfig',array('id'=>$id)); //If null it means the AdminForm model file is missing
+			$this->render('admin.views.default.noconfig'); //If null it means the AdminForm model file is missing
 
 	}
 
@@ -337,7 +331,6 @@ class AdminBaseController extends CController
 				$class != "CustomerController" &&
 				$class != "LanguageController" &&
 				$class != "UpgradeController" &&
-				$class != "GalleryController" &&
 				$class != "LicenseController"
 
 				) //Keep these showing up on top
@@ -474,86 +467,4 @@ SETUP;
 		}
 	}
 
-
-	public function scanModules($moduletype = "payment")
-	{
-		if($moduletype=="theme")
-		{
-			$files = glob(YiiBase::getPathOfAlias("webroot.themes").'/*', GLOB_ONLYDIR);
-			foreach($files as $key=>$file)
-				if(stripos($file,"/themes/trash")>0)
-					unset($files[$key]);
-
-		}
-		else
-		{
-			$arrCustom = glob(YiiBase::getPathOfAlias("custom.extensions.".$moduletype).'/*', GLOB_ONLYDIR);
-			if(!is_array($arrCustom)) $arrCustom = array();
-			$files=array_merge(glob(YiiBase::getPathOfAlias("ext.ws".$moduletype).'/*', GLOB_ONLYDIR),$arrCustom);
-		}
-
-		foreach ($files as $file)
-		{
-
-			$moduleName = mb_pathinfo($file,PATHINFO_BASENAME);
-			$version=0;
-			$name = $moduleName;
-
-			if($moduletype=="theme")
-			{
-				$model = Yii::app()->getComponent('wstheme')->getAdminModel($moduleName);
-				if($model)
-				{
-					$version = $model->version;
-					$name = $model->name;
-				}
-
-				$configuration = "";
-			} else {
-				try {
-				$version =  Yii::app()->getComponent($moduleName)->Version;
-				$name = Yii::app()->getComponent($moduleName)->AdminNameNormal;
-				$configuration = Yii::app()->getComponent($moduleName)->getDefaultConfiguration();
-				}catch (Exception $e) {
-					Yii::log("$moduleName component can't be read ".$e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-				}
-			}
-
-			//Check if module is already in database
-			$objModule = Modules::LoadByName($moduleName);
-			if(!($objModule instanceof Modules))
-			{
-				//The module doesn't exist, attempt to install it
-				try {
-
-					$objModule = new Modules();
-					$objModule->active=0;
-					$objModule->module = $moduleName;
-					$objModule->category = $moduletype;
-
-
-
-					$objModule->version = $version;
-					$objModule->name =  $name;
-					$objModule->configuration = $configuration;
-					if (!$objModule->save())
-						Yii::log("Found widget $moduleName could not install ".print_r($objModule->getErrors(),true), 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-
-				}
-				catch (Exception $e) {
-					Yii::log("Found $moduletype widget $moduleName could not install ".$e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-				}
-
-			} else  {
-				$objModule->version = $version;
-				$objModule->name = $name;
-				$objModule->save();
-			}
-		}
-
-
-
-
-
-	}
 }

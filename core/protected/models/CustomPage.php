@@ -38,10 +38,10 @@ class CustomPage extends BaseCustomPage
 			array('page_key', 'validateUnique'),
 			array('title', 'length', 'max'=>64),
 			array('request_url, meta_keywords, meta_description, product_tag', 'length', 'max'=>255),
-			array('deleteMe,page,created,column_template,product_display', 'safe'),
+			array('deleteMe,page, created', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, page_key, title, page, request_url, meta_keywords, meta_description, modified, created, product_tag, tab_position,column_template,product_display', 'safe', 'on'=>'search'),
+			array('id, page_key, title, page, request_url, meta_keywords, meta_description, modified, created, product_tag, tab_position', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -71,35 +71,11 @@ class CustomPage extends BaseCustomPage
 				'condition'=>'tab_position >= 20 AND tab_position <= 29',
 				'order'=>'tab_position',
 			),
-			'blendedtabs'=>array(
-				'condition'=>'tab_position = 30',
-				'order'=>'title',
-			),
 			'activetabs'=>array(
 				'select'=>'*,title as text',
 				'condition'=>'tab_position >= 10 AND tab_position <= 29',
 				'order'=>'title',
 			),
-		);
-	}
-
-	/**
-	 * @return array customized attribute labels (name=>label)
-	 */
-	public function attributeLabels()
-	{
-		return array(
-			'id' => 'ID',
-			'page_key' => 'Unique Page Key',
-			'title' => 'Title',
-			'page' => 'Page',
-			'request_url' => 'Request Url',
-			'meta_keywords' => 'Meta Keywords',
-			'meta_description' => 'Meta Description',
-			'modified' => 'Modified',
-			'created' => 'Created',
-			'product_tag' => 'Product Tag',
-			'tab_position' => 'Display Position',
 		);
 	}
 
@@ -228,77 +204,6 @@ class CustomPage extends BaseCustomPage
 
 
 	}
-
-	public function getPositions()
-	{
-		return array(
-			'0'=>'Not displayed',
-			'11'=>'1st Tab Position Top',
-			'12'=>'2nd Tab Position Top',
-			'13'=>'3rd Tab Position Top',
-			'14'=>'4th Tab Position Top',
-			'15'=>'5th Tab Position Top',
-			'21'=>'1st Tab Position Bottom',
-			'22'=>'2nd Tab Position Bottom',
-			'23'=>'3rd Tab Position Bottom',
-			'24'=>'4th Tab Position Bottom',
-			'25'=>'5th Tab Position Bottom',
-			'30'=>'Blended in Products Menu'
-		);
-		//+Configuration::getAdminDropdownOptions('ENABLE_FAMILIES');
-
-	}
-
-
-	public static function GetTree() {
-
-		$objRet = CustomPage::model()->blendedtabs()->findAll();
-
-		return self::getDataFormatted(self::parseTree($objRet,0));
-
-	}
-
-	protected static function formatData($person) {
-		return array(
-			'text'=>$person['text'],
-			'label'=>$person['label'],
-			'link'=>$person['link'],
-			'url'=>$person['link'],
-			'id'=>$person['id'],
-			'child_count'=>$person['child_count'],
-			'hasChildren'=>0);
-	}
-
-	protected static function getDataFormatted($data) {
-		$personFormatted = array();
-		if (is_array($data))
-			foreach($data as $k=>$person) {
-				$personFormatted[strtolower($person['label'].'cusp')] = self::formatData($person);
-
-			}
-		return $personFormatted;
-	}
-
-	public static function parseTree($objRet, $root = 0)
-	{
-		$return = array();
-		# Traverse the tree and search for direct children of the root
-		foreach($objRet as $objItem) {
-				$return[] = array(
-					'text'=>CHtml::link($objItem->title,$objItem->Link),
-					'label' => $objItem->title,
-					'link' => $objItem->Link,
-					'url' => $objItem->Link,
-					'id' => $objItem->id,
-					'child_count' => 0,
-					'children' => null
-				);
-
-		}
-		return empty($return) ? null : $return;
-	}
-
-
 
 	/**
 	 * Since Validate tests to make sure certain fields have values, populate requirements here such as the modified timestamp

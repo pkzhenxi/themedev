@@ -4,7 +4,7 @@
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @link http://www.yiiframework.com/
- * @copyright 2008-2013 Yii Software LLC
+ * @copyright Copyright &copy; 2008-2011 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
 
@@ -95,7 +95,6 @@ class CDbMessageSource extends CMessageSource
 
 	/**
 	 * Returns the DB connection used for the message source.
-	 * @throws CException if {@link connectionID} application component is invalid
 	 * @return CDbConnection the DB connection used for the message source.
 	 * @since 1.1.5
 	 */

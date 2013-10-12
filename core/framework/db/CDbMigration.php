@@ -4,7 +4,7 @@
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @link http://www.yiiframework.com/
- * @copyright 2008-2013 Yii Software LLC
+ * @copyright Copyright &copy; 2008-2011 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
 
@@ -19,9 +19,6 @@
  * Within each migration, the {@link up} method contains the logic for "upgrading"
  * the database used in an application; while the {@link down} method contains "downgrading"
  * logic. The "yiic migrate" command manages all available migrations in an application.
- *
- * By overriding {@link safeUp} or {@link safeDown} methods instead of {@link up} and {@link down}
- * the migration logic will be wrapped with a DB transaction.
  *
  * CDbMigration provides a set of convenient methods for manipulating database data and schema.
  * For example, the {@link insert} method can be used to easily insert a row of data into
@@ -43,7 +40,7 @@ abstract class CDbMigration extends CComponent
 	/**
 	 * This method contains the logic to be executed when applying this migration.
 	 * Child classes may implement this method to provide actual migration logic.
-	 * @return boolean Returning false means, the migration will not be applied.
+	 * @return boolean
 	 */
 	public function up()
 	{
@@ -68,8 +65,9 @@ abstract class CDbMigration extends CComponent
 
 	/**
 	 * This method contains the logic to be executed when removing this migration.
+	 * The default implementation throws an exception indicating the migration cannot be removed.
 	 * Child classes may override this method if the corresponding migrations can be removed.
-	 * @return boolean Returning false means, the migration will not be applied.
+	 * @return boolean
 	 */
 	public function down()
 	{
@@ -98,8 +96,7 @@ abstract class CDbMigration extends CComponent
 	 * be enclosed within a DB transaction.
 	 * Child classes may implement this method instead of {@link up} if the DB logic
 	 * needs to be within a transaction.
-	 * @return boolean Returning false means, the migration will not be applied and
-	 * the transaction will be rolled back.
+	 * @return boolean
 	 * @since 1.1.7
 	 */
 	public function safeUp()
@@ -112,8 +109,7 @@ abstract class CDbMigration extends CComponent
 	 * be enclosed within a DB transaction.
 	 * Child classes may implement this method instead of {@link up} if the DB logic
 	 * needs to be within a transaction.
-	 * @return boolean Returning false means, the migration will not be applied and
-	 * the transaction will be rolled back.
+	 * @return boolean
 	 * @since 1.1.7
 	 */
 	public function safeDown()
@@ -126,7 +122,6 @@ abstract class CDbMigration extends CComponent
 	 * You can call {@link setDbConnection} to switch to a different database connection.
 	 * Methods such as {@link insert}, {@link createTable} will use this database connection
 	 * to perform DB queries.
-	 * @throws CException if "db" application component is not configured
 	 * @return CDbConnection the currently active database connection
 	 */
 	public function getDbConnection()
@@ -427,7 +422,7 @@ abstract class CDbMigration extends CComponent
 	 */
 	public function dropPrimaryKey($name,$table)
 	{
-		echo "    > alter table $table drop primary key $name ...";
+		echo "    > alter table $table drop constraint $name primary key $column ...";
 		$time=microtime(true);
 		$this->getDbConnection()->createCommand()->dropPrimaryKey($name,$table);
 		echo " done (time: ".sprintf('%.3f', microtime(true)-$time)."s)\n";

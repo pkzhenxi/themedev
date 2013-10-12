@@ -126,10 +126,7 @@ class DefaultController extends AdminBaseController
 		{
 			if($oXML->webstore->version>XLSWS_VERSIONBUILD)
 			{
-				if( _xls_get_conf('LIGHTSPEED_HOSTING','0') != "1" &&
-					_xls_get_conf('AUTO_UPDATE','1')=='1' &&
-					$oXML->webstore->autopathfile
-				)
+				if(_xls_get_conf('AUTO_UPDATE','1')=='1' && $oXML->webstore->autopathfile)
 					$this->redirect($this->createUrl("upgrade/index",array('patch'=>$oXML->webstore->autopathfile)));
 				else
 					$this->render("newversion",array('oXML'=>$oXML->webstore));
@@ -215,9 +212,8 @@ class DefaultController extends AdminBaseController
 	public function actionReleasenotes()
 	{
 		$oXML = json_decode(_xls_check_version(true));
-		if(!isset($oXML->webstore))
-			$this->redirect(Yii::app()->createUrl('admin/default'));
-		else
+
+//print_r($oXML);die();
 		$this->render("releasenotes", array('oXML'=>$oXML->webstore));
 
 	}

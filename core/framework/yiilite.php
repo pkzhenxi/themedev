@@ -15,7 +15,7 @@
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @link http://www.yiiframework.com/
- * @copyright 2008-2013 Yii Software LLC
+ * @copyright Copyright &copy; 2008-2012 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  * @version $Id: $
  * @since 1.0
@@ -40,7 +40,7 @@ class YiiBase
 	private static $_logger;
 	public static function getVersion()
 	{
-		return '1.1.14';
+		return '1.1.13';
 	}
 	public static function createWebApplication($config=null)
 	{
@@ -134,14 +134,8 @@ class YiiBase
 				return $alias;
 			}
 			else
-			{
-				// try to autoload the class with an autoloader
-				if (class_exists($alias,true))
-					return self::$_imports[$alias]=$alias;
-				else
-					throw new CException(Yii::t('yii','Alias "{alias}" is invalid. Make sure it points to an existing directory or file.',
-						array('{alias}'=>$namespace)));
-			}
+				throw new CException(Yii::t('yii','Alias "{alias}" is invalid. Make sure it points to an existing directory.',
+					array('{alias}'=>$namespace)));
 		}
 		if(($pos=strrpos($alias,'.'))===false)  // a simple class name
 		{
@@ -376,7 +370,6 @@ class YiiBase
 		'CEAcceleratorCache' => '/caching/CEAcceleratorCache.php',
 		'CFileCache' => '/caching/CFileCache.php',
 		'CMemCache' => '/caching/CMemCache.php',
-		'CRedisCache' => '/caching/CRedisCache.php',
 		'CWinCache' => '/caching/CWinCache.php',
 		'CXCache' => '/caching/CXCache.php',
 		'CZendDataCache' => '/caching/CZendDataCache.php',
@@ -435,7 +428,6 @@ class YiiBase
 		'COciSchema' => '/db/schema/oci/COciSchema.php',
 		'COciTableSchema' => '/db/schema/oci/COciTableSchema.php',
 		'CPgsqlColumnSchema' => '/db/schema/pgsql/CPgsqlColumnSchema.php',
-		'CPgsqlCommandBuilder' => '/db/schema/pgsql/CPgsqlCommandBuilder.php',
 		'CPgsqlSchema' => '/db/schema/pgsql/CPgsqlSchema.php',
 		'CPgsqlTableSchema' => '/db/schema/pgsql/CPgsqlTableSchema.php',
 		'CSqliteColumnSchema' => '/db/schema/sqlite/CSqliteColumnSchema.php',
@@ -465,9 +457,7 @@ class YiiBase
 		'CDateTimeParser' => '/utils/CDateTimeParser.php',
 		'CFileHelper' => '/utils/CFileHelper.php',
 		'CFormatter' => '/utils/CFormatter.php',
-		'CLocalizedFormatter' => '/utils/CLocalizedFormatter.php',
 		'CMarkdownParser' => '/utils/CMarkdownParser.php',
-		'CPasswordHelper' => '/utils/CPasswordHelper.php',
 		'CPropertyValue' => '/utils/CPropertyValue.php',
 		'CTimestamp' => '/utils/CTimestamp.php',
 		'CVarDumper' => '/utils/CVarDumper.php',
@@ -1163,18 +1153,7 @@ abstract class CApplication extends CModule
 			$this->setBasePath('protected');
 		Yii::setPathOfAlias('application',$this->getBasePath());
 		Yii::setPathOfAlias('webroot',dirname($_SERVER['SCRIPT_FILENAME']));
-		if(isset($config['extensionPath']))
-		{
-			$this->setExtensionPath($config['extensionPath']);
-			unset($config['extensionPath']);
-		}
-		else
-			Yii::setPathOfAlias('ext',$this->getBasePath().DIRECTORY_SEPARATOR.'extensions');
-		if(isset($config['aliases']))
-		{
-			$this->setAliases($config['aliases']);
-			unset($config['aliases']);
-		}
+		Yii::setPathOfAlias('ext',$this->getBasePath().DIRECTORY_SEPARATOR.'extensions');
 		$this->preinit();
 		$this->initSystemHandlers();
 		$this->registerCoreComponents();
@@ -2258,7 +2237,6 @@ class CHttpRequest extends CApplicationComponent
 	private $_hostInfo;
 	private $_baseUrl;
 	private $_cookies;
-	private $_preferredAcceptTypes;
 	private $_preferredLanguages;
 	private $_csrfToken;
 	private $_restParams;
@@ -2286,16 +2264,7 @@ class CHttpRequest extends CApplicationComponent
 	}
 	public function stripSlashes(&$data)
 	{
-		if(is_array($data))
-		{
-			if(count($data) == 0)
-				return $data;
-			$keys=array_map('stripslashes',array_keys($data));
-			$data=array_combine($keys,array_values($data));
-			return array_map(array($this,'stripSlashes'),$data);
-		}
-		else
-			return stripslashes($data);
+		return is_array($data)?array_map(array($this,'stripSlashes'),$data):stripslashes($data);
 	}
 	public function getParam($name,$defaultValue=null)
 	{
@@ -2315,8 +2284,8 @@ class CHttpRequest extends CApplicationComponent
 			return $this->getPost($name, $defaultValue);
 		if($this->getIsDeleteRequest())
 		{
-			$restParams=$this->getRestParams();
-			return isset($restParams[$name]) ? $restParams[$name] : $defaultValue;
+			$this->getRestParams();
+			return isset($this->_restParams[$name]) ? $this->_restParams[$name] : $defaultValue;
 		}
 		else
 			return $defaultValue;
@@ -2327,8 +2296,8 @@ class CHttpRequest extends CApplicationComponent
 			return $this->getPost($name, $defaultValue);
 		if($this->getIsPutRequest())
 		{
-			$restParams=$this->getRestParams();
-			return isset($restParams[$name]) ? $restParams[$name] : $defaultValue;
+			$this->getRestParams();
+			return isset($this->_restParams[$name]) ? $this->_restParams[$name] : $defaultValue;
 		}
 		else
 			return $defaultValue;
@@ -2508,8 +2477,7 @@ class CHttpRequest extends CApplicationComponent
 	}
 	public function getIsSecureConnection()
 	{
-		return isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']=='on' || $_SERVER['HTTPS']==1)
-			|| isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO']=='https';
+		return !empty($_SERVER['HTTPS']) && strcasecmp($_SERVER['HTTPS'],'off');
 	}
 	public function getRequestType()
 	{
@@ -2623,95 +2591,6 @@ class CHttpRequest extends CApplicationComponent
 		if($terminate)
 			Yii::app()->end();
 	}
-	public static function parseAcceptHeader($header)
-	{
-		$matches=array();
-		$accepts=array();
-		// get individual entries with their type, subtype, basetype and params
-		preg_match_all('/(?:\G\s?,\s?|^)(\w+|\*)\/(\w+|\*)(?:\+(\w+))?|(?<!^)\G(?:\s?;\s?(\w+)=([\w\.]+))/',$header,$matches);
-		// the regexp should (in theory) always return an array of 6 arrays
-		if(count($matches)===6)
-		{
-			$i=0;
-			$itemLen=count($matches[1]);
-			while($i<$itemLen)
-			{
-				// fill out a content type
-				$accept=array(
-					'type'=>$matches[1][$i],
-					'subType'=>$matches[2][$i],
-					'baseType'=>null,
-					'params'=>array(),
-				);
-				// fill in the base type if it exists
-				if($matches[3][$i]!==null && $matches[3][$i]!=='')
-					$accept['baseType']=$matches[3][$i];
-				// continue looping while there is no new content type, to fill in all accompanying params
-				for($i++;$i<$itemLen;$i++)
-				{
-					// if the next content type is null, then the item is a param for the current content type
-					if($matches[1][$i]===null || $matches[1][$i]==='')
-					{
-						// if this is the quality param, convert it to a double
-						if($matches[4][$i]==='q')
-						{
-							// sanity check on q value
-							$q=(double)$matches[5][$i];
-							if($q>1)
-								$q=(double)1;
-							elseif($q<0)
-								$q=(double)0;
-							$accept['params'][$matches[4][$i]]=$q;
-						}
-						else
-							$accept['params'][$matches[4][$i]]=$matches[5][$i];
-					}
-					else
-						break;
-				}
-				// q defaults to 1 if not explicitly given
-				if(!isset($accept['params']['q']))
-					$accept['params']['q']=(double)1;
-				$accepts[] = $accept;
-			}
-		}
-		return $accepts;
-	}
-	public static function compareAcceptTypes($a,$b)
-	{
-		// check for equal quality first
-		if($a['params']['q']===$b['params']['q'])
-			if(!($a['type']==='*' xor $b['type']==='*'))
-				if (!($a['subType']==='*' xor $b['subType']==='*'))
-					// finally, higher number of parameters counts as greater precedence
-					if(count($a['params'])===count($b['params']))
-						return 0;
-					else
-						return count($a['params'])<count($b['params']) ? 1 : -1;
-				// more specific takes precedence - whichever one doesn't have a * subType
-				else
-					return $a['subType']==='*' ? 1 : -1;
-			// more specific takes precedence - whichever one doesn't have a * type
-			else
-				return $a['type']==='*' ? 1 : -1;
-		else
-			return ($a['params']['q']<$b['params']['q']) ? 1 : -1;
-	}
-	public function getPreferredAcceptTypes()
-	{
-		if($this->_preferredAcceptTypes===null)
-		{
-			$accepts=self::parseAcceptHeader($this->getAcceptTypes());
-			usort($accepts,array(get_class($this),'compareAcceptTypes'));
-			$this->_preferredAcceptTypes=$accepts;
-		}
-		return $this->_preferredAcceptTypes;
-	}
-	public function getPreferredAcceptType()
-	{
-		$preferredAcceptTypes=$this->getPreferredAcceptTypes();
-		return empty($preferredAcceptTypes) ? false : $preferredAcceptTypes[0];
-	}
 	public function getPreferredLanguages()
 	{
 		if($this->_preferredLanguages===null)
@@ -2748,56 +2627,13 @@ class CHttpRequest extends CApplicationComponent
 			if(($mimeType=CFileHelper::getMimeTypeByExtension($fileName))===null)
 				$mimeType='text/plain';
 		}
-		$fileSize=(function_exists('mb_strlen') ? mb_strlen($content,'8bit') : strlen($content));
-		$contentStart=0;
-		$contentEnd=$fileSize-1;
-		if(isset($_SERVER['HTTP_RANGE']))
-		{
-			header('Accept-Ranges: bytes');
-			//client sent us a multibyte range, can not hold this one for now
-			if(strpos($_SERVER['HTTP_RANGE'],',')!==false)
-			{
-				header("Content-Range: bytes $contentStart-$contentEnd/$fileSize");
-				throw new CHttpException(416,'Requested Range Not Satisfiable');
-			}
-			$range=str_replace('bytes=','',$_SERVER['HTTP_RANGE']);
-			//range requests starts from "-", so it means that data must be dumped the end point.
-			if($range[0]==='-')
-				$contentStart=$fileSize-substr($range,1);
-			else
-			{
-				$range=explode('-',$range);
-				$contentStart=$range[0];
-				// check if the last-byte-pos presents in header
-				if((isset($range[1]) && is_numeric($range[1])))
-					$contentEnd=$range[1];
-			}
-			/* Check the range and make sure it's treated according to the specs.
-			 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-			 */
-			// End bytes can not be larger than $end.
-			$contentEnd=($contentEnd > $fileSize) ? $fileSize-1 : $contentEnd;
-			// Validate the requested range and return an error if it's not correct.
-			$wrongContentStart=($contentStart>$contentEnd || $contentStart>$fileSize-1 || $contentStart<0);
-			if($wrongContentStart)
-			{
-				header("Content-Range: bytes $contentStart-$contentEnd/$fileSize");
-				throw new CHttpException(416,'Requested Range Not Satisfiable');
-			}
-			header('HTTP/1.1 206 Partial Content');
-			header("Content-Range: bytes $contentStart-$contentEnd/$fileSize");
-		}
-		else
-			header('HTTP/1.1 200 OK');
-		$length=$contentEnd-$contentStart+1; // Calculate new content length
 		header('Pragma: public');
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header("Content-Type: $mimeType");
-		header('Content-Length: '.$length);
+		header("Content-type: $mimeType");
+		header('Content-Length: '.(function_exists('mb_strlen') ? mb_strlen($content,'8bit') : strlen($content)));
 		header("Content-Disposition: attachment; filename=\"$fileName\"");
 		header('Content-Transfer-Encoding: binary');
-		$content=function_exists('mb_substr') ? mb_substr($content,$contentStart,$length) : substr($content,$contentStart,$length);
 		if($terminate)
 		{
 			// clean up the application first because the file downloading could take long time
@@ -2826,8 +2662,8 @@ class CHttpRequest extends CApplicationComponent
 		}
 		if(!isset($options['xHeader']))
 			$options['xHeader']='X-Sendfile';
-		if($options['mimeType']!==null)
-			header('Content-Type: '.$options['mimeType']);
+		if($options['mimeType'] !== null)
+			header('Content-type: '.$options['mimeType']);
 		header('Content-Disposition: '.$disposition.'; filename="'.$options['saveName'].'"');
 		if(isset($options['addHeaders']))
 		{
@@ -3028,10 +2864,7 @@ class CUrlManager extends CApplicationComponent
 		if(is_array($route) && isset($route['class']))
 			return $route;
 		else
-		{
-			$urlRuleClass=Yii::import($this->urlRuleClass,true);
-			return new $urlRuleClass($route,$pattern);
-		}
+			return new $this->urlRuleClass($route,$pattern);
 	}
 	public function createUrl($route,$params=array(),$ampersand='&')
 	{
@@ -4064,13 +3897,11 @@ class CWebUser extends CApplicationComponent implements IWebUser
 	const FLASH_COUNTERS='Yii.CWebUser.flashcounters';
 	const STATES_VAR='__states';
 	const AUTH_TIMEOUT_VAR='__timeout';
-	const AUTH_ABSOLUTE_TIMEOUT_VAR='__absolute_timeout';
 	public $allowAutoLogin=false;
 	public $guestName='Guest';
 	public $loginUrl=array('/site/login');
 	public $identityCookie;
 	public $authTimeout;
-	public $absoluteAuthTimeout;
 	public $autoRenewCookie=false;
 	public $autoUpdateFlash=true;
 	public $loginRequiredAjaxResponse;
@@ -4131,8 +3962,6 @@ class CWebUser extends CApplicationComponent implements IWebUser
 					throw new CException(Yii::t('yii','{class}.allowAutoLogin must be set true in order to use cookie-based authentication.',
 						array('{class}'=>get_class($this))));
 			}
-			if ($this->absoluteAuthTimeout)
-				$this->setState(self::AUTH_ABSOLUTE_TIMEOUT_VAR, time()+$this->absoluteAuthTimeout);
 			$this->afterLogin(false);
 		}
 		return !$this->getIsGuest();
@@ -4204,24 +4033,23 @@ class CWebUser extends CApplicationComponent implements IWebUser
 		$app=Yii::app();
 		$request=$app->getRequest();
 		if(!$request->getIsAjaxRequest())
-		{
 			$this->setReturnUrl($request->getUrl());
-			if(($url=$this->loginUrl)!==null)
-			{
-				if(is_array($url))
-				{
-					$route=isset($url[0]) ? $url[0] : $app->defaultController;
-					$url=$app->createUrl($route,array_splice($url,1));
-				}
-				$request->redirect($url);
-			}
-		}
 		elseif(isset($this->loginRequiredAjaxResponse))
 		{
 			echo $this->loginRequiredAjaxResponse;
 			Yii::app()->end();
 		}
-		throw new CHttpException(403,Yii::t('yii','Login Required'));
+		if(($url=$this->loginUrl)!==null)
+		{
+			if(is_array($url))
+			{
+				$route=isset($url[0]) ? $url[0] : $app->defaultController;
+				$url=$app->createUrl($route,array_splice($url,1));
+			}
+			$request->redirect($url);
+		}
+		else
+			throw new CHttpException(403,Yii::t('yii','Login Required'));
 	}
 	protected function beforeLogin($id,$states,$fromCookie)
 	{
@@ -4253,7 +4081,8 @@ class CWebUser extends CApplicationComponent implements IWebUser
 					$this->changeIdentity($id,$name,$states);
 					if($this->autoRenewCookie)
 					{
-						$this->saveToCookie($duration);
+						$cookie->expire=time()+$duration;
+						$request->getCookies()->add($cookie->name,$cookie);
 					}
 					$this->afterLogin(true);
 				}
@@ -4270,7 +4099,8 @@ class CWebUser extends CApplicationComponent implements IWebUser
 			$data=@unserialize($data);
 			if(is_array($data) && isset($data[0],$data[1],$data[2],$data[3]))
 			{
-				$this->saveToCookie($data[2]);
+				$cookie->expire=time()+$data[2];
+				$cookies->add($cookie->name,$cookie);
 			}
 		}
 	}
@@ -4424,11 +4254,10 @@ class CWebUser extends CApplicationComponent implements IWebUser
 	}
 	protected function updateAuthStatus()
 	{
-		if(($this->authTimeout!==null || $this->absoluteAuthTimeout!==null) && !$this->getIsGuest())
+		if($this->authTimeout!==null && !$this->getIsGuest())
 		{
 			$expires=$this->getState(self::AUTH_TIMEOUT_VAR);
-			$expiresAbsolute=$this->getState(self::AUTH_ABSOLUTE_TIMEOUT_VAR);
-			if ($expires!==null && $expires < time() || $expiresAbsolute!==null && $expiresAbsolute < time())
+			if ($expires!==null && $expires < time())
 				$this->logout(false);
 			else
 				$this->setState(self::AUTH_TIMEOUT_VAR,time()+$this->authTimeout);
@@ -4450,6 +4279,9 @@ class CHttpSession extends CApplicationComponent implements IteratorAggregate,Ar
 	public function init()
 	{
 		parent::init();
+		// default session gc probability is 1%
+		ini_set('session.gc_probability',1);
+		ini_set('session.gc_divisor',100);
 		if($this->autoStart)
 			$this->open();
 		register_shutdown_function(array($this,'close'));
@@ -4707,7 +4539,6 @@ class CHtml
 	public static $liveEvents=true;
 	public static $closeSingleTags=true;
 	public static $renderSpecialAttributesValue=true;
-	private static $_modelNameConverter;
 	public static function encode($text)
 	{
 		return htmlspecialchars($text,ENT_QUOTES,Yii::app()->charset);
@@ -4778,33 +4609,24 @@ class CHtml
 			$media=' media="'.$media.'"';
 		return "<style type=\"text/css\"{$media}>\n/*<![CDATA[*/\n{$text}\n/*]]>*/\n</style>";
 	}
-	public static function refresh($seconds,$url='')
+	public static function refresh($seconds, $url='')
 	{
 		$content="$seconds";
 		if($url!=='')
-			$content.=';url='.self::normalizeUrl($url);
+			$content.=';'.self::normalizeUrl($url);
 		Yii::app()->clientScript->registerMetaTag($content,null,'refresh');
 	}
 	public static function cssFile($url,$media='')
 	{
 		return CHtml::linkTag('stylesheet','text/css',$url,$media!=='' ? $media : null);
 	}
-	public static function script($text,array $htmlOptions=array())
+	public static function script($text)
 	{
-		$defaultHtmlOptions=array(
-			'type'=>'text/javascript',
-		);
-		$htmlOptions=array_merge($defaultHtmlOptions,$htmlOptions);
-		return self::tag('script',$htmlOptions,"\n/*<![CDATA[*/\n{$text}\n/*]]>*/\n");
+		return "<script type=\"text/javascript\">\n/*<![CDATA[*/\n{$text}\n/*]]>*/\n</script>";
 	}
-	public static function scriptFile($url,array $htmlOptions=array())
+	public static function scriptFile($url)
 	{
-		$defaultHtmlOptions=array(
-			'type'=>'text/javascript',
-			'src'=>$url
-		);
-		$htmlOptions=array_merge($defaultHtmlOptions,$htmlOptions);
-		return self::tag('script',$htmlOptions,'');
+		return '<script type="text/javascript" src="'.self::encode($url).'"></script>';
 	}
 	public static function form($action='',$method='post',$htmlOptions=array())
 	{
@@ -4874,7 +4696,7 @@ class CHtml
 		}
 		if(!isset($htmlOptions['type']))
 			$htmlOptions['type']='button';
-		if(!isset($htmlOptions['value']) && $htmlOptions['type']!='image')
+		if(!isset($htmlOptions['value']))
 			$htmlOptions['value']=$label;
 		self::clientChange('click',$htmlOptions);
 		return self::tag('input',$htmlOptions);
@@ -4934,41 +4756,6 @@ class CHtml
 	{
 		self::clientChange('change',$htmlOptions);
 		return self::inputField('text',$name,$value,$htmlOptions);
-	}
-	public static function numberField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('number',$name,$value,$htmlOptions);
-	}
-	public static function rangeField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('range',$name,$value,$htmlOptions);
-	}
-	public static function dateField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('date',$name,$value,$htmlOptions);
-	}
-	public static function timeField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('time',$name,$value,$htmlOptions);
-	}
-	public static function emailField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('email',$name,$value,$htmlOptions);
-	}
-	public static function telField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('tel',$name,$value,$htmlOptions);
-	}
-	public static function urlField($name,$value='',$htmlOptions=array())
-	{
-		self::clientChange('change',$htmlOptions);
-		return self::inputField('url',$name,$value,$htmlOptions);
 	}
 	public static function hiddenField($name,$value='',$htmlOptions=array())
 	{
@@ -5061,7 +4848,7 @@ class CHtml
 		self::clientChange('change',$htmlOptions);
 		$options="\n".self::listOptions($select,$data,$htmlOptions);
 		$hidden='';
-		if(!empty($htmlOptions['multiple']))
+		if(isset($htmlOptions['multiple']))
 		{
 			if(substr($htmlOptions['name'],-2)!=='[]')
 				$htmlOptions['name'].='[]';
@@ -5079,7 +4866,7 @@ class CHtml
 	{
 		if(!isset($htmlOptions['size']))
 			$htmlOptions['size']=4;
-		if(!empty($htmlOptions['multiple']))
+		if(isset($htmlOptions['multiple']))
 		{
 			if(substr($name,-2)!=='[]')
 				$name.='[]';
@@ -5107,39 +4894,23 @@ class CHtml
 		unset($htmlOptions['baseID']);
 		$id=0;
 		$checkAll=true;
-		foreach($data as $value=>$labelTitle)
+		foreach($data as $value=>$label)
 		{
 			$checked=!is_array($select) && !strcmp($value,$select) || is_array($select) && in_array($value,$select);
 			$checkAll=$checkAll && $checked;
 			$htmlOptions['value']=$value;
 			$htmlOptions['id']=$baseID.'_'.$id++;
 			$option=self::checkBox($name,$checked,$htmlOptions);
-			$beginLabel=self::openTag('label',$labelOptions);
-			$label=self::label($labelTitle,$htmlOptions['id'],$labelOptions);
-			$endLabel=self::closeTag('label');
-			$items[]=strtr($template,array(
-				'{input}'=>$option,
-				'{beginLabel}'=>$beginLabel,
-				'{label}'=>$label,
-				'{labelTitle}'=>$labelTitle,
-				'{endLabel}'=>$endLabel,
-			));
+			$label=self::label($label,$htmlOptions['id'],$labelOptions);
+			$items[]=strtr($template,array('{input}'=>$option,'{label}'=>$label));
 		}
 		if(isset($checkAllLabel))
 		{
 			$htmlOptions['value']=1;
 			$htmlOptions['id']=$id=$baseID.'_all';
 			$option=self::checkBox($id,$checkAll,$htmlOptions);
-			$beginLabel=self::openTag('label',$labelOptions);
 			$label=self::label($checkAllLabel,$id,$labelOptions);
-			$endLabel=self::closeTag('label');
-			$item=strtr($template,array(
-				'{input}'=>$option,
-				'{beginLabel}'=>$beginLabel,
-				'{label}'=>$label,
-				'{labelTitle}'=>$checkAllLabel,
-				'{endLabel}'=>$endLabel,
-			));
+			$item=strtr($template,array('{input}'=>$option,'{label}'=>$label));
 			if($checkAllLast)
 				$items[]=$item;
 			else
@@ -5171,33 +4942,18 @@ EOD;
 		unset($htmlOptions['template'],$htmlOptions['separator'],$htmlOptions['container']);
 		$labelOptions=isset($htmlOptions['labelOptions'])?$htmlOptions['labelOptions']:array();
 		unset($htmlOptions['labelOptions']);
-		if(isset($htmlOptions['empty']))
-		{
-			if(!is_array($htmlOptions['empty']))
-				$htmlOptions['empty']=array(''=>$htmlOptions['empty']);
-			$data=array_merge($htmlOptions['empty'],$data);
-			unset($htmlOptions['empty']);
-		}
 		$items=array();
 		$baseID=isset($htmlOptions['baseID']) ? $htmlOptions['baseID'] : self::getIdByName($name);
 		unset($htmlOptions['baseID']);
 		$id=0;
-		foreach($data as $value=>$labelTitle)
+		foreach($data as $value=>$label)
 		{
 			$checked=!strcmp($value,$select);
 			$htmlOptions['value']=$value;
 			$htmlOptions['id']=$baseID.'_'.$id++;
 			$option=self::radioButton($name,$checked,$htmlOptions);
-			$beginLabel=self::openTag('label',$labelOptions);
-			$label=self::label($labelTitle,$htmlOptions['id'],$labelOptions);
-			$endLabel=self::closeTag('label');
-			$items[]=strtr($template,array(
-				'{input}'=>$option,
-				'{beginLabel}'=>$beginLabel,
-				'{label}'=>$label,
-				'{labelTitle}'=>$labelTitle,
-				'{endLabel}'=>$endLabel,
-			));
+			$label=self::label($label,$htmlOptions['id'],$labelOptions);
+			$items[]=strtr($template,array('{input}'=>$option,'{label}'=>$label));
 		}
 		if(empty($container))
 			return implode($separator,$items);
@@ -5288,14 +5044,13 @@ EOD;
 	}
 	public static function activeLabel($model,$attribute,$htmlOptions=array())
 	{
-		$inputName=self::resolveName($model,$attribute);
 		if(isset($htmlOptions['for']))
 		{
 			$for=$htmlOptions['for'];
 			unset($htmlOptions['for']);
 		}
 		else
-			$for=self::getIdByName($inputName);
+			$for=self::getIdByName(self::resolveName($model,$attribute));
 		if(isset($htmlOptions['label']))
 		{
 			if(($label=$htmlOptions['label'])===false)
@@ -5320,12 +5075,6 @@ EOD;
 		self::resolveNameID($model,$attribute,$htmlOptions);
 		self::clientChange('change',$htmlOptions);
 		return self::activeInputField('text',$model,$attribute,$htmlOptions);
-	}
-	public static function activeSearchField($model,$attribute,$htmlOptions=array())
-	{
-		self::resolveNameID($model,$attribute,$htmlOptions);
-		self::clientChange('change',$htmlOptions);
-		return self::activeInputField('search',$model,$attribute,$htmlOptions);
 	}
 	public static function activeUrlField($model,$attribute,$htmlOptions=array())
 	{
@@ -5356,18 +5105,6 @@ EOD;
 		self::resolveNameID($model,$attribute,$htmlOptions);
 		self::clientChange('change',$htmlOptions);
 		return self::activeInputField('date',$model,$attribute,$htmlOptions);
-	}
-	public static function activeTimeField($model,$attribute,$htmlOptions=array())
-	{
-		self::resolveNameID($model,$attribute,$htmlOptions);
-		self::clientChange('change',$htmlOptions);
-		return self::activeInputField('time',$model,$attribute,$htmlOptions);
-	}
-	public static function activeTelField($model,$attribute,$htmlOptions=array())
-	{
-		self::resolveNameID($model,$attribute,$htmlOptions);
-		self::clientChange('change',$htmlOptions);
-		return self::activeInputField('tel',$model,$attribute,$htmlOptions);
 	}
 	public static function activeHiddenField($model,$attribute,$htmlOptions=array())
 	{
@@ -5452,7 +5189,7 @@ EOD;
 		if($model->hasErrors($attribute))
 			self::addErrorCss($htmlOptions);
 		$hidden='';
-		if(!empty($htmlOptions['multiple']))
+		if(isset($htmlOptions['multiple']))
 		{
 			if(substr($htmlOptions['name'],-2)!=='[]')
 				$htmlOptions['name'].='[]';
@@ -5603,27 +5340,11 @@ EOD;
 	}
 	public static function getIdByName($name)
 	{
-		return str_replace(array('[]','][','[',']',' '),array('','_','_','','_'),$name);
+		return str_replace(array('[]', '][', '[', ']', ' '), array('', '_', '_', '', '_'), $name);
 	}
 	public static function activeId($model,$attribute)
 	{
 		return self::getIdByName(self::activeName($model,$attribute));
-	}
-	public static function modelName($model)
-	{
-		if(is_callable(self::$_modelNameConverter))
-			return call_user_func(self::$_modelNameConverter,$model);
-		$className=is_object($model) ? get_class($model) : (string)$model;
-		return trim(str_replace('\\','_',$className),'_');
-	}
-	public static function setModelNameConverter($converter)
-	{
-		if(is_callable($converter))
-			self::$_modelNameConverter=$converter;
-		elseif($converter===null)
-			self::$_modelNameConverter=null;
-		else
-			throw new CException(Yii::t('yii','The $converter argument must be a valid callback or null.'));
 	}
 	public static function activeName($model,$attribute)
 	{
@@ -5663,7 +5384,7 @@ EOD;
 		$content='';
 		if(isset($htmlOptions['prompt']))
 		{
-			$content.='<option value="">'.strtr($htmlOptions['prompt'],array('<'=>'&lt;','>'=>'&gt;'))."</option>\n";
+			$content.='<option value="">'.strtr($htmlOptions['prompt'],array('<'=>'&lt;', '>'=>'&gt;'))."</option>\n";
 			unset($htmlOptions['prompt']);
 		}
 		if(isset($htmlOptions['empty']))
@@ -5671,7 +5392,7 @@ EOD;
 			if(!is_array($htmlOptions['empty']))
 				$htmlOptions['empty']=array(''=>$htmlOptions['empty']);
 			foreach($htmlOptions['empty'] as $value=>$label)
-				$content.='<option value="'.self::encode($value).'">'.strtr($label,array('<'=>'&lt;','>'=>'&gt;'))."</option>\n";
+				$content.='<option value="'.self::encode($value).'">'.strtr($label,array('<'=>'&lt;', '>'=>'&gt;'))."</option>\n";
 			unset($htmlOptions['empty']);
 		}
 		if(isset($htmlOptions['options']))
@@ -5705,7 +5426,7 @@ EOD;
 			}
 			else
 			{
-				$attributes=array('value'=>(string)$key,'encode'=>!$raw);
+				$attributes=array('value'=>(string)$key, 'encode'=>!$raw);
 				if(!is_array($selection) && !strcmp($key,$selection) || is_array($selection) && in_array($key,$selection))
 					$attributes['selected']='selected';
 				if(isset($options[$key]))
@@ -5771,9 +5492,9 @@ EOD;
 				$handler="return $confirm;";
 		}
 		if($live)
-			$cs->registerScript('Yii.CHtml.#' . $id,"jQuery('body').on('$event','#$id',function(){{$handler}});");
+			$cs->registerScript('Yii.CHtml.#' . $id, "jQuery('body').on('$event','#$id',function(){{$handler}});");
 		else
-			$cs->registerScript('Yii.CHtml.#' . $id,"jQuery('#$id').on('$event', function(){{$handler}});");
+			$cs->registerScript('Yii.CHtml.#' . $id, "jQuery('#$id').on('$event', function(){{$handler}});");
 		unset($htmlOptions['params'],$htmlOptions['submit'],$htmlOptions['ajax'],$htmlOptions['confirm'],$htmlOptions['return'],$htmlOptions['csrf']);
 	}
 	public static function resolveNameID($model,&$attribute,&$htmlOptions)
@@ -5787,25 +5508,24 @@ EOD;
 	}
 	public static function resolveName($model,&$attribute)
 	{
-		$modelName=self::modelName($model);
 		if(($pos=strpos($attribute,'['))!==false)
 		{
 			if($pos!==0)  // e.g. name[a][b]
-				return $modelName.'['.substr($attribute,0,$pos).']'.substr($attribute,$pos);
+				return get_class($model).'['.substr($attribute,0,$pos).']'.substr($attribute,$pos);
 			if(($pos=strrpos($attribute,']'))!==false && $pos!==strlen($attribute)-1)  // e.g. [a][b]name
 			{
 				$sub=substr($attribute,0,$pos+1);
 				$attribute=substr($attribute,$pos+1);
-				return $modelName.$sub.'['.$attribute.']';
+				return get_class($model).$sub.'['.$attribute.']';
 			}
 			if(preg_match('/\](\w+\[.*)$/',$attribute,$matches))
 			{
-				$name=$modelName.'['.str_replace(']','][',trim(strtr($attribute,array(']['=>']','['=>']')),']')).']';
+				$name=get_class($model).'['.str_replace(']','][',trim(strtr($attribute,array(']['=>']','['=>']')),']')).']';
 				$attribute=$matches[1];
 				return $name;
 			}
 		}
-		return $modelName.'['.$attribute.']';
+		return get_class($model).'['.$attribute.']';
 	}
 	public static function resolveValue($model,$attribute)
 	{
@@ -6002,9 +5722,8 @@ class CWidget extends CBaseController
 	public function getViewPath($checkTheme=false)
 	{
 		$className=get_class($this);
-		$scope=$checkTheme?'theme':'local';
-		if(isset(self::$_viewPaths[$className][$scope]))
-			return self::$_viewPaths[$className][$scope];
+		if(isset(self::$_viewPaths[$className]))
+			return self::$_viewPaths[$className];
 		else
 		{
 			if($checkTheme && ($theme=Yii::app()->getTheme())!==null)
@@ -6015,10 +5734,10 @@ class CWidget extends CBaseController
 				else
 					$path.=$className;
 				if(is_dir($path))
-					return self::$_viewPaths[$className]['theme']=$path;
+					return self::$_viewPaths[$className]=$path;
 			}
 			$class=new ReflectionClass($className);
-			return self::$_viewPaths[$className]['local']=dirname($class->getFileName()).DIRECTORY_SEPARATOR.'views';
+			return self::$_viewPaths[$className]=dirname($class->getFileName()).DIRECTORY_SEPARATOR.'views';
 		}
 	}
 	public function getViewFile($viewName)
@@ -6113,10 +5832,10 @@ class CClientScript extends CApplicationComponent
 			$map=$this->scriptFiles[self::POS_HEAD];
 		if(isset($this->scriptFiles[self::POS_BEGIN]))
 		{
-			foreach($this->scriptFiles[self::POS_BEGIN] as $scriptFile=>$scriptFileValue)
+			foreach($this->scriptFiles[self::POS_BEGIN] as $key=>$scriptFile)
 			{
 				if(isset($map[$scriptFile]))
-					unset($this->scriptFiles[self::POS_BEGIN][$scriptFile]);
+					unset($this->scriptFiles[self::POS_BEGIN][$key]);
 				else
 					$map[$scriptFile]=true;
 			}
@@ -6125,7 +5844,7 @@ class CClientScript extends CApplicationComponent
 		{
 			foreach($this->scriptFiles[self::POS_END] as $key=>$scriptFile)
 			{
-				if(isset($map[$key]))
+				if(isset($map[$scriptFile]))
 					unset($this->scriptFiles[self::POS_END][$key]);
 			}
 		}
@@ -6151,12 +5870,12 @@ class CClientScript extends CApplicationComponent
 		}
 		$this->cssFiles=$cssFiles;
 		$jsFiles=array();
-		foreach($this->scriptFiles as $position=>$scriptFiles)
+		foreach($this->scriptFiles as $position=>$scripts)
 		{
 			$jsFiles[$position]=array();
-			foreach($scriptFiles as $scriptFile=>$scriptFileValue)
+			foreach($scripts as $key=>$script)
 			{
-				$name=basename($scriptFile);
+				$name=basename($script);
 				if(isset($this->scriptMap[$name]))
 				{
 					if($this->scriptMap[$name]!==false)
@@ -6168,36 +5887,10 @@ class CClientScript extends CApplicationComponent
 						$jsFiles[$position][$this->scriptMap['*.js']]=$this->scriptMap['*.js'];
 				}
 				else
-					$jsFiles[$position][$scriptFile]=$scriptFileValue;
+					$jsFiles[$position][$key]=$script;
 			}
 		}
 		$this->scriptFiles=$jsFiles;
-	}
-	protected function renderScriptBatch(array $scripts)
-	{
-		$html = '';
-		$scriptBatches = array();
-		foreach($scripts as $scriptValue)
-		{
-			if(is_array($scriptValue))
-			{
-				$scriptContent = $scriptValue['content'];
-				unset($scriptValue['content']);
-				$scriptHtmlOptions = $scriptValue;
-			}
-			else
-			{
-				$scriptContent = $scriptValue;
-				$scriptHtmlOptions = array();
-			}
-			$key=serialize(ksort($scriptHtmlOptions));
-			$scriptBatches[$key]['htmlOptions']=$scriptHtmlOptions;
-			$scriptBatches[$key]['scripts'][]=$scriptContent;
-		}
-		foreach($scriptBatches as $scriptBatch)
-			if(!empty($scriptBatch['scripts']))
-				$html.=CHtml::script(implode("\n",$scriptBatch['scripts']),$scriptBatch['htmlOptions'])."\n";
-		return $html;
 	}
 	public function renderCoreScripts()
 	{
@@ -6230,8 +5923,8 @@ class CClientScript extends CApplicationComponent
 		{
 			if(isset($this->scriptFiles[$this->coreScriptPosition]))
 			{
-				foreach($this->scriptFiles[$this->coreScriptPosition] as $url => $value)
-					$jsFiles[$url]=$value;
+				foreach($this->scriptFiles[$this->coreScriptPosition] as $url)
+					$jsFiles[$url]=$url;
 			}
 			$this->scriptFiles[$this->coreScriptPosition]=$jsFiles;
 		}
@@ -6251,16 +5944,11 @@ class CClientScript extends CApplicationComponent
 		{
 			if(isset($this->scriptFiles[self::POS_HEAD]))
 			{
-				foreach($this->scriptFiles[self::POS_HEAD] as $scriptFileValueUrl=>$scriptFileValue)
-				{
-					if(is_array($scriptFileValue))
-						$html.=CHtml::scriptFile($scriptFileValueUrl,$scriptFileValue)."\n";
-					else
-						$html.=CHtml::scriptFile($scriptFileValueUrl)."\n";
-				}
+				foreach($this->scriptFiles[self::POS_HEAD] as $scriptFile)
+					$html.=CHtml::scriptFile($scriptFile)."\n";
 			}
 			if(isset($this->scripts[self::POS_HEAD]))
-				$html.=$this->renderScriptBatch($this->scripts[self::POS_HEAD]);
+				$html.=CHtml::script(implode("\n",$this->scripts[self::POS_HEAD]))."\n";
 		}
 		if($html!=='')
 		{
@@ -6277,16 +5965,11 @@ class CClientScript extends CApplicationComponent
 		$html='';
 		if(isset($this->scriptFiles[self::POS_BEGIN]))
 		{
-			foreach($this->scriptFiles[self::POS_BEGIN] as $scriptFileUrl=>$scriptFileValue)
-			{
-				if(is_array($scriptFileValue))
-					$html.=CHtml::scriptFile($scriptFileUrl,$scriptFileValue)."\n";
-				else
-					$html.=CHtml::scriptFile($scriptFileUrl)."\n";
-			}
+			foreach($this->scriptFiles[self::POS_BEGIN] as $scriptFile)
+				$html.=CHtml::scriptFile($scriptFile)."\n";
 		}
 		if(isset($this->scripts[self::POS_BEGIN]))
-			$html.=$this->renderScriptBatch($this->scripts[self::POS_BEGIN]);
+			$html.=CHtml::script(implode("\n",$this->scripts[self::POS_BEGIN]))."\n";
 		if($html!=='')
 		{
 			$count=0;
@@ -6307,13 +5990,8 @@ class CClientScript extends CApplicationComponent
 		$html='';
 		if(isset($this->scriptFiles[self::POS_END]))
 		{
-			foreach($this->scriptFiles[self::POS_END] as $scriptFileUrl=>$scriptFileValue)
-			{
-				if(is_array($scriptFileValue))
-					$html.=CHtml::scriptFile($scriptFileUrl,$scriptFileValue)."\n";
-				else
-					$html.=CHtml::scriptFile($scriptFileUrl)."\n";
-			}
+			foreach($this->scriptFiles[self::POS_END] as $scriptFile)
+				$html.=CHtml::scriptFile($scriptFile)."\n";
 		}
 		$scripts=isset($this->scripts[self::POS_END]) ? $this->scripts[self::POS_END] : array();
 		if(isset($this->scripts[self::POS_READY]))
@@ -6331,7 +6009,7 @@ class CClientScript extends CApplicationComponent
 				$scripts[]=implode("\n",$this->scripts[self::POS_LOAD]);
 		}
 		if(!empty($scripts))
-			$html.=$this->renderScriptBatch($scripts);
+			$html.=CHtml::script(implode("\n",$scripts))."\n";
 		if($fullPage)
 			$output=str_replace('<###end###>',$html,$output);
 		else
@@ -6413,38 +6091,22 @@ class CClientScript extends CApplicationComponent
 		$this->recordCachingAction('clientScript','registerCss',$params);
 		return $this;
 	}
-	public function registerScriptFile($url,$position=null,array $htmlOptions=array())
+	public function registerScriptFile($url,$position=null)
 	{
 		if($position===null)
 			$position=$this->defaultScriptFilePosition;
 		$this->hasScripts=true;
-		if(empty($htmlOptions))
-			$value=$url;
-		else
-		{
-			$value=$htmlOptions;
-			$value['src']=$url;
-		}
-		$this->scriptFiles[$position][$url]=$value;
+		$this->scriptFiles[$position][$url]=$url;
 		$params=func_get_args();
 		$this->recordCachingAction('clientScript','registerScriptFile',$params);
 		return $this;
 	}
-	public function registerScript($id,$script,$position=null,array $htmlOptions=array())
+	public function registerScript($id,$script,$position=null)
 	{
 		if($position===null)
 			$position=$this->defaultScriptPosition;
 		$this->hasScripts=true;
-		if(empty($htmlOptions))
-			$scriptValue=$script;
-		else
-		{
-			if($position==self::POS_LOAD || $position==self::POS_READY)
-				throw new CException(Yii::t('yii','Script HTML options are not allowed for "CClientScript::POS_LOAD" and "CClientScript::POS_READY".'));
-			$scriptValue=$htmlOptions;
-			$scriptValue['content']=$script;
-		}
-		$this->scripts[$position][$id]=$scriptValue;
+		$this->scripts[$position][$id]=$script;
 		if($position===self::POS_READY || $position===self::POS_LOAD)
 			$this->registerCoreScript('jquery');
 		$params=func_get_args();
@@ -6882,7 +6544,7 @@ class CAccessRule extends CComponent
 	}
 	protected function isControllerMatched($controller)
 	{
-		return empty($this->controllers) || in_array(strtolower($controller->getUniqueId()),$this->controllers);
+		return empty($this->controllers) || in_array(strtolower($controller->getId()),$this->controllers);
 	}
 	protected function isUserMatched($user)
 	{
@@ -7205,7 +6867,7 @@ abstract class CActiveRecord extends CModel
 	const STAT='CStatRelation';
 	public static $db;
 	private static $_models=array();			// class name => model
-	private static $_md=array();				// class name => meta data
+	private $_md;								// meta data
 	private $_new=false;						// whether this instance is new or not
 	private $_attributes=array();				// attribute name => attribute value
 	private $_related=array();					// attribute name => related objects
@@ -7233,6 +6895,7 @@ abstract class CActiveRecord extends CModel
 	}
 	public function __sleep()
 	{
+		$this->_md=null;
 		return array_keys((array)$this);
 	}
 	public function __get($name)
@@ -7320,7 +6983,7 @@ abstract class CActiveRecord extends CModel
 		else
 			$r=$name;
 		unset($this->_related[$name]);
-		$finder=$this->getActiveFinder($r);
+		$finder=new CActiveFinder($this,$r);
 		$finder->lazyFind($this);
 		if(!isset($this->_related[$name]))
 		{
@@ -7379,25 +7042,24 @@ abstract class CActiveRecord extends CModel
 		else
 		{
 			$model=self::$_models[$className]=new $className(null);
+			$model->_md=new CActiveRecordMetaData($model);
 			$model->attachBehaviors($model->behaviors());
 			return $model;
 		}
 	}
 	public function getMetaData()
 	{
-		$className=get_class($this);
-		if(!array_key_exists($className,self::$_md))
-		{
-			self::$_md[$className]=null; // preventing recursive invokes of {@link getMetaData()} via {@link __get()}
-			self::$_md[$className]=new CActiveRecordMetaData($this);
-		}
-		return self::$_md[$className];
+		if($this->_md!==null)
+			return $this->_md;
+		else
+			return $this->_md=self::model(get_class($this))->_md;
 	}
 	public function refreshMetaData()
 	{
-		$className=get_class($this);
-		if(array_key_exists($className,self::$_md))
-			unset(self::$_md[$className]);
+		$finder=self::model(get_class($this));
+		$finder->_md=new CActiveRecordMetaData($finder);
+		if($this!==$finder)
+			$this->_md=$finder->_md;
 	}
 	public function tableName()
 	{
@@ -7568,14 +7230,6 @@ abstract class CActiveRecord extends CModel
 	{
 		$this->raiseEvent('onAfterFind',$event);
 	}
-	public function getActiveFinder($with)
-	{
-		return new CActiveFinder($this,$with);
-	}
-	public function onBeforeCount($event)
-	{
-		$this->raiseEvent('onBeforeCount',$event);
-	}
 	protected function beforeSave()
 	{
 		if($this->hasEventHandler('onBeforeSave'))
@@ -7615,11 +7269,6 @@ abstract class CActiveRecord extends CModel
 			$event=new CModelEvent($this);
 			$this->onBeforeFind($event);
 		}
-	}
-	protected function beforeCount()
-	{
-		if($this->hasEventHandler('onBeforeCount'))
-			$this->onBeforeCount(new CEvent($this));
 	}
 	protected function afterFind()
 	{
@@ -7808,12 +7457,12 @@ abstract class CActiveRecord extends CModel
 		{
 			if(!$all)
 				$criteria->limit=1;
-			$command=$this->getCommandBuilder()->createFindCommand($this->getTableSchema(),$criteria,$this->getTableAlias());
+			$command=$this->getCommandBuilder()->createFindCommand($this->getTableSchema(),$criteria);
 			return $all ? $this->populateRecords($command->queryAll(), true, $criteria->index) : $this->populateRecord($command->queryRow());
 		}
 		else
 		{
-			$finder=$this->getActiveFinder($criteria->with);
+			$finder=new CActiveFinder($this,$criteria->with);
 			return $finder->query($criteria,$all);
 		}
 	}
@@ -7910,7 +7559,7 @@ abstract class CActiveRecord extends CModel
 		if(($criteria=$this->getDbCriteria(false))!==null && !empty($criteria->with))
 		{
 			$this->resetScope(false);
-			$finder=$this->getActiveFinder($criteria->with);
+			$finder=new CActiveFinder($this,$criteria->with);
 			return $finder->findBySql($sql,$params);
 		}
 		else
@@ -7925,7 +7574,7 @@ abstract class CActiveRecord extends CModel
 		if(($criteria=$this->getDbCriteria(false))!==null && !empty($criteria->with))
 		{
 			$this->resetScope(false);
-			$finder=$this->getActiveFinder($criteria->with);
+			$finder=new CActiveFinder($this,$criteria->with);
 			return $finder->findAllBySql($sql,$params);
 		}
 		else
@@ -7937,14 +7586,13 @@ abstract class CActiveRecord extends CModel
 	public function count($condition='',$params=array())
 	{
 		$builder=$this->getCommandBuilder();
-		$this->beforeCount();
 		$criteria=$builder->createCriteria($condition,$params);
 		$this->applyScopes($criteria);
 		if(empty($criteria->with))
 			return $builder->createCountCommand($this->getTableSchema(),$criteria)->queryScalar();
 		else
 		{
-			$finder=$this->getActiveFinder($criteria->with);
+			$finder=new CActiveFinder($this,$criteria->with);
 			return $finder->count($criteria);
 		}
 	}
@@ -7952,20 +7600,18 @@ abstract class CActiveRecord extends CModel
 	{
 		$prefix=$this->getTableAlias(true).'.';
 		$builder=$this->getCommandBuilder();
-		$this->beforeCount();
 		$criteria=$builder->createColumnCriteria($this->getTableSchema(),$attributes,$condition,$params,$prefix);
 		$this->applyScopes($criteria);
 		if(empty($criteria->with))
 			return $builder->createCountCommand($this->getTableSchema(),$criteria)->queryScalar();
 		else
 		{
-			$finder=$this->getActiveFinder($criteria->with);
+			$finder=new CActiveFinder($this,$criteria->with);
 			return $finder->count($criteria);
 		}
 	}
 	public function countBySql($sql,$params=array())
 	{
-		$this->beforeCount();
 		return $this->getCommandBuilder()->createSqlCommand($sql,$params)->queryScalar();
 	}
 	public function exists($condition='',$params=array())
@@ -7977,11 +7623,11 @@ abstract class CActiveRecord extends CModel
 		$criteria->limit=1;
 		$this->applyScopes($criteria);
 		if(empty($criteria->with))
-			return $builder->createFindCommand($table,$criteria,$this->getTableAlias(false, false))->queryRow()!==false;
+			return $builder->createFindCommand($table,$criteria)->queryRow()!==false;
 		else
 		{
 			$criteria->select='*';
-			$finder=$this->getActiveFinder($criteria->with);
+			$finder=new CActiveFinder($this,$criteria->with);
 			return $finder->count($criteria)>0;
 		}
 	}
@@ -8191,7 +7837,6 @@ class CActiveRelation extends CBaseActiveRelation
 	public $with=array();
 	public $together;
 	 public $scopes;
-	public $through;
 	public function mergeWith($criteria,$fromScope=false)
 	{
 		if($criteria instanceof CDbCriteria)
@@ -8230,12 +7875,14 @@ class CBelongsToRelation extends CActiveRelation
 }
 class CHasOneRelation extends CActiveRelation
 {
+	public $through;
 }
 class CHasManyRelation extends CActiveRelation
 {
 	public $limit=-1;
 	public $offset=-1;
 	public $index;
+	public $through;
 	public function mergeWith($criteria,$fromScope=false)
 	{
 		if($criteria instanceof CDbCriteria)
@@ -8280,14 +7927,14 @@ class CActiveRecordMetaData
 	public $columns;
 	public $relations=array();
 	public $attributeDefaults=array();
-	private $_modelClassName;
+	private $_model;
 	public function __construct($model)
 	{
-		$this->_modelClassName=get_class($model);
+		$this->_model=$model;
 		$tableName=$model->tableName();
 		if(($table=$model->getDbConnection()->getSchema()->getTable($tableName))===null)
 			throw new CDbException(Yii::t('yii','The table "{table}" for active record class "{class}" cannot be found in the database.',
-				array('{class}'=>$this->_modelClassName,'{table}'=>$tableName)));
+				array('{class}'=>get_class($model),'{table}'=>$tableName)));
 		if($table->primaryKey===null)
 		{
 			$table->primaryKey=$model->primaryKey();
@@ -8319,7 +7966,7 @@ class CActiveRecordMetaData
 		if(isset($config[0],$config[1],$config[2]))  // relation class, AR class, FK
 			$this->relations[$name]=new $config[0]($name,$config[1],$config[2],array_slice($config,3));
 		else
-			throw new CDbException(Yii::t('yii','Active record "{class}" has an invalid configuration for relation "{relation}". It must specify the relation type, the related active record class and the foreign key.', array('{class}'=>$this->_modelClassName,'{relation}'=>$name)));
+			throw new CDbException(Yii::t('yii','Active record "{class}" has an invalid configuration for relation "{relation}". It must specify the relation type, the related active record class and the foreign key.', array('{class}'=>get_class($this->_model),'{relation}'=>$name)));
 	}
 	public function hasRelation($name)
 	{
@@ -8452,13 +8099,8 @@ class CDbConnection extends CApplicationComponent
 			elseif($driver==='sqlsrv')
 				$pdoClass='CMssqlSqlsrvPdoAdapter';
 		}
-		if(!class_exists($pdoClass))
-			throw new CDbException(Yii::t('yii','CDbConnection is unable to find PDO class "{className}". Make sure PDO is installed correctly.',
-				array('{className}'=>$pdoClass)));
-		@$instance=new $pdoClass($this->connectionString,$this->username,$this->password,$this->_attributes);
-		if(!$instance)
-			throw new CDbException(Yii::t('yii','CDbConnection failed to open the DB connection.'));
-		return $instance;
+		return new $pdoClass($this->connectionString,$this->username,
+									$this->password,$this->_attributes);
 	}
 	protected function initConnection($pdo)
 	{
@@ -8909,8 +8551,7 @@ abstract class CDbSchema extends CComponent
 	}
 	public function addPrimaryKey($name,$table,$columns)
 	{
-		if(is_string($columns))
-			$columns=preg_split('/\s*,\s*/',$columns,-1,PREG_SPLIT_NO_EMPTY);
+		$columns=preg_split('/\s*,\s*/',$columns,-1,PREG_SPLIT_NO_EMPTY);
 		foreach($columns as $i=>$col)
 			$columns[$i]=$this->quoteColumnName($col);
 		return 'ALTER TABLE ' . $this->quoteTableName($table) . ' ADD CONSTRAINT '
@@ -8942,28 +8583,26 @@ class CSqliteSchema extends CDbSchema
 	);
 	public function resetSequence($table,$value=null)
 	{
-		if($table->sequenceName===null)
-			return;
-		if($value!==null)
-			$value=(int)($value)-1;
-		else
-			$value=(int)$this->getDbConnection()
-				->createCommand("SELECT MAX(`{$table->primaryKey}`) FROM {$table->rawName}")
-				->queryScalar();
-		try
+		if($table->sequenceName!==null)
 		{
-			// it's possible that 'sqlite_sequence' does not exist
-			$this->getDbConnection()
-				->createCommand("UPDATE sqlite_sequence SET seq='$value' WHERE name='{$table->name}'")
-				->execute();
-		}
-		catch(Exception $e)
-		{
+			if($value===null)
+				$value=$this->getDbConnection()->createCommand("SELECT MAX(`{$table->primaryKey}`) FROM {$table->rawName}")->queryScalar();
+			else
+				$value=(int)$value-1;
+			try
+			{
+				// it's possible sqlite_sequence does not exist
+				$this->getDbConnection()->createCommand("UPDATE sqlite_sequence SET seq='$value' WHERE name='{$table->name}'")->execute();
+			}
+			catch(Exception $e)
+			{
+			}
 		}
 	}
 	public function checkIntegrity($check=true,$schema='')
 	{
-		$this->getDbConnection()->createCommand('PRAGMA foreign_keys='.(int)$check)->execute();
+		// SQLite doesn't enforce integrity
+		return;
 	}
 	protected function findTableNames($schema='')
 	{
@@ -9885,10 +9524,7 @@ class CSqliteColumnSchema extends CDbColumnSchema
 {
 	protected function extractDefault($defaultValue)
 	{
-		if($this->dbType==='timestamp' && $defaultValue==='CURRENT_TIMESTAMP')
-			$this->defaultValue=null;
-		else
-			$this->defaultValue=$this->typecast(strcasecmp($defaultValue,'null') ? $defaultValue : null);
+		$this->defaultValue=$this->typecast(strcasecmp($defaultValue,'null') ? $defaultValue : null);
 		if($this->type==='string' && $this->defaultValue!==null) // PHP 5.2.6 adds single quotes while 5.2.0 doesn't
 			$this->defaultValue=trim($this->defaultValue,"'\"");
 	}
@@ -10020,12 +9656,6 @@ class CStringValidator extends CValidator
 		$value=$object->$attribute;
 		if($this->allowEmpty && $this->isEmpty($value))
 			return;
-		if(is_array($value))
-		{
-			// https://github.com/yiisoft/yii/issues/1955
-			$this->addError($object,$attribute,Yii::t('yii','{attribute} is invalid.'));
-			return;
-		}
 		if(function_exists('mb_strlen') && $this->encoding!==false)
 			$length=mb_strlen($value, $this->encoding ? $this->encoding : Yii::app()->charset);
 		else
@@ -10107,7 +9737,6 @@ class CRequiredValidator extends CValidator
 {
 	public $requiredValue;
 	public $strict=false;
-	public $trim=true;
 	protected function validateAttribute($object,$attribute)
 	{
 		$value=$object->$attribute;
@@ -10120,7 +9749,7 @@ class CRequiredValidator extends CValidator
 				$this->addError($object,$attribute,$message);
 			}
 		}
-		elseif($this->isEmpty($value,$this->trim))
+		elseif($this->isEmpty($value,true))
 		{
 			$message=$this->message!==null?$this->message:Yii::t('yii','{attribute} cannot be blank.');
 			$this->addError($object,$attribute,$message);
@@ -10150,12 +9779,8 @@ if(value!=" . CJSON::encode($this->requiredValue) . ") {
 			$message=strtr($message, array(
 				'{attribute}'=>$object->getAttributeLabel($attribute),
 			));
-			if($this->trim)
-				$emptyCondition = "jQuery.trim(value)==''";
-			else
-				$emptyCondition = "value==''";
 			return "
-if({$emptyCondition}) {
+if(jQuery.trim(value)=='') {
 	messages.push(".CJSON::encode($message).");
 }
 ";
@@ -10177,14 +9802,6 @@ class CNumberValidator extends CValidator
 		$value=$object->$attribute;
 		if($this->allowEmpty && $this->isEmpty($value))
 			return;
-		if(!is_numeric($value))
-		{
-			// https://github.com/yiisoft/yii/issues/1955
-			// https://github.com/yiisoft/yii/issues/1669
-			$message=$this->message!==null?$this->message:Yii::t('yii','{attribute} must be a number.');
-			$this->addError($object,$attribute,$message);
-			return;
-		}
 		if($this->integerOnly)
 		{
 			if(!preg_match($this->integerPattern,"$value"))

@@ -4,7 +4,7 @@ class cashondelivery extends WsPayment
 {
 
 	protected $defaultName = "Cash on Delivery";
-	protected $version = 1;
+	protected $version = "1.0";
 
 
 	/**

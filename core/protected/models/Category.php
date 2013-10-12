@@ -136,11 +136,11 @@ class Category extends BaseCategory
 		$personFormatted = array();
 		if (is_array($data))
 			foreach($data as $k=>$person) {
-				$personFormatted[strtolower($person['label'].'cat')] = Category::formatData($person);
+				$personFormatted[$k] = Category::formatData($person);
 				$parents = null;
 				if (isset($person['children'])) {
 					$parents = Category::getDataFormatted($person['children']);
-					$personFormatted[strtolower($person['label'].'cat')]['children'] = $parents;
+					$personFormatted[$k]['children'] = $parents;
 				}
 			}
 		return $personFormatted;
