@@ -228,6 +228,8 @@ a:hover {  text-decoration: none;   }
 
 #product_details #photos legend { font-size: 0.7em;}
 #product_details .thumbs, #product_details .targetarea { margin-left: 0px;margin-bottom: 10px;}
+#product_details .targetarea {min-height: 260px;}
+#product_details .thumbs img { margin-right: 10px; }
 
 #autoadd { margin-top: 30px; }
 #autoadd .items th { background: none; height: 4px; padding:0px; background-color: black; }
