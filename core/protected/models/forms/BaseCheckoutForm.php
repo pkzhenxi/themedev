@@ -111,7 +111,7 @@ class BaseCheckoutForm extends CFormModel
 				'validatePostal','on'=>'CalculateShipping,formSubmitGuest,formSubmitCreatingAccount,formSubmitExistingAccount'),
 
 			array('acceptTerms,shippingProvider,shippingPriority,paymentProvider','required',
-				'on'=>'formSubmit,formSubmitCreatingAccount,formSubmitExistingAccount'),
+				'on'=>'formSubmit,formSubmitGuest,formSubmitCreatingAccount,formSubmitExistingAccount'),
 
 			array('cardNumber,cardExpiryMonth, cardExpiryYear,cardType,cardCVV,cardNameOnCard','validateCard',
 				'on'=>'formSubmitGuest,formSubmitCreatingAccount,formSubmitExistingAccount'),
@@ -128,7 +128,7 @@ class BaseCheckoutForm extends CFormModel
 
 			array('acceptTerms','required', 'requiredValue'=>1,
 				'message'=>Yii::t('global','You must accept Terms and Conditions'),
-				'on'=>'formSubmit,formSubmitCreatingAccount,formSubmitExistingAccount'),
+				'on'=>'formSubmit,formSubmitGuest,formSubmitCreatingAccount,formSubmitExistingAccount'),
 
 			array('createPassword', 'length', 'max'=>255),
 			array('createPassword', 'compare', 'on'=>'formSubmitCreatingAccount'),
