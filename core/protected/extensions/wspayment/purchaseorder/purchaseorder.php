@@ -4,7 +4,7 @@ class purchaseorder extends WsPayment
 {
 
 	protected $defaultName = "Purchase Order";
-	protected $version = "1.0";
+	protected $version = 1;
 
 	//Define a subform
 	public $subform = "purchaseorderform"; //will be available as $this->subformModel during processing

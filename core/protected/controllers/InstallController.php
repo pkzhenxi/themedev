@@ -19,6 +19,13 @@ class InstallController extends Controller
 	
 	public function init() {
 		Yii::app()->setViewPath(Yii::getPathOfAlias('application')."/views-cities");
+		Yii::app()->setComponent('bootstrap',array(
+			'class'=>'ext.bootstrap.components.Bootstrap',
+			'responsiveCss'=>true,
+		));
+		Yii::setPathOfAlias('bootstrap', dirname(__FILE__).DIRECTORY_SEPARATOR.'../extensions/bootstrap');
+		Yii::app()->bootstrap->init();
+
 		set_time_limit(300);
 		//We override init() to keep our system from trying to autoload stuff we haven't finished converting yet
 	}

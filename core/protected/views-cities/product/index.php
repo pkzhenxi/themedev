@@ -19,7 +19,7 @@
 	        <div class="span7">
 	            <div class="row productheader">
 	                <h1 class="title"><?= CHtml::tag('div',array('id'=>CHtml::activeId($model,'title')),$model->Title); ?></h1>
-					<?php if(isset($model->family)): ?>
+					<?php if(_xls_get_conf('SHOW_FAMILY') && isset($model->family)): ?>
 						<h2 class="brand">By: <?= CHtml::link($model->family->family,$model->family->Link) ?></h2>
 					<?php endif; ?>
 		            <?php if (_xls_get_conf('SHOW_TEMPLATE_CODE', true)): ?>

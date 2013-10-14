@@ -35,6 +35,7 @@ class Controller extends CController
 	public $pageHeader;
 	public $pageHeaderImage;
 	public $pageGoogleVerify;
+	public $pageGoogleFonts;
 	public $lnkNameLogout;
 	public $sharingHeader;
 	public $sharingFooter;
@@ -58,9 +59,9 @@ class Controller extends CController
 	public function init()
 	{
 
+
 		Yii::app()->setViewPath(Yii::getPathOfAlias('application')."/views-cities");
 
-		$this->logoutUrl = $this->createUrl("site/logout");
 
 		$filename = Yii::getPathOfAlias('webroot.themes').DIRECTORY_SEPARATOR.'brooklyn';
 		if(!file_exists($filename))
@@ -85,6 +86,7 @@ class Controller extends CController
 				die("you have no theme set");
 		}
 
+		$this->buildBootstrap();
 
 		if (Yii::app()->params['STORE_OFFLINE']>0 || Yii::app()->params['INSTALLED'] != '1')
 		{
@@ -100,7 +102,7 @@ class Controller extends CController
 
 		$this->logoutUrl = $this->createUrl("site/logout");
 
-		$strViewset = "cities";
+		$strViewset = Yii::app()->theme->info->viewset;
 		if(!empty($strViewset)) Yii::app()->setViewPath(Yii::getPathOfAlias('application')."/views-".$strViewset);
 
 
@@ -219,7 +221,12 @@ class Controller extends CController
 	protected function buildGoogle() {
 
 		$this->pageGoogleVerify = _xls_get_conf('GOOGLE_VERIFY');
+		$this->pageGoogleFonts = _xls_get_conf('GOOGLE_FONTS_LINK');
+		if (Yii::app()->theme->info->GoogleFonts)
+			$this->pageGoogleFonts .= '<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family='.
+				Yii::app()->theme->info->GoogleFonts.'">';
 
+		$this->pageGoogleFonts = str_replace("http://","//",$this->pageGoogleFonts);
 	}
 
 	/**
@@ -236,6 +243,32 @@ class Controller extends CController
 	protected function buildSharing() {
 		$this->sharingHeader = $this->renderPartial('/site/_sharing_header',null,true);
 		$this->sharingFooter = $this->renderPartial('/site/_sharing_footer',null,true);
+
+
+	}
+
+	protected function buildBootstrap()
+	{
+
+		Yii::setPathOfAlias('bootstrap',null);
+		$strBootstrap = Yii::app()->theme->info->bootstrap;
+
+		if(!isset($strBootstrap)) {
+			Yii::app()->setComponent('bootstrap',array(
+				'class'=>'ext.bootstrap.components.Bootstrap',
+				'responsiveCss'=>true,
+			));
+			Yii::setPathOfAlias('bootstrap', dirname(__FILE__).DIRECTORY_SEPARATOR.'../extensions/bootstrap');
+			Yii::app()->bootstrap->init();
+		}
+		elseif(!empty($strBootstrap)) {
+			Yii::setPathOfAlias('bootstrap',
+				dirname(__FILE__).DIRECTORY_SEPARATOR.'../extensions/'.Yii::app()->theme->info->bootstrap);
+			Yii::app()->setComponent('bootstrap',array(
+				'class'=>'ext.'.Yii::app()->theme->info->bootstrap.'.components.Bootstrap'
+			));
+			Yii::app()->bootstrap->init();
+		}
 
 
 	}
@@ -314,7 +347,7 @@ class Controller extends CController
 	 */
 	protected function createBookends($model)
 	{
-		if(count($model)==0) return $model;
+		if(count($model)==0 || Yii::app()->theme->config->disableGridRowDivs) return $model;
 
 		$ct=-1;
 		$next = 0;
@@ -341,5 +374,54 @@ class Controller extends CController
 		return true;
 	}
 
-}
 
+	public function getCategories()
+	{
+		return array(
+			array('label'=>'Home', 'url'=>array('/site/index')),
+			array('label'=>'About', 'url'=>array('/site/page', 'view'=>'about')),
+			array('label'=>'Contact', 'url'=>array('/site/contact')),
+			array('label'=>'Login', 'url'=>array('/site/login'), 'visible'=>Yii::app()->user->isGuest),
+			array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
+		);
+
+	}
+
+
+	public function getMenuTree()
+	{
+		$objTree = Category::GetTree() + CustomPage::GetTree();
+		ksort($objTree);
+
+		if(_xls_get_conf('ENABLE_FAMILIES', 0)>0)
+		{
+
+			$families = Family::GetTree();
+			$familyMenu[0] = array(
+				'text'=>Yii::app()->params['ENABLE_FAMILIES_MENU_LABEL'],
+				'label'=>Yii::app()->params['ENABLE_FAMILIES_MENU_LABEL'],
+				'link'=>$this->createUrl("search/browse",array('brand'=>'*')),
+				'url'=>$this->createUrl("search/browse",array('brand'=>'*')),
+				'id'=>0,
+				'child_count'=>count($families),
+				'hasChildren'=>1,
+				'children'=>$families);
+			switch(_xls_get_conf('ENABLE_FAMILIES', 0))
+			{
+
+
+				case 3: $objFullTree = $families  + $objTree; ksort($objFullTree); break; //blended
+				case 2: $objFullTree = $familyMenu + $objTree; break; //on top
+				case 1: $objFullTree = $objTree + $familyMenu; break; //onbottom
+
+			}
+
+		} else $objFullTree = $objTree;
+
+		//if(_xls_get_conf('ENABLE_FAMILIES', 0)==2) $objTree .= Family::GetTree();
+
+		return $objFullTree;
+	}
+
+
+}

@@ -146,6 +146,7 @@ $objModule = Modules::LoadByName('fedex');
 		$this->assertEquals('FEDEX_GROUND',$arrReturn[0]['level']);
 		$this->objCart->clearCart();
 	}
+
 	public function testFreeShipping()
 	{
 
@@ -193,7 +194,7 @@ $objModule = Modules::LoadByName('fedex');
 
 		$arrReturn = Yii::app()->getComponent('australiapost')->setCheckoutForm($this->checkoutForm)->run();
 		print_r($arrReturn);
-		$this->assertEquals(23.35,$arrReturn[0]['price']); //19.35 plus 4 dollar mar
+		$this->assertGreaterThan(23.35,$arrReturn[0]['price']); //19.35 plus 4 dollar mar
 		$this->objCart->clearCart();
 
 

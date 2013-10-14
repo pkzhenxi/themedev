@@ -26,7 +26,8 @@ class WishlistController extends Controller
 
 		//We should only show this option to a logged in user
 		if (Yii::app()->user->isGuest)
-			throw new CHttpException(404,'The requested page does not exist.');
+			$this->redirect($this->createUrl("wishlist/search"));
+
 
 		$this->breadcrumbs = array(
 			'My Wish Lists'=>$this->createUrl("/wishlist"),

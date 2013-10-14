@@ -235,5 +235,14 @@ class SiteController extends Controller
 	}
 
 
+	/**
+	 * Since many third party templates have site/contact as a default tab, redirect to our own
+	 */
+	public function actionContact()
+	{
+		$this->redirect("/custompage/contact");
+	}
+
+
 
 }

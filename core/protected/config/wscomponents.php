@@ -17,6 +17,17 @@ function searchForComponents()
 	foreach (glob(dirname(__FILE__).'/../extensions/wsshipping/*', GLOB_ONLYDIR) as $moduleDirectory)
 		$arr[basename($moduleDirectory)] = array('class'=>'ext.wsshipping.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
 
+	$arr['wstheme'] = array('class'=>'ext.wstheme.WsTheme');
+	$arr['themeManager']=array('themeClass'=>'Theme');
+	//Load any custom payment components
+	foreach (glob(dirname(__FILE__).'/../../../custom/extensions/payment/*', GLOB_ONLYDIR) as $moduleDirectory)
+		$arr[basename($moduleDirectory)] = array('class'=>'custom.extensions.payment.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
+
+	//Load any custom shipping components
+	foreach (glob(dirname(__FILE__).'/../../../custom/extensions/shipping/*', GLOB_ONLYDIR) as $moduleDirectory)
+		$arr[basename($moduleDirectory)] = array('class'=>'custom.extensions.shipping.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
+
+
 	if (file_exists(dirname(__FILE__).'/../../../config/wslogging.php'))
 		$arr['log']=require(dirname(__FILE__).'/../../../config/wslogging.php');
 	else

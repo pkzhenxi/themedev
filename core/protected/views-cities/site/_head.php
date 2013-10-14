@@ -15,12 +15,13 @@
 	<meta property="og:url" content="<?= $this->CanonicalUrl; ?>"/>
 
 	<meta name="google-site-verification" content="<?= $this->pageGoogleVerify; ?>"/>
+	<?= $this->pageGoogleFonts; ?>
 
-	<link rel="Shortcut Icon" href="<?=Yii::app()->baseUrl."/images/favicon.ico" ?>" type="image/x-icon"/>
+	<link rel="shortcut icon" href="<?=Yii::app()->baseUrl."/images/favicon.ico" ?>" />
 
-	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->baseUrl.'/css/base.css'); ?>
+	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/base.css'); ?>
 	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/style.css'); ?>
-	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/'._xls_get_conf('CHILD_THEME').'.css'); ?>
+	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/'.Yii::app()->theme->config->CHILD_THEME.'.css'); ?>
 	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/custom.css'); ?>
 	<?php echo $this->renderPartial("/site/_google",null,true); ?>
 </head>

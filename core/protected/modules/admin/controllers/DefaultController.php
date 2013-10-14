@@ -98,7 +98,7 @@ class DefaultController extends AdminBaseController
 				return "To edit the actual language strings, use the Translation menu options under ".CHtml::link("Database",$this->createUrl("databaseadmin/index"));
 
 			case self::PRODUCT_PHOTOS:
-				return "Photo sizes are now under the ".CHtml::link("Themes->Set Photo Sizes",$this->createUrl('theme/edit',array('id'=>self::THEME_PHOTOS)))." menu. Please note these settings affect photos as they are uploaded. You will need to reflag a product photo and Update Store to see the changes.";
+				return "Photo sizes are now under the ".CHtml::link("Themes->Set Photo Sizes",$this->createUrl('theme/edit',array('id'=>self::THEME_PHOTOS)))." menu. Please note these settings affect photos as they are uploaded. You will need to reflag a product photo and Update Store to see the changes. Note: Using FancyBox requires additional one-time license purchase from ".CHtml::link('http://www.fancyapps.com/store/','http://www.fancyapps.com/store/');
 
 			case self::SEO_PRODUCT:
 				return "<P>These settings control the Page Title and Meta Description using keys that represent product information. Each of these keys is wrapped with a percentage ({) sign. Most represent fields in the Product Card. {crumbtrail} and {rcrumbtrail} (reverse crumbtrail) are the product's category path. Below is the available list of keys:</p><P>{storename}, {name}, {description}, {shortdescription}, {longdescription}, {price}, {family}, {class}, {crumbtrail}, {rcrumbtrail}</p>You can use {storename} and {storetagline} for the homepage.";
@@ -126,7 +126,10 @@ class DefaultController extends AdminBaseController
 		{
 			if($oXML->webstore->version>XLSWS_VERSIONBUILD)
 			{
-				if(_xls_get_conf('AUTO_UPDATE','1')=='1' && $oXML->webstore->autopathfile)
+				if( _xls_get_conf('LIGHTSPEED_HOSTING','0') != "1" &&
+					_xls_get_conf('AUTO_UPDATE','1')=='1' &&
+					$oXML->webstore->autopathfile
+				)
 					$this->redirect($this->createUrl("upgrade/index",array('patch'=>$oXML->webstore->autopathfile)));
 				else
 					$this->render("newversion",array('oXML'=>$oXML->webstore));
@@ -212,8 +215,9 @@ class DefaultController extends AdminBaseController
 	public function actionReleasenotes()
 	{
 		$oXML = json_decode(_xls_check_version(true));
-
-//print_r($oXML);die();
+		if(!isset($oXML->webstore))
+			$this->redirect(Yii::app()->createUrl('admin/default'));
+		else
 		$this->render("releasenotes", array('oXML'=>$oXML->webstore));
 
 	}

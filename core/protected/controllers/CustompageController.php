@@ -51,7 +51,16 @@ class CustompageController extends Controller
 		);
 
 		$this->CanonicalUrl = $model->CanonicalUrl;
-		$this->render('index',array('model'=>$model,'objCustomPage'=>$model));
+		$this->layout = "//layouts/column".$model->column_template;
+		if (!empty($model->product_tag) && $model->product_display==2)
+		{
+			$_GET['tag']=$model->product_tag;
+			$_GET['cpc']=$model->id;
+			$this->forward("search/results");
+
+		}
+		else
+			$this->render('index',array('model'=>$model,'objCustomPage'=>$model));
 
 
 
@@ -64,12 +73,14 @@ class CustompageController extends Controller
 	public function actionContact()
 	{
 
-		$model = CustomPage::LoadByRequestUrl("contact-us");
+		$model = CustomPage::LoadByRequestUrl('contact-us');
 		$this->pageTitle=$model->PageTitle;
 		$this->pageDescription=$model->meta_description;
 		$this->breadcrumbs = array(
 			$model->title=>$model->RequestUrl,
 		);
+
+		$this->layout = "//layouts/column".$model->column_template;
 
 		$ContactForm=new ContactForm;
 		if(isset($_POST['ContactForm']))

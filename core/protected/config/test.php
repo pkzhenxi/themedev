@@ -23,7 +23,10 @@ return CMap::mergeArray(
 			'application.models.base.*',
 			'application.components.*',
 			'application.helpers.*',
-			'application.controllers.*'
+			'application.controllers.*',
+            'application.modules.admin.controllers.*',
+            'application.modules.admin.components.*',
+            'application.modules.admin.models.*'
 		),
 
 

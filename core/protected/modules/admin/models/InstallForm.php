@@ -21,6 +21,8 @@ class InstallForm extends CFormModel
 	public $TIMEZONE;
 	public $encryptionKey;
 	public $encryptionSalt;
+	public $loginemail;
+	public $loginpassword;
 
 	public $EMAIL_SMTP_SERVER;
 	public $EMAIL_SMTP_PORT;
@@ -39,9 +41,11 @@ class InstallForm extends CFormModel
 			//array('label,login,trans_key,live,ccv,restrictcountry,ls_payment_method','required'),
 			array('iagree','required', 'requiredValue'=>1,'message'=>'You must accept Terms and Conditions', 'on'=>'page1'),
 			array('LSKEY,encryptionKey,encryptionSalt,TIMEZONE','required', 'on'=>'page2'),
+			array('loginemail,loginpassword','safe', 'on'=>'page2'),
 			array('STORE_NAME,EMAIL_FROM,STORE_ADDRESS1,STORE_ADDRESS2,STORE_HOURS,STORE_PHONE','required', 'on'=>'page3'),
 			array('EMAIL_SMTP_SERVER,EMAIL_SMTP_PORT,EMAIL_SMTP_USERNAME,EMAIL_SMTP_PASSWORD,EMAIL_SMTP_SECURITY_MODE','required', 'on'=>'page4'),
 			array('STORE_NAME,EMAIL_FROM,STORE_ADDRESS1,STORE_ADDRESS2,STORE_HOURS,STORE_PHONE,LSKEY,encryptionKey,encryptionSalt,TIMEZONE','safe'),
+            array('EMAIL_FROM,loginemail','email'),
 			array('page','safe'),
 		);
 	}
@@ -66,6 +70,8 @@ class InstallForm extends CFormModel
 			'TIMEZONE'=>'Server timezone',
 			'encryptionKey'=>'Encryption Key 1',
 			'encryptionSalt'=>'Encryption Key 2',
+			'loginemail'=>'External Admin Login Email',
+			'loginpassword'=>'External Admin Login Password',
 
 		);
 	}
@@ -132,7 +138,7 @@ class InstallForm extends CFormModel
 	public function getPage2()
 	{
 		return array(
-			'title'=>'Enter a store password and verify the server timezone. The encryption keys are used to encrypt all passwords, you can generally accept the randomly generated ones below. <b>Type in your store password even if this is an upgrade. Your new store password will be reset to what is entered here.</b>',
+			'title'=>'<p>Enter a store password and verify the server timezone. The encryption keys are used to encrypt all passwords, you can generally accept the randomly generated ones below. <strong>Type in your store password even if this is an upgrade. Your new store password will be reset to what is entered here.</strong></p><p>You can enter an email address and password which will be granted admin access when logging into <strong>'.Yii::app()->createAbsoluteUrl('admin').'</strong> in any web browser. If this email already exists in Web Store, the password will be updated and admin access granted.</p></b>',
 
 
 			'elements'=>array(
@@ -150,6 +156,16 @@ class InstallForm extends CFormModel
 				),
 				'encryptionSalt'=>array(
 					'type'=>'text',
+					'maxlength'=>64,
+					'size'=>60,
+				),
+				'loginemail'=>array(
+					'type'=>'text',
+					'maxlength'=>64,
+					'size'=>60,
+				),
+				'loginpassword'=>array(
+					'type'=>'password',
 					'maxlength'=>64,
 					'size'=>60,
 				),
@@ -262,6 +278,28 @@ class InstallForm extends CFormModel
 				_xls_set_conf('LSKEY',strtolower(md5($this->LSKEY)));
 				_xls_set_conf('TIMEZONE',$this->TIMEZONE);
 				Configuration::exportKeys($this->encryptionKey,$this->encryptionSalt);
+
+				//Now that we have encryption keys written, save the account if we have it
+				if(!empty($this->loginemail) && !empty($this->loginpassword))
+				{
+					$objCustomer = Customer::LoadByEmail($this->loginemail);
+					if(!($objCustomer instanceof Customer))
+					{
+						$objCustomer = new Customer();
+						$objCustomer->first_name = "Admin";
+						$objCustomer->last_name = "User";
+						$objCustomer->record_type=1;
+						$objCustomer->pricing_level=1;
+						$objCustomer->preferred_language="en";
+						$objCustomer->currency="USD";
+						$objCustomer->email=$this->loginemail;
+						$objCustomer->mainphone=_xls_get_conf('STORE_PHONE');
+
+					}
+					$objCustomer->password=_xls_encrypt($this->loginpassword);
+					$objCustomer->allow_login=2;
+					$objCustomer->save();
+				}
 			break;
 
 			case 3:

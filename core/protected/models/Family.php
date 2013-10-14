@@ -62,7 +62,7 @@ class Family extends BaseFamily
 		$personFormatted = array();
 		if (is_array($data))
 			foreach($data as $k=>$person) {
-				$personFormatted[$k] = Family::formatData($person);
+				$personFormatted[strtolower($person['label'].'fam')] = Family::formatData($person);
 
 			}
 		return $personFormatted;

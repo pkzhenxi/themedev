@@ -8,6 +8,13 @@ class AdminModule extends CWebModule
 		// this method is called when the module is being created
 		// you may place code here to customize the module or the application
 
+		Yii::app()->setComponent('bootstrap',array(
+			'class'=>'ext.bootstrap.components.Bootstrap',
+			'responsiveCss'=>true,
+		));
+		Yii::setPathOfAlias('bootstrap', dirname(__FILE__).DIRECTORY_SEPARATOR.'../../extensions/bootstrap');
+		Yii::app()->bootstrap->init();
+
 		// import the module-level models and components
 		$this->setImport(array(
 			'admin.models.*',

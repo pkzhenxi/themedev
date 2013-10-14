@@ -3,7 +3,7 @@
 require_once "../bootstrap.php";
 require_once "PHPUnit/Autoload.php";
 
-class BugFixTest extends PHPUnit_Framework_TestCase
+class BugFix400Test extends PHPUnit_Framework_TestCase
 {
 
 	public function setUp()

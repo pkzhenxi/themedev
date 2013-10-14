@@ -47,7 +47,6 @@ class CustomerTest extends PHPUnit_Framework_TestCase
 		$objCustomer->email = "george@example.com";
 		$objCustomer->mainphone = "202-555-1212";
 		$objCustomer->mainphonetype = "mobile";
-		$objCustomer->allow_login=1;
 
 		$retVal = $objCustomer->save();
 		$this->assertEquals(1,$retVal);
@@ -67,7 +66,6 @@ class CustomerTest extends PHPUnit_Framework_TestCase
 		$objCustomer->mainphonetype = "mobile";
 		$objCustomer->currency = "CAD";
 		$objCustomer->password = Customer::GeneratePassword(6);
-		$objCustomer->allow_login=1;
 
 		$retVal = $objCustomer->save();
 		$this->assertEquals(2,$retVal);
@@ -87,7 +85,6 @@ class CustomerTest extends PHPUnit_Framework_TestCase
 		$objCustomer->mainphonetype = "mobile";
 		$objCustomer->currency = "USD";
 		$objCustomer->password = Customer::GeneratePassword(6);
-		$objCustomer->allow_login=1;
 
 		$retVal = $objCustomer->save();
 		$this->assertEquals(3,$retVal);

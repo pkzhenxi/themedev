@@ -9,6 +9,7 @@ class WsExtension extends CComponent
 	const SHIPPING = 'shipping';
 	const PAYMENT = 'payment';
 	const SIDEBAR = 'sidebar';
+	const THEME = 'theme';
 
 	/**
 	 * shipping or billing extension
@@ -21,10 +22,10 @@ class WsExtension extends CComponent
 	 */
 	protected $strModuleName = "Web Store Module";
 	/**
-	 * Extension version number
-	 * @var float
+	 * Extension version number (note whole numbers only)
+	 * @var int
 	 */
-	protected $Version = 1.0;
+	protected $version = 1;
 	/**
 	 * For billing extensions, does it redirect offsite (Simple Integration a la Paypal)
 	 * @var bool
@@ -179,14 +180,18 @@ class WsExtension extends CComponent
 	}
 
 
-	/**
-	 * This should be overridden in our WsPayment and WSShipping classes. Get the AdminForm from the models folder under our shipping/payment module.
-	 * In the payment/shipping class, we actually create an instance of the form model and pass it back. We should never actually get a null because
-	 * that would mean the model file is missing.
-	 * @return null
-	 */
+
 	public function getAdminModel()
 	{
+
+		$className = $this->getAdminModelName();
+		$reflector = new ReflectionClass(get_class($this));
+		$classPath = $reflector->getFileName();
+		$adminFile = str_replace(get_class($this).".php","models/".$className,$classPath.".php");
+
+		if(file_exists($adminFile))
+			return new $className;
+		else
 			return null;
 
 	}
@@ -268,7 +273,7 @@ class WsExtension extends CComponent
 
 	public function getVersion()
 	{
-		return $this->Version;
+		return $this->version;
 	}
 	public function getAdminNameNormal()
 	{

@@ -497,7 +497,6 @@ class HelperTest extends PHPUnit_Framework_TestCase
 		$obj->id = 99;
 		$obj->created = new CDbExpression('NOW()');
 		$obj->modified = new CDbExpression('NOW()');
-		$obj->allow_login=1;
 		if (!$obj->save())
 			print_r($obj->getErrors());
 

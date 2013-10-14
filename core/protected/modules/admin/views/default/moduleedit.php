@@ -51,7 +51,7 @@ $this->Widget('zii.widgets.jui.CJuiDialog',array(
 		<?php echo $form->renderBegin(); ?>
 	    <?php echo $form->renderBody();?>
         <div class="row field_label">
-            <div class="span5"><?php echo CHtml::activeLabelEx($objModule,'Active:'); ?></div>
+            <div class="span5"><?php echo CHtml::activeLabelEx($objModule,($objModule->category=='theme' ? 'Automatically Update:' : 'Active:')); ?></div>
             <div class="span5"><?php
 			    echo '<div class="onoff" id="'.$objModule->id.'"></div>'; //Create On/Off
 			    echo CHtml::activeHiddenField($objModule,"active");

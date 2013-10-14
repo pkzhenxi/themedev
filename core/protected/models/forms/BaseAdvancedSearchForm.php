@@ -14,6 +14,7 @@ class BaseAdvancedSearchForm extends CFormModel
 	public $cat;
 	public $product_size;
 	public $product_color;
+	public $tag;
 
 
 	/**
@@ -23,7 +24,7 @@ class BaseAdvancedSearchForm extends CFormModel
 	{
 		return array(
 			array('q', 'required'),
-			array('q,startprice,endprice,cat,product_size,product_color', 'safe'),
+			array('q,startprice,endprice,cat,product_size,product_color,tag', 'safe'),
 			// rememberMe needs to be a boolean
 			array('startprice,endprice,cat', 'numerical'),
 		);

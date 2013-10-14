@@ -20,21 +20,15 @@
             <div class="span3"><?php echo $form->error($model,'title'); ?></div>
         </div>
 
+	    <div class="row">
+		    <div class="span4"><?php echo $form->labelEx($model,'column_template'); ?></div>
+		    <div class="span5"><?php echo $form->dropDownList($model,'column_template',array('1'=>'column1','2'=>'column2')); ?></div>
+		    <div class="span3"><?php echo $form->error($model,'column_template'); ?></div>
+	    </div>
+
         <div class="row">
             <div class="span4"><?php echo $form->labelEx($model,'tab_position'); ?></div>
-            <div class="span5"><?php echo $form->dropDownList($model,'tab_position',array(
-	            '0'=>'Tab not displayed',
-	            '11'=>'1st Position Top',
-	            '12'=>'2nd Position Top',
-	            '13'=>'3rd Position Top',
-	            '14'=>'4th Position Top',
-	            '15'=>'5th Position Top',
-	            '21'=>'1st Position Bottom',
-	            '22'=>'2nd Position Bottom',
-	            '23'=>'3rd Position Bottom',
-	            '24'=>'4th Position Bottom',
-	            '25'=>'5th Position Bottom'
-            )); ?></div>
+            <div class="span5"><?php echo $form->dropDownList($model,'tab_position',$model->getPositions()); ?></div>
             <div class="span3"><?php echo $form->error($model,'tab_position'); ?></div>
         </div>
 
@@ -43,6 +37,13 @@
             <div class="span5"><?php echo $form->textField($model,'product_tag'); ?></div>
             <div class="span3"><?php echo $form->error($model,'product_tag'); ?></div>
         </div>
+
+
+	    <div class="row">
+		    <div class="span4"><?php echo $form->labelEx($model,'product_display'); ?></div>
+		    <div class="span5"><?php echo $form->dropDownList($model,'product_display',array('2'=>'as grid','1'=>'as slider')); ?></div>
+		    <div class="span3"><?php echo $form->error($model,'product_display'); ?></div>
+	    </div>
 
         <div class="row">
             <div class="span4"><?php echo $form->labelEx($model,'meta_description'); ?></div>
@@ -61,7 +62,7 @@
 
 	<div class="span11">
 	    <h4>Edit Page Content</h4>
-		<div class="tip">Click on the first tool on the toolbar to switch to editing HTML directly. Note this editor can be used for HTML and CSS, but any scripting language like JavaScript will not be functional.</div>
+		<div class="tip">Enter optional page content that will appear above any products (if you are using product tags feature). Click on the first tool on the toolbar to switch to editing HTML directly. Note this editor can be used for HTML and CSS, but any scripting language like JavaScript will not be functional.</div>
 		<?php
 		$this->widget('ImperaviRedactorWidget', array(
 			'model' => $model,

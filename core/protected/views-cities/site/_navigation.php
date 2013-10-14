@@ -2,7 +2,7 @@
 
 	<div class="span2">
 		<?php $this->widget('application.extensions.wsmenu.wsmenu', array(
-			'categories'=> Category::GetTree(),
+			'categories'=> $this->MenuTree,
 			'menuheader'=> Yii::t('global','Products'),
 			'showarrow'=>true,
 		)); //products dropdown menu ?>

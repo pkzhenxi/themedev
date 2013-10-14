@@ -16,6 +16,10 @@
 			                    echo CHtml::activeTextField($item,"[$i]key_value",array('title'=>$item->helper_text));
 			                    break;
 
+                            case "EMAIL":
+                                echo CHtml::activeEmailField($item,"[$i]key_value",array('title'=>$item->helper_text));
+                                break;
+
 		                    case "PASSWORD":
 			                    echo CHtml::activePasswordField($item,"[$i]key_value",array('title'=>$item->helper_text));
 			                    break;

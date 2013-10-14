@@ -245,8 +245,6 @@ class CartSequence61 extends PHPUnit_Framework_TestCase
 
 
 		//Check our cart controller for JSON reply
-
-		//Check our cart controller for JSON reply
 		$_POST['CheckoutForm']['promoCode'] = $objPromo->code;
 		$cartController->actionApplyPromocode();
 
