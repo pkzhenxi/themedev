@@ -161,28 +161,12 @@ return array(
 
 	public static function exportEmail()
 	{
-		$objConfig = Configuration::model()->findAllByAttributes(array('param'=>'1'),array('order'=>'key_name'));
-
 		$fp2 = fopen(YiiBase::getPathOfAlias('config')."/wsemail.php","w");
 		if(!$fp2) die("error writing wsemail");
 
-		$ssl = "false";
-		if(_xls_get_conf('EMAIL_SMTP_SECURITY_MODE')==0)
-			if (_xls_get_conf('EMAIL_SMTP_PORT')=="465") $ssl = "true";
-
-		if(_xls_get_conf('EMAIL_SMTP_SECURITY_MODE')==1) $ssl = "false";
-		if(_xls_get_conf('EMAIL_SMTP_SECURITY_MODE')==2) $ssl = "true";
-
 		fwrite($fp2,"<?php
 
-return array(
-			'class'=>'KEmail',
-			'host_name'=>'"._xls_get_conf('EMAIL_SMTP_SERVER')."',
-			'host_port'=>'"._xls_get_conf('EMAIL_SMTP_PORT')."',
-			'user'=>'"._xls_get_conf('EMAIL_SMTP_USERNAME')."',
-			'password'=>'"._xls_decrypt(_xls_get_conf('EMAIL_SMTP_PASSWORD'))."',
-			'ssl'=>".$ssl.",
-			);
+return array(); //no longer used
 ");
 		fclose($fp2);
 
@@ -329,7 +313,7 @@ return array(
 				);
 
 			case 'EMAIL_SMTP_SECURITY_MODE':
-				return array(0 => _sp("Autodetect") , 1 => _sp("Force No Security") , 2 => _sp("Force SSL"));
+				return array(0 => _sp("Autodetect") , 1 => _sp("Force No Security") , 2 => _sp("Force SSL"),3 => _sp("Force TLS"));
 
 			case 'STORE_IMAGE_LOCATION':
 				return array('DB'=>'Database' , 'FS' => 'File System');

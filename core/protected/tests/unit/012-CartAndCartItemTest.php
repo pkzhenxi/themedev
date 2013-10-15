@@ -297,15 +297,9 @@ class CartAndCartItemTest extends PHPUnit_Framework_TestCase
 		foreach ($objMails as $objMail) {
 
 			if ($objMail->to == "george@example.com") $objMail->to="kris.white@lightspeedretail.com";
-			Yii::import("ext.KEmail.KEmail");
-			$blnResult = Yii::app()->email->send(
-				_xls_get_conf('EMAIL_FROM'),
-				$objMail->to,
-				$objMail->subject,
-				$objMail->htmlbody,
-				$headers);
 
 			$this->assertContains('Billing (if different)',$objMail->htmlbody);
+			$blnResult =_xls_send_email($objMail->id,true);
 			$this->assertEquals(1,$blnResult); //1 is true, but assert doesn't think so so we can't use assertTrue
 			if($blnResult) $objMail->delete();
 		}

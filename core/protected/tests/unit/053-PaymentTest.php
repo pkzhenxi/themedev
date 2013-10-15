@@ -230,6 +230,9 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 	{
 
 		$this->checkoutForm->setScenario('formSubmitGuest');
+		$this->checkoutForm->acceptTerms=1;
+		$this->checkoutForm->shippingProvider=1;
+		$this->checkoutForm->shippingPriority=1;
 		$arrReturn = $this->checkoutForm->validate();
 		print_r($this->checkoutForm->getErrors());
 		$this->assertTrue($arrReturn);

@@ -27,6 +27,7 @@ function searchForComponents()
 	foreach (glob(dirname(__FILE__).'/../../../custom/extensions/shipping/*', GLOB_ONLYDIR) as $moduleDirectory)
 		$arr[basename($moduleDirectory)] = array('class'=>'custom.extensions.shipping.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
 
+	$arr['Smtpmail'] = array('class'=>'application.extensions.smtpmail.PHPMailer');
 
 	if (file_exists(dirname(__FILE__).'/../../../config/wslogging.php'))
 		$arr['log']=require(dirname(__FILE__).'/../../../config/wslogging.php');

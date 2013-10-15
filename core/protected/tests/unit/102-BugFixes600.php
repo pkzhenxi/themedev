@@ -113,6 +113,107 @@ class BugFix600Test extends PHPUnit_Framework_TestCase
         //is product still there?
         $this->assertEquals('delete',$retVal);
     }
+
+	/*
+	 * WS-695 - Customer Web Order Notification Emails Send Intermittently (on certain Hosts)
+	 * we really can't use this unit tests in checked in code until we get an email address that I can put in a pw for
+	 * that's not part of the archive
+	 */
+//	public function testWS695()
+//	{
+//
+//
+//		//Create new email instance
+//		$mail = $this->createEmail('test beginning, initial good');
+//		//Make sure our email sends first
+//		$blnResult = $mail->Send();
+//		$this->assertTrue($blnResult);
+//
+//
+//		//Scenario 1, test an invalid host
+//		$mail = $this->createEmail('Scenario 1, test an invalid host');
+//		$mail->Host = 'smtp.gmail.moc';
+//		$blnResult = $mail->Send();
+//		$this->assertFalse($blnResult);
+//		$this->assertContains("Called Mail() without being connected",$mail->ErrorInfo);
+//		$mail->ErrorInfo=null;
+//		//Now fix the error
+//		$mail->Host = 'smtp.gmail.com';
+//		$blnResult = $mail->Send();
+//		$this->assertTrue($blnResult);
+//
+//
+//
+//
+//		//error scenario 2, bad email address
+//		//Now make the host correct but not a valid email
+//		$mail = $this->createEmail("error scenario 2, bad email address");
+//		$mail->Username = 'notarealemail@lightspeedretail.com';
+//		$blnResult = $mail->Send();
+//		$this->assertFalse($blnResult);
+//		//echo $mail->ErrorInfo;
+//		$this->assertContains("Authentication Required",$mail->ErrorInfo);
+//		//Now fix the error
+//		$mail->Username = 'kris.white@lightspeedretail.com';
+//		//print_r($mail);
+//		$blnResult = $mail->Send();
+//		echo $mail->ErrorInfo;
+//		$this->assertTrue($blnResult);
+//
+//
+//
+//
+//		//Now make the email correct but an invalid password
+//		$mail = $this->createEmail("error scenario 3, bad password");
+//		$mail->Password= "badpassword";
+//		$blnResult = $mail->Send();
+//		$this->assertFalse($blnResult);
+//		//echo $mail->ErrorInfo;
+//		$this->assertContains("Authentication Required",$mail->ErrorInfo);
+//		//fix error
+//		$mail->Password= "goodpassword";
+//		$blnResult = $mail->Send();
+//		$this->assertTrue($blnResult);
+//
+//		//Now make the password correct but spoof the from address
+//		$mail->SetFrom('kris.white@lightspeedretail.com', 'Kris White');
+//		$mail->Password= "goodpassword";
+//		$blnResult = $mail->Send();
+//		$this->assertFalse($blnResult);
+//		echo $mail->ErrorInfo;
+//		$this->assertContains("whatever",$mail->ErrorInfo);
+//
+//
+//
+//
+//	}
+//	protected function createEmail($subject = "test email")
+//	{
+//
+//
+//		//Destroy any smtp object that existed before, otherwise testing won't go of prior tests
+//		Yii::app()->setComponent('Smtpmail', null);
+//
+//		//Create new email object
+//		$mail=Yii::app()->Smtpmail;
+//		$mail->Debugoutput=true;
+//		$mail->IsSMTP();
+//		$mail->Username = $from = 'kris.white@lightspeedretail.com';
+//		$mail->Password = 'goodpassword';
+//		$mail->Mailer = 'smtp';
+//		$mail->Port = 465;
+//		$mail->SMTPAuth =  true;
+//		$mail->SMTPDebug=1;
+//		$mail->SMTPSecure = 'ssl';
+//		$mail->Subject = "test email";
+//		$mail->Host = 'smtp.gmail.com';
+//
+//		$mail->SetFrom($from, 'Kris White');
+//		$mail->Subject = $subject;
+//		$mail->MsgHTML("<p>This is a <strong>test</strong></p>");
+//		$mail->AddAddress("kris.white@lightspeedretail.com", "Kris White");
+//		return $mail;
+//	}
 }
 
 
