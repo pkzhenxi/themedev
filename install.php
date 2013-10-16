@@ -2965,9 +2965,9 @@ function initialConfigLoad($db)
 	$db->add_config_key("LANGUAGES","Languages","fr","",3,4,NULL);
 	$db->add_config_key("EMAIL_SMTP_SERVER","SMTP Server","","SMTP Server to send emails",5,11,NULL);
 	$db->add_config_key("MIN_PASSWORD_LEN","Minimum Password Length",6,"Minimum password length",3,5,"INT");
-	$db->add_config_key("EMAIL_FROM","Store Email","","From which address emails will be sent",2,3,NULL);
+	$db->add_config_key("EMAIL_FROM","Store Email","","From which address emails will be sent",2,3,"EMAIL");
 	$db->add_config_key("STORE_NAME","Store Name","LightSpeed Web Store","",2,1,NULL);
-	$db->add_config_key("EMAIL_BCC","BCC Address","","Enter an email address here if you would like to get BCCed on all emails sent by the webstore.",5,2,NULL);
+	$db->add_config_key("EMAIL_BCC","BCC Address","","Enter an email address here if you would like to get BCCed on all emails sent by the webstore.",5,2,"EMAIL");
 	$db->add_config_key("EMAIL_SIGNATURE","Email Signature","Thank you, {storename}","Email signature for all outgoing emails",24,10,NULL);
 	$db->add_config_key("ENABLE_WISH_LIST","Enable Wish List",1,"",7,1,"BOOL");
 	$db->add_config_key("ENABLE_SRO","Display My Repairs (SROs) under My Account",0,"If your store uses SROs for repairs and uploads them to Web Store, turn this option on to allow customers to view pending repairs.",6,4,"BOOL");
@@ -2975,7 +2975,7 @@ function initialConfigLoad($db)
 	$db->add_config_key("ENABLE_FAMILIES","Show Families on Product Menu?",1,"",19,5,"ENABLE_FAMILIES");
 	$db->add_config_key("PRODUCTS_PER_PAGE","Products Per Page",12,"Number of products per page to display in product listing or search",8,3,"INT");
 	$db->add_config_key("PRODUCT_SORT_FIELD","Products Sorting","-modified","By which field products will sorted in result",8,4,"PRODUCT_SORT");
-	$db->add_config_key("ORDER_FROM","Order From","","Order email address from which order notification is sent. This email address also gets the notification of the order",5,1,NULL);
+	$db->add_config_key("ORDER_FROM","Order From","","Order email address from which order notification is sent. This email address also gets the notification of the order",5,1,"EMAIL");
 	$db->add_config_key("ALLOW_GUEST_CHECKOUT","New customers can purchase",1,"Force customers to sign up with an account before shopping? Note this some customers will abandon a forced-signup process. Customer cards are created in LightSpeed based on all orders, not dependent on customer registrations.",3,2,"ALLOW_GUEST_CHECKOUT");
 	$db->add_config_key("INVENTORY_LOW_THRESHOLD","Low Inventory Threshold",3,"If inventory of a product is below this quantity, Low inventory threshold title will be displayed in place of inventory value.",11,8,"INT");
 	$db->add_config_key("INVENTORY_AVAILABLE","Available Inventory Message","{qty} Available","This text will be shown when product is available for shipping. This value will only be shown if you choose Display Inventory Level in place of actual inventory value",11,6,NULL);

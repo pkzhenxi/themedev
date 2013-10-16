@@ -100,13 +100,8 @@ FANCYBOX;
 	{
 
 
-		//if the image file exists than generate the html string and return it
-		if(file_exists(Yii::getPathOfAlias('webroot') .'/'.$this->images[0]['image']))
-		{
-			//$this->images[0]['image'] = "/images/small/image1.jpg";
-			//$this->images[0]['image_large'] = "/images/large/image1.jpg";
-			$html='<div class="'.$this->css_target.'">';
-			$html.='<img id="zoomPrimary" class="'.$this->zoomClass.'" src="'.$this->images[0]['image'].'"
+		$html='<div class="'.$this->css_target.'">';
+		$html.='<img id="zoomPrimary" class="'.$this->zoomClass.'" src="'.$this->images[0]['image'].'"
 				data-cloudzoom="zoomImage: \''.$this->images[0]['image_large'].'\',
 				zoomSizeMode:\''.$this->zoomSizeMode.'\',
 				zoomOffsetX: '.$this->zoomOffsetX.',
@@ -114,19 +109,16 @@ FANCYBOX;
 				zoomFlyOut: '.$this->zoomFlyOut.'
 				"/>';
 
-			$html .= "</div>";
+		$html .= "</div>";
 
-			if(count($this->images)>1)
-			{
-				$html .= $this->buildAdditionalImages();
-			}
-
-
-
-			return $html;
+		if(count($this->images)>1)
+		{
+			$html .= $this->buildAdditionalImages();
 		}
 
 
+
+		return $html;
 
 
 	}

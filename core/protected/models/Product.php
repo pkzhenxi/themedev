@@ -255,10 +255,15 @@ class Product extends BaseProduct
 		{
 			$a = array();
 			$a['image']=Images::GetLink($obj->id,ImagesType::pdetail,$absolute);
-			$a['image_large']=Images::GetLink($obj->id,ImagesType::normal,$absolute);
 			$a['image_thumb']=Images::GetLink($obj->id,ImagesType::preview,$absolute);
 			$a['image_alt']=$this->Title;
 			$a['image_desc']='';
+			$a['image_large']=Images::GetLink($obj->id,ImagesType::normal,$absolute);
+			list($wo, $ho, $type, $attr) = getimagesize(Yii::getPathOfAlias('webroot').$a['image_large']);
+			list($wt, $ht, $type, $attr) = getimagesize(Yii::getPathOfAlias('webroot').$a['image']);
+			if($obj->width<=$wt && $obj->height<=$ht)
+				$a['image_large']=$a['image'];
+
 			$arrImages[] = $a;
 
 		}

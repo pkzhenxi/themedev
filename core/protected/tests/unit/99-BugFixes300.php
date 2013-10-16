@@ -53,6 +53,12 @@ class BugFix300Test extends PHPUnit_Framework_TestCase
         $errors = $model->getErrors();
         $this->assertContains('not a valid email address',print_r($errors,true));
 
+	    $model->EMAIL_FROM = 'nonsense@example';
+	    $model->scenario = 'page3';
+	    $this->assertEquals(false,$model->validate());
+	    $errors = $model->getErrors();
+	    $this->assertContains('not a valid email address',print_r($errors,true));
+
         $model->EMAIL_FROM = 'nonsense@example.ca';
         $this->assertEquals(true,$model->validate());
 
