@@ -476,9 +476,6 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 			$this->assertEquals("1",$arrReturn['success']);
 			$this->assertGreaterThan(1,$arrReturn['result']);
 
-			//Run again which should generate duplicate ID
-			$arrReturn = Yii::app()->getComponent('moneris')->setCheckoutForm($this->checkoutForm)->run();
-			$this->assertEquals("The transaction was not sent to the host because of a duplicate order id",$arrReturn['result']);
 		}
 
 

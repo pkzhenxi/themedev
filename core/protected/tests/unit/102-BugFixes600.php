@@ -119,101 +119,107 @@ class BugFix600Test extends PHPUnit_Framework_TestCase
 	 * we really can't use this unit tests in checked in code until we get an email address that I can put in a pw for
 	 * that's not part of the archive
 	 */
-//	public function testWS695()
-//	{
-//
-//
-//		//Create new email instance
-//		$mail = $this->createEmail('test beginning, initial good');
-//		//Make sure our email sends first
-//		$blnResult = $mail->Send();
-//		$this->assertTrue($blnResult);
-//
-//
-//		//Scenario 1, test an invalid host
-//		$mail = $this->createEmail('Scenario 1, test an invalid host');
-//		$mail->Host = 'smtp.gmail.moc';
-//		$blnResult = $mail->Send();
-//		$this->assertFalse($blnResult);
-//		$this->assertContains("Called Mail() without being connected",$mail->ErrorInfo);
-//		$mail->ErrorInfo=null;
-//		//Now fix the error
-//		$mail->Host = 'smtp.gmail.com';
-//		$blnResult = $mail->Send();
-//		$this->assertTrue($blnResult);
-//
-//
-//
-//
-//		//error scenario 2, bad email address
-//		//Now make the host correct but not a valid email
-//		$mail = $this->createEmail("error scenario 2, bad email address");
-//		$mail->Username = 'notarealemail@lightspeedretail.com';
-//		$blnResult = $mail->Send();
-//		$this->assertFalse($blnResult);
-//		//echo $mail->ErrorInfo;
-//		$this->assertContains("Authentication Required",$mail->ErrorInfo);
-//		//Now fix the error
-//		$mail->Username = 'kris.white@lightspeedretail.com';
-//		//print_r($mail);
-//		$blnResult = $mail->Send();
-//		echo $mail->ErrorInfo;
-//		$this->assertTrue($blnResult);
-//
-//
-//
-//
-//		//Now make the email correct but an invalid password
-//		$mail = $this->createEmail("error scenario 3, bad password");
-//		$mail->Password= "badpassword";
-//		$blnResult = $mail->Send();
-//		$this->assertFalse($blnResult);
-//		//echo $mail->ErrorInfo;
-//		$this->assertContains("Authentication Required",$mail->ErrorInfo);
-//		//fix error
-//		$mail->Password= "goodpassword";
-//		$blnResult = $mail->Send();
-//		$this->assertTrue($blnResult);
-//
-//		//Now make the password correct but spoof the from address
-//		$mail->SetFrom('kris.white@lightspeedretail.com', 'Kris White');
-//		$mail->Password= "goodpassword";
-//		$blnResult = $mail->Send();
-//		$this->assertFalse($blnResult);
-//		echo $mail->ErrorInfo;
+	public function testWS695()
+	{
+		//Create new email instance
+		$mail = $this->createEmail('test beginning, initial good');
+		//Make sure our email sends first
+		$blnResult = $mail->Send();
+//		var_dump($blnResult);
+		$this->assertTrue($blnResult);
+
+		//Scenario 1, test an invalid host
+		$mail = $this->createEmail('Scenario 1, test an invalid host');
+		$mail->Host = 'smtp.gmail.moc';
+		$blnResult = $mail->Send();
+		$this->assertFalse($blnResult);
+		$this->assertContains("Called Mail() without being connected",$mail->ErrorInfo);
+		$mail->ErrorInfo=null;
+		//Now fix the error
+		$mail->Host = 'smtp.gmail.com';
+		$blnResult = $mail->Send();
+		$this->assertTrue($blnResult);
+
+
+//		error scenario 2, bad email address
+//		Now make the host correct but not a valid email
+		$mail = $this->createEmail("error scenario 2, bad email address");
+		$mail->Username = 'notarealemail@lightspeedretail.com';
+		$blnResult = $mail->Send();
+		$this->assertFalse($blnResult);
+		//echo $mail->ErrorInfo;
+		$this->assertContains("Authentication Required",$mail->ErrorInfo);
+		//Now fix the error?
+		$mail->Username = 'dev.unittest@lightspeedretail.com';
+		$blnResult = $mail->Send();
+		//Turns out it is not enough to simply fix an incorrect username and resend
+		//For gmail anyway
+		$this->assertFalse($blnResult);
+		$this->assertContains("Authentication Required",$mail->ErrorInfo);
+
+		//we must rebuild the email and send
+		$mail = $this->createEmail("error scenario 2, rebuilt");
+		$blnResult = $mail->Send();
+		$this->assertTrue($blnResult);
+
+		//Now make the email correct but an invalid password
+		$mail = $this->createEmail("error scenario 3, bad password");
+		$mail->Password= "badpassword";
+		$blnResult = $mail->Send();
+		$this->assertFalse($blnResult);
+		//echo $mail->ErrorInfo;
+		$this->assertContains("Authentication Required",$mail->ErrorInfo);
+		//fix error
+		$mail->Password= "spike5-dump";
+		$blnResult = $mail->Send();
+		//Turns out it is not enough to simply fix an incorrect password and resend
+		//For gmail anyway
+		$this->assertFalse($blnResult);
+		$this->assertContains("Authentication Required",$mail->ErrorInfo);
+
+		//we must rebuild the email and send
+		$mail = $this->createEmail("error scenario 3, rebuilt");
+		$blnResult = $mail->Send();
+		$this->assertTrue($blnResult);
+
+		//Now make the password correct but spoof the from address
+		$mail->SetFrom('nonsense', 'who knows');
+		$mail->Password= "spike5-dump";
+		$blnResult = $mail->Send();
+		//Spoofing the reply-to field does not stop the email from sending
+		$this->assertTrue($blnResult);
 //		$this->assertContains("whatever",$mail->ErrorInfo);
-//
-//
-//
-//
-//	}
-//	protected function createEmail($subject = "test email")
-//	{
-//
-//
-//		//Destroy any smtp object that existed before, otherwise testing won't go of prior tests
-//		Yii::app()->setComponent('Smtpmail', null);
-//
-//		//Create new email object
-//		$mail=Yii::app()->Smtpmail;
-//		$mail->Debugoutput=true;
-//		$mail->IsSMTP();
-//		$mail->Username = $from = 'kris.white@lightspeedretail.com';
-//		$mail->Password = 'goodpassword';
-//		$mail->Mailer = 'smtp';
-//		$mail->Port = 465;
-//		$mail->SMTPAuth =  true;
-//		$mail->SMTPDebug=1;
-//		$mail->SMTPSecure = 'ssl';
-//		$mail->Subject = "test email";
-//		$mail->Host = 'smtp.gmail.com';
-//
-//		$mail->SetFrom($from, 'Kris White');
-//		$mail->Subject = $subject;
-//		$mail->MsgHTML("<p>This is a <strong>test</strong></p>");
-//		$mail->AddAddress("kris.white@lightspeedretail.com", "Kris White");
-//		return $mail;
-//	}
+
+	}
+
+	protected function createEmail($subject = "test email")
+	{
+
+		//Destroy any smtp object that existed before, otherwise testing won't go of prior tests
+		Yii::app()->setComponent('Smtpmail', null);
+
+		//Create new email object
+		$mail=Yii::app()->Smtpmail;
+		$mail->Debugoutput=true;
+		$mail->IsSMTP();
+		$mail->Host = 'smtp.gmail.com';
+		$mail->Port = 465;
+		$mail->Username = $from = 'dev.unittest@lightspeedretail.com';
+		$mail->Password = 'spike5-dump';
+		$mail->Mailer = 'smtp';
+		$mail->AuthType = "LOGIN";
+		$mail->SMTPAuth = true;
+		$mail->SMTPDebug=1;
+		$mail->SMTPSecure = 'ssl';
+		$mail->Subject = "test email";
+
+
+		$mail->SetFrom($from, 'Dev Unit');
+		$mail->Subject = $subject;
+		$mail->MsgHTML("<p>This is a <strong>test</strong></p>");
+		$mail->AddAddress("kevin.ottley@lightspeedretail.com", "Kevin Ottley");
+		return $mail;
+	}
 }
 
 

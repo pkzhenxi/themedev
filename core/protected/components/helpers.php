@@ -844,7 +844,7 @@ function _xls_send_email($id, $hideJson = false)
 		$orderEmail = _xls_get_conf('ORDER_FROM','');
 		$from = empty($orderEmail) ? _xls_get_conf('EMAIL_FROM') : $orderEmail;
 
-
+		Yii::app()->setComponent('Smtpmail',null);
 		$mail=Yii::app()->Smtpmail;
 		//$mail->CharSet="utf-8";
 		$mail->Debugoutput="error_log";

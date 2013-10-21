@@ -478,7 +478,6 @@ class LegacySoapController extends Controller
 	){
 
 
-
 		if(!$this->check_passkey($passkey))
 			return self::FAIL_AUTH;
 
@@ -490,8 +489,8 @@ class LegacySoapController extends Controller
 				foreach($arrProduct as $key=>$val) {
 					switch ($key) {
 
-						case 'inventory': $objProduct->inventory = $val; break;
-						case 'inventoryTotal': $objProduct->inventory_total = $val; break;
+						case 'inventory': $objProduct->inventory = (float)$val; break;
+						case 'inventoryTotal': $objProduct->inventory_total = (float)$val; break;
 
 					}
 
@@ -499,11 +498,16 @@ class LegacySoapController extends Controller
 				// Now save the product
 				try {
 
-					$objProduct->save();
-					$objProduct->SetAvailableInventory();
-					//Create event
-					$objEvent = new CEventProduct('LegacysoapController','onUpdateInventory',$objProduct);
-					_xls_raise_events('CEventProduct',$objEvent);
+					if(!$objProduct->save())
+						Yii::log("Saving Products got errors ".print_r($objProduct->getErrors(),true),
+							'error', 'application.'.__CLASS__.".".__FUNCTION__);
+					else {
+						$objProduct->SetAvailableInventory();
+						//Create event
+						$objEvent = new CEventProduct('LegacysoapController','onUpdateInventory',$objProduct);
+						_xls_raise_events('CEventProduct',$objEvent);
+					}
+
 
 				}
 				catch(Exception $e) {
