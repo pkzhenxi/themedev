@@ -217,7 +217,7 @@ class BugFix600Test extends PHPUnit_Framework_TestCase
 		$mail->SetFrom($from, 'Dev Unit');
 		$mail->Subject = $subject;
 		$mail->MsgHTML("<p>This is a <strong>test</strong></p>");
-		$mail->AddAddress("kevin.ottley@lightspeedretail.com", "Kevin Ottley");
+		$mail->AddAddress("dev.unittest@lightspeedretail.com", "Dev Tests");
 		return $mail;
 	}
 }

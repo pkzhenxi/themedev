@@ -2217,8 +2217,15 @@ class LegacySoapController extends Controller
 			$strReturn .= "ShippingMethod:".base64encode($objCart->shipping->shipping_method).chr(13);
 			$strReturn .= "ShippingModule:".base64encode($objCart->shipping->shipping_module).chr(13);
 			$strReturn .= "ShippingData:".base64encode($objCart->shipping->shipping_data).chr(13);
-			$strReturn .= "ShippingCost:".base64encode($objCart->shipping->shipping_cost).chr(13);
-			$strReturn .= "ShippingSell:".base64encode($objCart->shipping->shipping_sell).chr(13);
+
+			$shippingCost = $objCart->shipping->shipping_cost;
+			$shippingSell = $objCart->shipping->shipping_sell;
+
+			if(empty($shippingCost)) $shippingCost='0';
+			if(empty($shippingSell)) $shippingSell='0';
+
+			$strReturn .= "ShippingCost:".base64encode($shippingCost).chr(13);
+			$strReturn .= "ShippingSell:".base64encode($shippingSell).chr(13);
 			$strReturn .= "PaymentMethod:".base64encode($objCart->payment->payment_method).chr(13);
 			$strReturn .= "PaymentModule:".base64encode($objCart->payment->payment_module).chr(13);
 			$strReturn .= "PaymentData:".base64encode($objCart->payment->payment_data).chr(13);

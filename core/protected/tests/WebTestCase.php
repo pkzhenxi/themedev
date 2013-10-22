@@ -36,8 +36,7 @@ function sendSoap($action,$soap)
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 	//execute post
-	$response = curl_exec($ch);
-
+	return curl_exec($ch);
 
 }
 

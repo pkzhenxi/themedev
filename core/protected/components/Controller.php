@@ -75,7 +75,7 @@ class Controller extends CController
 		{
 			if(_xls_get_conf('theme'))
 			{
-				//We can't find our theme for some reason, switch back to brookyn
+				//We can't find our theme for some reason, switch back to brooklyn
 				_xls_set_conf('theme','brooklyn');
 				_xls_set_conf('CHILD_THEME','light');
 				Yii::log("Couldn't find our theme, switched back to Brooklyn for emergency",

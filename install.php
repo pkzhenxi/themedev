@@ -111,7 +111,7 @@ INITIALIZING...\n\nYOU MUST DESTROY 17 KINGONS IN 30 STARDATES WITH 3 STARBASES\
 		$db->query("update xlsws_configuration set key_value=1 where key_name='LIGHTSPEED_HOSTING'");
 
 	echo "\nLaunching Yii bootstrap\n";
-	runYii($arg['url'],$_SERVER['SCRIPT_NAME']);
+	runYii($arg['url'],$arg['scriptname']);
 
 }
 else {
@@ -173,10 +173,10 @@ function runYii($url,$scriptname,$sqlline=1)
 	Yii::app()->params['OFFLINE']=0;
 	Yii::app()->params['INSTALLED']=1;
 
-
 	$_SERVER=array(
 		'REQUEST_URI'=>'/index.php',
 		'SERVER_NAME'=>$url,
+		'SCRIPT_FILENAME'=>realpath(dirname(__FILE__)."/".$scriptname),
 		'SCRIPT_NAME'=>$scriptname,
 		'PHP_SELF'=>$scriptname,
 		'HTTP_USER_AGENT'=>'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/536.30.1 (KHTML, like Gecko)',
@@ -4351,6 +4351,8 @@ function arguments ( $args )
 
 function modifyArgs($arg)
 {
+	global $_SERVER;
+
 	if(isset($arg['url']))
 	{
 		$url = str_replace("http://","",$arg['url']);
@@ -4362,15 +4364,17 @@ function modifyArgs($arg)
 		if(stripos($url,"/")===false)
 		{
 			$_SERVER['SERVER_NAME'] = $arg['url'];
-			$_SERVER['SCRIPT_NAME']=$_SERVER['PHP_SELF']="/install.php";
-		} else
+			$arg['scriptname'] = $_SERVER['SCRIPT_NAME']=$_SERVER['PHP_SELF']="/install.php";
+		}
+		else
 		{
+
 			$marker = stripos($arg['url'],"/");
 			$path=substr($arg['url'],$marker);
 			$arg['url'] = substr($arg['url'],0,$marker);
 
 			$_SERVER['SERVER_NAME'] = $arg['url'];
-			$_SERVER['SCRIPT_NAME']=$_SERVER['PHP_SELF']=$path."/install.php";
+			$arg['scriptname'] = $_SERVER['SCRIPT_NAME']=$_SERVER['PHP_SELF']=$path."/install.php";
 
 		}
 
