@@ -128,6 +128,7 @@ return CMap::mergeArray(
 						'/xls_admin.php/<controller:\w+>/<action:\w+>'=>array('admin/<controller>/<action>', 'caseSensitive'=>false,'parsingOnly'=>true),
 						'admin/<controller:\w+>/<action:\w+>'=>'admin/<controller>/<action>',
 						'xls_image_upload.php/<type:\w+>/<id:\w+>/<key:\w+>/<position:\w+>' => 'legacysoap/image', //soap
+						'soap/image/<type:\w+>/<id:\w+>/<key:\w+>/<position:\w+>' => 'soap/image', //soap
 						'brand/<brand:(.*)>' => 'search/browse', //display product
 						'<name:(.*)>/dp/<id:[0-9]+>' => 'product/view', //display product
 						'<feed:[\w\d\-_\.()]+>.xml' => 'xml/<feed>', //xml feeds

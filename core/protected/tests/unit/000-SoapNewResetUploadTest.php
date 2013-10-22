@@ -10,7 +10,7 @@
 require_once "../bootstrap.php";
 require_once "PHPUnit/Autoload.php";
 
-class SoapResetUploadTest extends PHPUnit_Framework_TestCase
+class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 {
 
 	/**
@@ -41,12 +41,12 @@ class SoapResetUploadTest extends PHPUnit_Framework_TestCase
 	 * This uses our SOAP transaction log and basically emulates a full wipe and upload
 	 * @group soap
 	 */
-	public function testLegacyFullSoapUpload()
+	public function testFullSoapUpload()
 	{
 
 		_dbx('update xlsws_modules set configuration=\'a:15:{s:17:"PRODUCTS_PER_PAGE";s:2:"12";s:19:"LISTING_IMAGE_WIDTH";s:3:"180";s:20:"LISTING_IMAGE_HEIGHT";s:3:"190";s:18:"DETAIL_IMAGE_WIDTH";s:3:"256";s:19:"DETAIL_IMAGE_HEIGHT";s:3:"256";s:16:"MINI_IMAGE_WIDTH";s:2:"30";s:17:"MINI_IMAGE_HEIGHT";s:2:"30";s:20:"CATEGORY_IMAGE_WIDTH";s:3:"180";s:21:"CATEGORY_IMAGE_HEIGHT";s:3:"180";s:19:"PREVIEW_IMAGE_WIDTH";s:2:"30";s:20:"PREVIEW_IMAGE_HEIGHT";s:2:"30";s:18:"SLIDER_IMAGE_WIDTH";s:2:"90";s:19:"SLIDER_IMAGE_HEIGHT";s:2:"90";s:11:"CHILD_THEME";s:5:"light";s:16:"IMAGE_BACKGROUND";s:7:"#FFFFFF";}\' where module=\'brooklyn\'');
 
-		$url = 'http://www.copper.site/xls_soap.php';
+		$url = 'http://www.copper.site/index-test.php/soap/bronze?ws=1';
 
 		$dbC = Yii::app()->db->createCommand();
 		$dbC->setFetchMode(PDO::FETCH_OBJ);//fetch each row as Object
@@ -75,7 +75,7 @@ class SoapResetUploadTest extends PHPUnit_Framework_TestCase
 
 
 			//First we test the response back from the SOAP transaction itself
-			$strResponse = '>'.$row->expected_response.'</'.$row->soap_action.'Result>';
+			$strResponse = '>'.$row->expected_response.'</return>';
 			if (!is_null($row->expected_response))
 				$this->assertContains($strResponse,$response);
 
@@ -85,6 +85,7 @@ class SoapResetUploadTest extends PHPUnit_Framework_TestCase
 
 				case 'db_flush':
 					$strTableName = $row->affected_object;
+					echo $row->affected_object;
 					$item_count = $strTableName::model()->count();
 					$this->assertEquals(0,$item_count);
 					break;
@@ -195,7 +196,7 @@ class SoapResetUploadTest extends PHPUnit_Framework_TestCase
 			$pinfo = mb_pathinfo($file);
 			if (is_numeric(($pinfo['filename']))) {
 
-				$url = 'http://www.copper.site/xls_image_upload.php/product/'.$pinfo['filename'].'/index/0/';
+				$url = 'http://www.copper.site/index-test.php/soap/image/product/'.$pinfo['filename'].'/index/0/';
 				error_log("posting to ".$url);
 				$imageString = file_get_contents('../photos/'.$file);
 
@@ -220,6 +221,7 @@ class SoapResetUploadTest extends PHPUnit_Framework_TestCase
 			}
 		}
 	}
+
 
 
 }

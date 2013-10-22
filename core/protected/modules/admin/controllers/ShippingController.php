@@ -334,10 +334,10 @@ class ShippingController extends AdminBaseController
 
 				if($obj->save())
 					echo "success";
-				else echo print_r($obj->getErrors,true);
+				else echo _xls_convert_errors_display(_xls_convert_errors($obj->getErrors()));
 			}
 			else
-				echo print_r($obj->getErrors,true);
+				echo _xls_convert_errors_display(_xls_convert_errors($obj->getErrors()));
 
 		}
 	}
