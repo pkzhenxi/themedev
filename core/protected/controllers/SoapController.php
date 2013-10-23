@@ -13,7 +13,7 @@ class SoapController extends CController
 	{
 		return array(
 			'bronze'=>array(
-				'class'=>'CWebServiceAction',
+				'class'=>'WebServiceAction',
 				'serviceOptions'=>array('soapVersion'=>'1.2'),
 			),
 		);
