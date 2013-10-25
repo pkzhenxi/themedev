@@ -1254,8 +1254,9 @@ class CartController extends Controller
 	 * @return mixed
 	 */
 	protected static function PreFinalizeHooks($objCart) {
-		if (function_exists('_custom_before_order_complete'))
-			_custom_before_order_process($objCart);
+
+		$objEvent = new CEventOrder('CartController','onBeforeCreateOrder',$objCart->id_str);
+		_xls_raise_events('CEventOrder',$objEvent);
 
 		return $objCart;
 	}
@@ -1266,8 +1267,9 @@ class CartController extends Controller
 	 * @return mixed
 	 */
 	protected static function PostFinalizeHooks($objCart) {
-		if (function_exists('_custom_after_order_complete'))
-			_custom_after_order_complete($objCart);
+
+		$objEvent = new CEventOrder('CartController','onCreateOrder',$objCart->id_str);
+		_xls_raise_events('CEventOrder',$objEvent);
 
 		return $objCart;
 	}

@@ -194,6 +194,16 @@ class DatabaseadminController extends AdminBaseController
 		$value = Yii::app()->getRequest()->getPost('value');
 
 		Cart::model()->updateByPk($pk,array($name=>$value));
+
+		if($name=="downloaded" && $value==0)
+		{
+			$objCart = Cart::model()->findByPk($pk);
+			$objEvent = new CEventOrder('CartController','onCreateOrder',$objCart->id_str);
+			_xls_raise_events('CEventOrder',$objEvent);
+
+		}
+
+
 		echo "success";
 
 

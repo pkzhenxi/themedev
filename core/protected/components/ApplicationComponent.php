@@ -10,6 +10,8 @@ class ApplicationComponent extends CApplicationComponent {
 	public function onSaveProduct($event) {}
 	public function onUpdateInventory($event) {}
 	public function onActionProductView($event) {}
+	public function onBeforeCreateOrder($event) {}
+	public function onCreateOrder($event) {}
 	public function onDownloadOrders($event) {}
 	public function OnActionUploadProduct($event) {}
 	public function OnActionUploadPrice($event) {}

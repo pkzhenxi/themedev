@@ -283,6 +283,24 @@ function hex2rgb($hex) {
 	return $rgb; // returns an array with the rgb values
 }
 
+function json_encode_with_relations(array $models, $attributeNames) {
+	$attributeNames = explode(',', $attributeNames);
+
+	$rows = array(); //the rows to output
+	foreach ($models as $model) {
+		$row = array(); //you will be copying in model attribute values to this array
+		foreach ($attributeNames as $name) {
+			$name = trim($name); //in case of spaces around commas
+			$row[$name] = CHtml::value($model, $name); //this function walks the relations
+		}
+		$rows[] = $row;
+	}
+
+	return CJSON::encode($rows);
+
+}
+
+
 function _xls_get_sort_order() {
 	$strProperty = _xls_get_conf('PRODUCT_SORT_FIELD' , 'Name');
 	$blnAscend = true;
