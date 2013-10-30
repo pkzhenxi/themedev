@@ -81,6 +81,7 @@ class AdminBaseController extends CController
 			Yii::app()->user->setFlash('warning',Yii::t('admin','Your store is currently set offline for maintenance -- you can access it via the url {url}',
 				array('{url}'=>Yii::app()->createAbsoluteUrl('site/index',array('offline'=>_xls_get_conf('STORE_OFFLINE'))))));
 
+
 		return parent::beforeAction($action);
 
 	}

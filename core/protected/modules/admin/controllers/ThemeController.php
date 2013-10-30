@@ -46,9 +46,9 @@ class ThemeController extends AdminBaseController
 			array(
 				array('label'=>'Manage My Themes', 'url'=>array('theme/manage')),
 				array('label'=>'Configure '.ucfirst($this->currentTheme), 'url'=>array('theme/module')),
-				array('label'=>'Edit custom.css for '.ucfirst($this->currentTheme), 'url'=>array('theme/customcss')),
-				array('label'=>'View Theme Gallery', 'url'=>array('theme/gallery')),
-				array('label'=>'Upload Theme .Zip', 'url'=>array('theme/upload')),
+				array('label'=>'Edit custom.css for '.ucfirst($this->currentTheme), 'url'=>array('theme/customcss'), 'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)),
+				array('label'=>'View Theme Gallery', 'url'=>array('theme/gallery'), 'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)),
+				array('label'=>'Upload Theme .Zip', 'url'=>array('theme/upload'), 'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)),
 				array('label'=>'View My Image Gallery', 'url'=>array('theme/image','id'=>1)),
 				array('label'=>'Set Header Image', 'url'=>array('theme/header')),
 				array('label'=>'Upload FavIcon', 'url'=>array('theme/favicon'))

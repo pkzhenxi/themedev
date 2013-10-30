@@ -28,10 +28,11 @@ class PaymentsController extends AdminBaseController
 		foreach ($arrModules as $module)
 			try {
 				if (Yii::app()->getComponent($module->module))
-					if (Yii::app()->getComponent($module->module)->advancedMode)
-						$menuSidebara[] = array('label'=>Yii::app()->getComponent($module->module)->AdminName, 'url'=>array('payments/module', 'id'=>$module->module));
-					else
-						$menuSidebar[] = array('label'=>Yii::app()->getComponent($module->module)->AdminName, 'url'=>array('payments/module', 'id'=>$module->module));
+					if (Yii::app()->getComponent($module->module)->cloudCompatible || _xls_get_conf('LIGHTSPEED_CLOUD')==0)
+						if (Yii::app()->getComponent($module->module)->advancedMode)
+							$menuSidebara[] = array('label'=>Yii::app()->getComponent($module->module)->AdminName, 'url'=>array('payments/module', 'id'=>$module->module));
+						else
+							$menuSidebar[] = array('label'=>Yii::app()->getComponent($module->module)->AdminName, 'url'=>array('payments/module', 'id'=>$module->module));
 			}
 			catch (Exception $e) {
 				Yii::log("Missing widget ".$e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
@@ -43,7 +44,7 @@ class PaymentsController extends AdminBaseController
 				),
 			$menuSidebar,
 			array(
-				array('label'=>'Advanced Integration Modules', 'linkOptions'=>array('class'=>'nav-header'))
+				array('label'=>'Advanced Integration Modules', 'linkOptions'=>array('class'=>'nav-header'), 'visible'=>count($menuSidebara)>0)
 			),
 			$menuSidebara,
 			array(

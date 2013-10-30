@@ -5,6 +5,7 @@ class phoneorder extends WsPayment
 
 	protected $defaultName = "Phone Order";
 	protected $version = 1;
+	public $cloudCompatible = false;
 
 	//Define a subform
 	public $subform = "phoneorderform";

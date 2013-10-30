@@ -236,6 +236,7 @@ a:hover {  text-decoration: none;   }
 #autoadd .summary { font-weight: normal; font-size: 0.7em;}
 #autoadd #autoadd_c0 { margin-right: 0px; border-right: 0px; }
 
+.cloudzoom-zoom, .cloudzoom-zoom-inside { background-color: white;}
 
 
 /***** Checkout page and Registration Page *****/

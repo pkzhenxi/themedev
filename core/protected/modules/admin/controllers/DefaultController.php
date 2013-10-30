@@ -49,30 +49,31 @@ class DefaultController extends AdminBaseController
 
 	public function beforeAction($action)
 	{
-
-		$this->menuItems = array(
-			array('label'=>'Store', 'linkOptions'=>array('class'=>'nav-header')),
+			$this->menuItems = array(
+				array('label'=>'Store', 'linkOptions'=>array('class'=>'nav-header')),
 				array('label'=>'Store Information', 'url'=>array('default/edit', 'id'=>self::STORE_INFORMATION)),
 				array('label'=>'Email Sending Options', 'url'=>array('default/edit', 'id'=>self::EMAIL_SENDING_OPTIONS)),
 				array('label'=>'Localization', 'url'=>array('default/edit', 'id'=>self::LOCALIZATION)),
 				array('label'=>'Customer Registration', 'url'=>array('default/edit', 'id'=>self::CUSTOMER_REGISTRATION)),
 				//array('label'=>'Captcha Setup', 'url'=>array('site/contact')),
-			array('label'=>'Appearance', 'linkOptions'=>array('class'=>'nav-header')),
+				array('label'=>'Appearance', 'linkOptions'=>array('class'=>'nav-header')),
 				array('label'=>'Display Options', 'url'=>array('default/edit', 'id'=>self::TEMPLATE_OPTIONS)),
 				array('label'=>'Products', 'url'=>array('default/edit', 'id'=>self::PRODUCTS)),
 				array('label'=>'Inventory', 'url'=>array('default/edit', 'id'=>self::INVENTORY)),
 				array('label'=>'Product Photos', 'url'=>array('default/edit', 'id'=>self::PRODUCT_PHOTOS)),
 				array('label'=>'Carts', 'url'=>array('default/edit', 'id'=>self::CARTS)),
 				array('label'=>'Wish Lists', 'url'=>array('default/edit', 'id'=>self::WISH_LIST)),
-				array('label'=>'SROs', 'url'=>array('default/edit', 'id'=>self::SRO)),
-			array('label'=>'SEO', 'linkOptions'=>array('class'=>'nav-header')),
+				array('label'=>'SROs', 'url'=>array('default/edit', 'id'=>self::SRO), 'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)),
+				array('label'=>'SEO', 'linkOptions'=>array('class'=>'nav-header')),
 				array('label'=>'URL Options', 'url'=>array('default/edit', 'id'=>self::SEO_URL)),
 				array('label'=>'Product Meta Data', 'url'=>array('default/edit', 'id'=>self::SEO_PRODUCT)),
 				array('label'=>'Category/Custom Title Format', 'url'=>array('default/edit', 'id'=>self::SEO_CATEGORY)),
 				array('label'=>'Category Meta Data', 'url'=>array('default/categorymeta')),
 
 
-		);
+
+			);
+
 
 		//run parent init() after setting menu so highlighting works
 		return parent::beforeAction($action);

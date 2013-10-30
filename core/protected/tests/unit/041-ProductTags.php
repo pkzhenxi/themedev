@@ -16,13 +16,15 @@ class ProductTagsTest extends PHPUnit_Framework_TestCase
 	public function testTags()
 	{
 
-//		$objProduct = Product::LoadByRequestUrl('cupcakes-for-you-pink-l');
-//
-//		foreach ($objProduct->productTags->tag as $tag)
-//			if ($tag->tag=="new")
-//				echo "yes"; else echo "no";
-//
+		$objProduct = Product::LoadByRequestUrl('cupcakes-for-you-pink-l');
 
+		print_r($objProduct->productTags[1]->tag->tag);
+		foreach ($objProduct->productTags as $tag)
+			if ($tag->tag->tag=="new")
+				echo "yes"; else echo "no";
+
+
+		print_r( CHtml::listData($objProduct->productTags,'tag.tag','tag.tag'));
 
 	}
 

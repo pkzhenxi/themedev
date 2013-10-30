@@ -137,6 +137,7 @@ h3 { margin-top: 2px; }
 .installing { background-image: url("img/spinner_14.gif"); background-repeat: no-repeat; background-position: 21px 7px;}
 .photo-editor label { text-align: left; }
 #CustomPage_page { width: 720px; height: 600px;}
+.langedit { margin-bottom: -1px; }
 
 #btnCopy { display: hidden;}
 #btnClean { display: hidden;}
