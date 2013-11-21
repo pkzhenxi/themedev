@@ -3,13 +3,12 @@
 		convertErrorsToExceptions="true"
 		convertNoticesToExceptions="true"
 		convertWarningsToExceptions="true"
-		stopOnFailure="true">
+		stopOnFailure="false">
 
 	<selenium>
 	<!--	<browser name="Firefox" browser="*firefox" /> -->
 	</selenium>
 	<php>
-		<server name="SERVER_NAME" value="www.copper.site"/>
 		<server name="SERVER_ADDR" value="127.0.0.1"/>
 		<server name="SERVER_PORT" value="80"/>
         <server name="HTTP_HOST" value="www.copper.site"/>
@@ -28,6 +27,7 @@
             <group>delete</group>
             <group>email</group>
             <group>taxin</group>
+            <group>payment</group>
         </exclude>
     </groups>
 </phpunit>

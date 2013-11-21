@@ -31,7 +31,7 @@ class ProductTest extends PHPUnit_Framework_TestCase
 		curl_setopt($ch,CURLOPT_URL,$url);
 		curl_setopt($ch, CURLOPT_POST,           true );
 		curl_setopt($ch, CURLOPT_POSTFIELDS,    $imageString);
-		curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/html; charset=utf-8', 'Content-Length: '.strlen($imageString),'Testdb: true','PassKey: '.'webstore' ));
+		curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/html; charset=utf-8', 'Content-Length: '.strlen($imageString),'PassKey: '.'webstore' ));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 		$response = curl_exec($ch);

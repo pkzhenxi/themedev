@@ -15,12 +15,27 @@
  */
 class WishlistController extends Controller
 {
+	/**
+	 * We want to ensure Wish lists are enabled before a user can view,
+	 * search and-or create lists. So, we display an exception to prevent
+	 *  running any of these processes.
+	 *
+	 * @param CAction $action
+	 * @return bool
+	 * @throws CHttpException
+	 */
 
-	public function init()
+	public function beforeAction($action)
 	{
-		//Yii::app()->clientScript->registerScriptFile(Yii::app()->baseUrl . '/js/custom.js');
-		parent::init();
+		if (_xls_get_conf('ENABLE_WISH_LIST',0)==0)
+		{
+			throw new CHttpException(404,'Wish lists are not enabled on this store.');
+			return false;
+		}
+
+		return parent::beforeAction($action);
 	}
+
 	public function actionIndex()
 	{
 
@@ -45,6 +60,7 @@ class WishlistController extends Controller
 			'My Wish Lists'=>$this->createUrl("/wishlist"),
 			'Create a Wish List'=>$this->createUrl("wishlist/create"),
 		);
+
 
 		//We should only show this option to a logged in user
 		if (Yii::app()->user->isGuest)
@@ -82,7 +98,6 @@ class WishlistController extends Controller
 
 	public function actionEdit()
 	{
-
 		//We should only show this option to a logged in user
 		if (Yii::app()->user->isGuest)
 			throw new CHttpException(404, Yii::t('wishlist','You must be logged in to edit Wish Lists.'));

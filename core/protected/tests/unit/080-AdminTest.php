@@ -25,19 +25,6 @@ class AdminTest extends PHPUnit_Framework_TestCase
 	}
 
 
-//	public function testChangeConf() {
-//
-//		$controller = new AdminController("default");
-//
-//		$retValue = $controller->actionExportconfig();
-//		$this->assertTrue($retValue);
-//
-//
-//	}
-
-
-
-
 	public function testAdminConfiguration()
 	{
 
@@ -121,13 +108,8 @@ class AdminTest extends PHPUnit_Framework_TestCase
 	{
 		$reset = false;
 
-		if (!(_xls_get_conf('LIGHTSPEED_CLOUD')>0))
-		{
-			$reset = true;
-			_xls_set_conf('LIGHTSPEED_CLOUD',date('dis'));   // 6 digits
-		}
+		_xls_set_conf('LIGHTSPEED_CLOUD',date("Y"));   // 6 digits
 
-		Configuration::exportConfig();
 
 		$controller = new ThemeController('theme');
 		Yii::app()->controller = $controller;
@@ -142,11 +124,11 @@ class AdminTest extends PHPUnit_Framework_TestCase
 		$controller->setAction($value);
 		$controller->beforeAction('index');
 
-//		print_r($controller->menuItems);
+		print_r($controller->menuItems);
 
-		$this->assertFalse($controller->menuItems[2]['visible']);  //custom.com
-		$this->assertFalse($controller->menuItems[3]['visible']);  //View Theme Gallery
-		$this->assertFalse($controller->menuItems[4]['visible']);  //Upload Theme .Zip
+		$this->assertNotEquals(1,$controller->menuItems[2]['visible']);  //custom.com
+		$this->assertNotEquals(1,$controller->menuItems[3]['visible']);  //View Theme Gallery
+		$this->assertNotEquals(1,$controller->menuItems[4]['visible']);  //Upload Theme .Zip
 
 		unset($controller);
 		unset($value);
@@ -164,10 +146,10 @@ class AdminTest extends PHPUnit_Framework_TestCase
 
 //		print_r($controller->menuItems);
 
-		$this->assertFalse($controller->menuItems[12]['visible']);  //SROs
+		$this->assertNotEquals(1,$controller->menuItems[12]['visible']);  //SROs
 
-		$tmp = Configuration::model()->findByAttributes(array('key_name'=>'TAX_INCLUSIVE_PRICING'));
-		$this->assertNotEquals(15,$tmp->configuration_type_id); //will not be visible
+//		$tmp = Configuration::model()->findByAttributes(array('key_name'=>'TAX_INCLUSIVE_PRICING'));
+//		$this->assertNotEquals(15,$tmp->configuration_type_id); //will not be visible
 
 		unset($controller);
 		unset($value);
@@ -187,20 +169,14 @@ class AdminTest extends PHPUnit_Framework_TestCase
 
 		$i=0;
 		while ($controller->menuItems[$i]['label']!='Advanced Integration Modules') $i++;
-		$this->assertFalse($controller->menuItems[$i]['visible']);  //Advanced Integration Modules label
+		$this->assertNotEquals(1,$controller->menuItems[$i]['visible']);  //Advanced Integration Modules label
 		$this->assertLessThan(13,count($controller->menuItems));   //if ALL advanced modules are disabled and all except 3 simple are visible
 
 		unset($controller);
 		unset($value);
 
 
-		//undo db change
-		if ($reset)
-		{
-			_xls_set_conf('LIGHTSPEED_CLOUD','0');
-			Configuration::exportConfig();
-		}
-
+		_xls_set_conf('LIGHTSPEED_CLOUD','0');
 
 	}
 

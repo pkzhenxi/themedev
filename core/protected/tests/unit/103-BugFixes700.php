@@ -56,6 +56,25 @@ class BugFix700Test extends PHPUnit_Framework_TestCase
 		$this->assertArrayNotHasKey('cardNumber',$retVal);
 
 	}
+
+	/**
+	 * WS-791 - Error in payment form removes payment info fields from checkout page
+	 * @group taxout
+	 */
+	public function testWS791()
+	{
+		//we just need to ensure our function that returns the shipping priority
+		//is escaping reserved characters correctly
+
+		$string = "We're only available during available office hours.";
+		Yii::app()->session['ship.priorityRadio.cache'] = array('Store Pickup'=>$string);
+
+		$controller = new BaseCheckoutForm();
+		$retVal = $controller->getSavedPrioritiesRadio();
+
+		$this->assertContains("We\'re",$retVal);
+
+	}
 }
 
 

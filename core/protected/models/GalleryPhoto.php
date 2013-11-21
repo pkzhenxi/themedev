@@ -14,6 +14,12 @@ class GalleryPhoto extends BaseGalleryPhoto
 	/** @var string directory in web root for galleries */
 	public $_galleryDir = 'images/gallery';
 
+
+	public function __construct($scenario='insert')
+	{
+		$this->galleryExt = Yii::app()->params['IMAGE_FORMAT'];
+		return parent::__construct($scenario);
+	}
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -122,7 +128,16 @@ class GalleryPhoto extends BaseGalleryPhoto
 
 	public function getPreview()
 	{
-		return Yii::app()->request->baseUrl . '/' . $this->galleryDir . '/_' . $this->getFileName('') . '.' . $this->galleryExt;
+
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+			$this->_galleryDir = "gallery";
+
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+			$prefix = "//lightspeedwebstore.s3.amazonaws.com/" . Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/'.$this->galleryDir;
+		else
+			$prefix = Yii::app()->request->baseUrl . '/' . $this->galleryDir;
+
+		return $prefix . '/_' . $this->getFileName('') . '.' . $this->galleryExt;
 	}
 
 	private function getFileName($version = '')
@@ -132,16 +147,31 @@ class GalleryPhoto extends BaseGalleryPhoto
 
 	public function getUrl($version = '')
 	{
-		return Yii::app()->request->baseUrl . '/' . $this->galleryDir . '/' . $this->getFileName($version) . '.' . $this->galleryExt;
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+			$this->_galleryDir = "gallery";
+
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+			$prefix = "//lightspeedwebstore.s3.amazonaws.com/" . Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/'.$this->galleryDir;
+		else
+			$prefix = Yii::app()->request->baseUrl . '/' . $this->galleryDir;
+
+		return $prefix . '/' . $this->getFileName($version) . '.' . $this->galleryExt;
 	}
 
-	public function setImage($path)
+	/**
+	 * Save image either locally or on cloud.
+	 * @param $path temporary file location
+	 */
+	public function setImage($imageFile)
 	{
+		$path = $imageFile->getTempName();
+		$strExt = $this->getExtension($imageFile);
+
 		if(!is_dir($this->galleryDir))
 			@mkdir($this->galleryDir,0775,true);
 
 		//save image in original size
-		Yii::app()->image->load($path)->save($this->galleryDir . '/' . $this->getFileName('') . '.' . $this->galleryExt);
+		Yii::app()->image->load($path)->save($this->galleryDir . '/' . $this->getFileName('') . '.' . $strExt);
 		//create image preview for gallery manager
 		Yii::app()->image->load($path)->resize(300, null)->save($this->galleryDir . '/_' . $this->getFileName('') . '.' . $this->galleryExt);
 
@@ -154,10 +184,59 @@ class GalleryPhoto extends BaseGalleryPhoto
 		}
 	}
 
+	public function setS3Image($imageFile)
+	{
+		$path = $imageFile->getTempName();
+		$strExt = $this->getExtension($imageFile);
+
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+			$this->_galleryDir = "gallery";
+
+		$objComponent=Yii::createComponent('ext.wscloud.wscloud');
+		$objImage = new Images();
+		$objImage->strImageName = $this->galleryDir . '/' . $this->getFileName('') . '.' . $strExt;
+
+		//save image in original size
+		$objComponent->SaveToS3($objImage,$path);
+
+		$d = YiiBase::getPathOfAlias('webroot')."/runtime/cloudimages/"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL');
+		@mkdir($d,0777,true);
+		$tmpOriginal = tempnam($d,"galleryimg");
+		@unlink($tmpOriginal);
+		$tmpOriginal .= '.' . $this->galleryExt;
+
+		//create image preview for gallery manager
+		Yii::app()->image->load($path)->resize(300, null)->save($tmpOriginal);
+		$objImage->strImageName = $this->galleryDir . '/_' . $this->getFileName('') . '.' . $this->galleryExt;
+		$objComponent->SaveToS3($objImage,$tmpOriginal);
+		@unlink($tmpOriginal);
+
+		foreach ($this->gallery->versions as $version => $actions) {
+			$image = Yii::app()->image->load($path);
+			foreach ($actions as $method => $args) {
+				call_user_func_array(array($image, $method), is_array($args) ? $args : array($args));
+			}
+			$tmpOriginal = tempnam($d,"galleryimg");
+			@unlink($tmpOriginal);
+			$tmpOriginal .= '.' . $this->galleryExt;
+			$objImage->strImageName = $this->galleryDir . '/' . $this->getFileName($version) . '.' . $this->galleryExt;
+			$image->save($tmpOriginal);
+			$objComponent->SaveToS3($objImage,$tmpOriginal);
+			@unlink($tmpOriginal);
+		}
+	}
+
 	public function delete()
 	{
-		$this->removeFile($this->galleryDir . '/' . $this->getFileName('') . '.' . $this->galleryExt);
-		//create image preview for gallery manager
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+			$this->_galleryDir = "gallery";
+
+		$p = $this->file_name;
+		$path = mb_pathinfo($p);
+		$ext = $path['extension'];
+		$this->removeFile($this->galleryDir . '/' . $this->getFileName('') . '.' . $ext);
+
+
 		$this->removeFile($this->galleryDir . '/_' . $this->getFileName('') . '.' . $this->galleryExt);
 
 		foreach ($this->gallery->versions as $version => $actions) {
@@ -168,7 +247,14 @@ class GalleryPhoto extends BaseGalleryPhoto
 
 	private function removeFile($fileName)
 	{
-		if (file_exists($fileName))
+		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+		{
+			$this->_galleryDir = "gallery";
+			$objComponent=Yii::createComponent('ext.wscloud.wscloud');
+			$objImage = new Images();
+			$objImage->strImageName = _xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$fileName;
+			$objComponent->RemoveImageFromS3($objImage,$objImage->strImageName);
+		} elseif (file_exists($fileName))
 			@unlink($fileName);
 	}
 
@@ -194,4 +280,13 @@ class GalleryPhoto extends BaseGalleryPhoto
 			$image->save($this->galleryDir . '/' . $this->getFileName($version) . '.' . $this->galleryExt);
 		}
 	}
+
+	public function getExtension($imageFile)
+	{
+		$type = $imageFile->type;
+		if($type=="image/png") $type="png"; else $type = "jpg";
+
+		return $type;
+	}
+
 }

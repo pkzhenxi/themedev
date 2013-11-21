@@ -5,7 +5,7 @@ class purchaseorder extends WsPayment
 
 	protected $defaultName = "Purchase Order";
 	protected $version = 1;
-	public $cloudCompatible = true;
+	public $cloudCompatible = false;
 
 	//Define a subform
 	public $subform = "purchaseorderform"; //will be available as $this->subformModel during processing

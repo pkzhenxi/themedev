@@ -13,7 +13,7 @@ class LegacySoapController extends Controller
 {
 
 	public function init() {
-		Yii::app()->setViewPath(Yii::getPathOfAlias('application')."/views-cities");
+		Controller::initParams();
 		if(Yii::app()->params['INSTALLED'] != '1') die(); //No soap when not installed (or partially installed)
 
 		//do nothing since we don't need a PHP session created for SOAP transactions
@@ -22,12 +22,6 @@ class LegacySoapController extends Controller
 
 	public function actionIndex() {
 
-		if (isset($_SERVER['HTTP_TESTDB']))
-		{
-			Yii::app()->db->setActive(false);
-			Yii::app()->db->connectionString = 'mysql:host=localhost;dbname=copper-unittest';
-			Yii::app()->db->setActive(true);
-		}
 		if (!isset($_SERVER['HTTP_SOAPACTION'])) //isset($_GET['wsdl']))
 			$this->publishWsdl();
 		//error_log($_SERVER['HTTP_SOAPACTION']);
@@ -69,12 +63,7 @@ class LegacySoapController extends Controller
 
 
 	public function actionImage() {
-		if (isset($_SERVER['HTTP_TESTDB']))
-		{
-			Yii::app()->db->setActive(false);
-			Yii::app()->db->connectionString = 'mysql:host=localhost;dbname=copper-unittest';
-			Yii::app()->db->setActive(true);
-		}
+
 
 		$ctx=stream_context_create(array(
 			'http'=>array('timeout' => ini_get('max_input_time'))
@@ -105,7 +94,7 @@ class LegacySoapController extends Controller
 
 		} elseif ($position == 0) {
 			// save master product image
-			//error_log("ostdata is ".$postdata);
+			//error_log("postdata is ".$postdata);
 			if ($this->save_product_image($id, $postdata))
 				$this->successResponse("Image saved for product " . $id);
 			else
@@ -2447,11 +2436,13 @@ class LegacySoapController extends Controller
 				case "Images":
 
 					//Because we could have a huge number of Image entries, we need to just use SQL/DAO directly
-					$cmd = Yii::app()->db->createCommand('SELECT image_path FROM xlsws_images WHERE image_path IS NOT NULL');
+					$cmd = Yii::app()->db->createCommand("SELECT image_path FROM xlsws_images WHERE image_path IS NOT NULL AND left(image_path,2)<>'//'");
 					$dataReader=$cmd->query();
 					while(($image=$dataReader->read())!==false)
 						@unlink(Images::GetImagePath($image['image_path']));
 
+					$objEvent = new CEventPhoto('LegacysoapController','onFlushTable',null,null,0);
+					_xls_raise_events('CEventPhoto',$objEvent);
 
 
 					//Yii::app()->db->createCommand()->truncateTable('xlsws_product_image_assn');

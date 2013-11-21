@@ -51,23 +51,79 @@ class Controller extends CController
     public $custom_page_content;
 
 
-	/**
-	 * Load anything we need globally, such as items we're going to use in our main.php template.
-	 * If you create init() in any other controller, you need to run parent::init() too or this
-	 * will be skipped.
-	 */
-	public function init()
+	public function beforeAction($action)
 	{
 
+		//For all other actions, we're not supposed to be using shared ssl
+		if( Yii::app()->controller->id != "site" &&
+			Yii::app()->controller->id != "cart" &&
+			Yii::app()->controller->id != "myaccount" &&
+			$action->id != "login" &&
+			_xls_get_conf('LIGHTSPEED_HOSTING','0') == '1' &&
+			_xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL','0') == '1'
+		)
+			$this->verifyNoSharedSSL();
+
+		return parent::beforeAction($action);
+
+	}
+
+	/**
+	 * Dynamically load the configuration settings for the client and
+	 * establish Params to make everything faster
+	 */
+	public static function initParams()
+	{
+		defined('DEFAULT_THEME') or define('DEFAULT_THEME','albany');
+
+		$Params = CHtml::listData(Configuration::model()->findAll(),'key_name','key_value');
+
+		foreach($Params as $key=>$value)
+			Yii::app()->params->add($key, $value);
+
+		if(isset(Yii::app()->params['THEME']))
+			Yii::app()->theme=Yii::app()->params['THEME'];
+		else Yii::app()->theme=DEFAULT_THEME;
+		if(isset(Yii::app()->params['LANG_CODE']))
+			Yii::app()->language=Yii::app()->params['LANG_CODE'];
+		else Yii::app()->language = "en";
+		Yii::app()->params->add('listPerPage',Yii::app()->params['PRODUCTS_PER_PAGE']);
+
+		//Based on logging setting, set log level dynamically and possibly turn on debug mode
+		switch (Yii::app()->params['DEBUG_LOGGING'])
+		{
+
+			case 'info':   $logLevel = "error,warning,info";break;
+			case 'trace':  $logLevel = "error,warning,info,trace";
+				defined('YII_DEBUG') or define('YII_DEBUG',true);
+				defined('YII_TRACE_LEVEL') or define('YII_TRACE_LEVEL',3);
+				break;
+			case 'error':  default: $logLevel = "error,warning"; break;
+
+		}
+
+		foreach( Yii::app()->getComponent('log')->routes as $route)
+			$route->levels = $logLevel;
 
 		Yii::app()->setViewPath(Yii::getPathOfAlias('application')."/views-cities");
 
 
-		$filename = Yii::getPathOfAlias('webroot.themes').DIRECTORY_SEPARATOR.'brooklyn';
-		if(!file_exists($filename))
+	}
+	/**
+	 * Load anything we need globally, such as items we're going to use in our main.php template.
+	 * If you create init() in any other controller, you need to run parent::init() too or this
+	 * will be skipped. If you run your own init() and don't call this, you must call Controller::initParams();
+	 * or nothing will work.
+	 */
+	public function init()
+	{
+		self::initParams();
+
+		$filename = Yii::getPathOfAlias('webroot.themes').DIRECTORY_SEPARATOR.DEFAULT_THEME;
+		if(!file_exists($filename) && _xls_get_conf('LIGHTSPEED_MT',0)=='0')
 		{
-			if(!downloadBrooklyn())
-				die("missing Brooklyn");
+			if(!downloadTheme(DEFAULT_THEME))
+				die("missing ".DEFAULT_THEME);
 			else
 				$this->redirect("/");
 		}
@@ -75,10 +131,10 @@ class Controller extends CController
 		{
 			if(_xls_get_conf('theme'))
 			{
-				//We can't find our theme for some reason, switch back to brooklyn
-				_xls_set_conf('theme','brooklyn');
+				//We can't find our theme for some reason, switch back to default
+				_xls_set_conf('theme',DEFAULT_THEME);
 				_xls_set_conf('CHILD_THEME','light');
-				Yii::log("Couldn't find our theme, switched back to Brooklyn for emergency",
+				Yii::log("Couldn't find our theme, switched back to ".DEFAULT_THEME." for emergency",
 					'error', 'application.'.__CLASS__.".".__FUNCTION__);
 				$this->redirect("/");
 
@@ -118,7 +174,6 @@ class Controller extends CController
 			Yii::app()->end();
 
 		//Set defaults
-		Yii::app()->params['listPerPage'] = _xls_get_conf('PRODUCTS_PER_PAGE'); //different code may use either
 		$this->getUserLanguage();
 
 		$this->pageTitle =
@@ -300,6 +355,14 @@ class Controller extends CController
 
 	protected function getFacebookLogin()
 	{
+
+		//Facebook integration
+		$fbArray = require(YiiBase::getPathOfAlias('application.config').'/_wsfacebook.php');
+		$fbArray['appId']=Yii::app()->params['FACEBOOK_APPID'];
+		$fbArray['secret']=Yii::app()->params['FACEBOOK_SECRET'];
+		Yii::app()->setComponent('facebook',$fbArray);
+
+
 		if (Yii::app()->user->isGuest)
 		{
 			$userid = Yii::app()->facebook->getUser();
@@ -423,5 +486,122 @@ class Controller extends CController
 		return $objFullTree;
 	}
 
+
+	/*
+	 * Shared SSL Functionality
+	 */
+	protected function verifySharedSSL()
+	{
+		if(_xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL') != '1')
+			throw new CHttpException(404,'The requested page does not exist.');
+
+		if($_SERVER['HTTP_HOST'] != _xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL'))
+		{
+			$userID = Yii::app()->user->id;
+			$cartID = Yii::app()->shoppingcart->id;
+			$controller = Yii::app()->controller->id;
+			$action = Yii::app()->controller->action->id;
+
+			if(empty($userID)) $userID=0;
+			$strIdentity = $userID.",".$cartID.",".$controller.",".$action;
+
+			$redirString = _xls_encrypt($strIdentity);
+			$strFullUrl = "https://"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').
+				$this->createUrl("cart/sharedsslreceive",array('link'=>$redirString));
+
+			$this->render('/site/redirect',array('url'=>$strFullUrl));
+			Yii::app()->end();
+		}
+
+	}
+
+	protected function verifyNoSharedSSL()
+	{
+		if(_xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL') != '1')
+			throw new CHttpException(404,'The requested page does not exist.');
+
+		//If we're here, it means we're using a shared SSL and we should go back to our own domain
+		if($_SERVER['HTTP_HOST'] == _xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL'))
+		{
+			$userID = Yii::app()->user->id;
+			$cartID = Yii::app()->shoppingcart->id;
+			$uri = $_SERVER['REQUEST_URI'];
+
+
+			if(empty($userID)) $userID=0;
+			$strIdentity = $userID.",".$cartID.",".$uri;
+
+			$redirString = _xls_encrypt($strIdentity);
+			$strFullUrl = "http://"._xls_get_conf('LIGHTSPEED_HOSTING_ORIGINAL_URL').
+				$this->createUrl("cart/sharednosslreceive",array('link'=>$redirString));
+
+			$this->redirect($strFullUrl);
+
+			//$this->render('/site/redirect',array('url'=>$strFullUrl));
+			Yii::app()->end();
+		}
+
+	}
+
+	public function actionSharedSSLReceive()
+	{
+
+		if(_xls_get_conf('LIGHTSPEED_HOSTING','0') != '1' || _xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL') != '1')
+			throw new CHttpException(404,'The requested page does not exist.');
+
+		$strLink = Yii::app()->getRequest()->getQuery('link');
+
+		$link = _xls_decrypt($strLink);
+		$linka = explode(",",$link);
+		if($linka[0]>0)
+		{
+			//we were logged in on the other URL so re-login here
+			$objCustomer = Customer::model()->findByPk($linka[0]);
+			$identity=new UserIdentity($objCustomer->email,_xls_decrypt($objCustomer->password));
+			$identity->authenticate();
+			if($identity->errorCode==UserIdentity::ERROR_NONE)
+				Yii::app()->user->login($identity,3600*24*30);
+			else
+				Yii::log("Error attempting to switch to shared SSL and logging in, error ".
+					$identity->errorCode, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+		}
+
+		Yii::app()->user->setState('cartid',$linka[1]);
+		Yii::app()->user->setState('sharedssl','1');
+		$this->redirect($this->createUrl($linka[2]."/".$linka[3]));
+
+	}
+
+	public function actionSharedNoSSLReceive()
+	{
+
+		if(_xls_get_conf('LIGHTSPEED_HOSTING','0') != '1' || _xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL') != '1')
+			throw new CHttpException(404,'The requested page does not exist.');
+
+		$strLink = Yii::app()->getRequest()->getQuery('link');
+
+		$link = _xls_decrypt($strLink);
+		$linka = explode(",",$link);
+		if($linka[0]>0)
+		{
+			//we were logged in on the other URL so re-login here
+			$objCustomer = Customer::model()->findByPk($linka[0]);
+			$identity=new UserIdentity($objCustomer->email,_xls_decrypt($objCustomer->password));
+			$identity->authenticate();
+			if($identity->errorCode==UserIdentity::ERROR_NONE)
+				Yii::app()->user->login($identity,3600*24*30);
+			else
+				Yii::log("Error attempting to switch to from shared SSL, error ".
+					$identity->errorCode, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+		}
+
+		Yii::app()->user->setState('cartid',$linka[1]);
+		Yii::app()->user->setState('sharedssl','0');
+		if($linka[2]=="/")
+			$this->redirect("http://"._xls_get_conf('LIGHTSPEED_HOSTING_ORIGINAL_URL'));
+		else
+			$this->redirect($this->createUrl($linka[2]));
+
+	}
 
 }

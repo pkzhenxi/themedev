@@ -624,7 +624,7 @@ class BaseCheckoutForm extends CFormModel
 			$outercount=0;
 			foreach (Yii::app()->session['ship.priorityRadio.cache'] as $key => $value) {
 				if ($outercount++>0) $strReturn .= ",";
-				$strReturn .= $key.":'".$value."'";
+				$strReturn .= $key.":'"._xls_jssafe_name($value)."'";
 			}
 			$strReturn .= "}";
 			return $strReturn;

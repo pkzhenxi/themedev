@@ -32,7 +32,7 @@ class SoapQuoteTest extends PHPUnit_Framework_TestCase
 	public function testSoapDownload()
 	{
 
-		$url = 'http://www.copper.site/xls_soap.php';
+		$url = 'http://'.$_SERVER['testini']['SERVER_NAME'].'/index-test.php/xls_soap.php';
 
 		$dbC = Yii::app()->db->createCommand();
 		$dbC->setFetchMode(PDO::FETCH_OBJ);//fetch each row as Object
@@ -51,7 +51,7 @@ class SoapQuoteTest extends PHPUnit_Framework_TestCase
 			curl_setopt($ch, CURLOPT_POST,           true );
 			curl_setopt($ch, CURLOPT_POSTFIELDS,    $row->envelope);
 			curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8',
-				'Content-Length: '.strlen($row->envelope),'Testdb: true','SOAPAction: '.$row->soap_action ));
+				'Content-Length: '.strlen($row->envelope),'SOAPAction: '.$row->soap_action ));
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 			//execute post
@@ -72,7 +72,7 @@ class SoapQuoteTest extends PHPUnit_Framework_TestCase
 			switch($row->soap_action) {
 
 				case 'get_quote_link':
-					$this->assertContains("www.copper.site/cart/quote/",$response);
+					$this->assertContains($_SERVER['testini']['SERVER_NAME']."/cart/quote/",$response);
 
 					break;
 

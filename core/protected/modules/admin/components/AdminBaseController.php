@@ -50,9 +50,29 @@ class AdminBaseController extends CController
 		);
 	}
 
+	public function verifySSL()
+	{
+		if (_xls_get_conf('ENABLE_SSL')==1 && !Yii::app()->user->getState('internal', false))
+		{
+			$controller = Yii::app()->controller->id;
+			$action = Yii::app()->controller->action->id;
+
+			if(!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != 'on') {
+				if(_xls_get_conf('LIGHTSPEED_HOSTING','0') == '1' && _xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL','0') == '1')
+					$strFullUrl = "https://"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL')."/admin";
+				else
+					$strFullUrl = Yii::app()->createAbsoluteUrl("admin/".$controller.'/'.$action,array(),'https');
+				$this->redirect($strFullUrl);
+				Yii::app()->end();
+			}
+		}
+
+
+	}
+
 	public function beforeAction($action)
 	{
-
+		$this->verifySSL();
 
 		$arrControllerList = $this->getControllerList();
 		$this->moduleList = $this->convertControllersToMenu($arrControllerList);

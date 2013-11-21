@@ -15,12 +15,18 @@ class ThemeForm extends CFormModel
 
 	//Public options (config keys)
 	public $CHILD_THEME = "light";
+	/*
+	 * ATTENTION THEME DESIGNERS: These values below are NOT live, they are defaults. If you are experimenting
+	 * and wish to change these values to see the effect, after changing them here, go into Admin Panel, under
+	 * the Configuration panel for your theme, and click Save. This will write these values to the
+	 * xlsws_module table for your themes, which is where Web Store looks for them at runtime.
+	 */
 	public $CATEGORY_IMAGE_HEIGHT = 180;
 	public $CATEGORY_IMAGE_WIDTH = 180;
 	public $DETAIL_IMAGE_HEIGHT = 256;
 	public $DETAIL_IMAGE_WIDTH = 256;
-	public $LISTING_IMAGE_HEIGHT = 190;
-	public $LISTING_IMAGE_WIDTH = 180;
+	public $LISTING_IMAGE_HEIGHT = 0;
+	public $LISTING_IMAGE_WIDTH = 0;
 	public $MINI_IMAGE_HEIGHT = 30;
 	public $MINI_IMAGE_WIDTH = 30;
 	public $PREVIEW_IMAGE_HEIGHT = 30;
@@ -28,7 +34,6 @@ class ThemeForm extends CFormModel
 	public $SLIDER_IMAGE_HEIGHT = 90;
 	public $SLIDER_IMAGE_WIDTH = 90;
 	public $PRODUCTS_PER_PAGE = 12;
-	public $IMAGE_BACKGROUND = "#FFFFFF";
 
 	public $menuposition = "left";
 

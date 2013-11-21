@@ -15,7 +15,7 @@ class ImageTest extends CDbTestCase
 	public function testGetImagePath() {
 
 		$strName = Images::GetImagePath('test1.jpg');
-		$this->assertContains("/Volumes/dev/copper/images/test1.jpg",$strName);
+		$this->assertContains(realpath(Yii::getPathOfAlias('webroot')) . "/images/test1.jpg",$strName);
 
 	}
 	public function testIsWritablePath() {

@@ -67,14 +67,14 @@ class CartInventorySequence extends PHPUnit_Framework_TestCase
 		//Fake upload
 		$soap1='<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Header></SOAP-ENV:Header><SOAP-ENV:Body xmlns:ns1="http://10.80.0.169/add_order"><ns1:add_order><passkey>webstore</passkey><strId>'.$objCart->id_str.'</strId><intDttDate>1323234000</intDttDate><intDttDue>1323234000</intDttDue><strPrintedNotes>100000502</strPrintedNotes><strStatus>Requested</strStatus><strEmail>kris@xsilva.com</strEmail><strPhone>9725177126</strPhone><strZipcode>75025</strZipcode><intTaxcode>0</intTaxcode><fltShippingSell>0.000000</fltShippingSell><fltShippingCost>0.000000</fltShippingCost></ns1:add_order></SOAP-ENV:Body></SOAP-ENV:Envelope>';
 
-		$url = 'http://www.copper.site/xls_soap.php';
+		$url = 'http://'.$_SERVER['testini']['SERVER_NAME'].'/index-test.php/xls_soap.php';
 
 		$ch = curl_init();
 		curl_setopt($ch,CURLOPT_URL,$url);
 		curl_setopt($ch, CURLOPT_POST,           true );
 		curl_setopt($ch, CURLOPT_POSTFIELDS,    $soap1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8',
-			'Content-Length: '.strlen($soap1),'Testdb: true','SOAPAction: add_order'));
+			'Content-Length: '.strlen($soap1),'SOAPAction: add_order'));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 
@@ -85,7 +85,7 @@ class CartInventorySequence extends PHPUnit_Framework_TestCase
 
 		curl_setopt($ch, CURLOPT_POSTFIELDS,    $soap1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8',
-			'Content-Length: '.strlen($soap1),'Testdb: true','SOAPAction: add_order'));
+			'Content-Length: '.strlen($soap1),'SOAPAction: add_order'));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 

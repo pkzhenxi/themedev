@@ -62,120 +62,9 @@ class Configuration extends BaseConfiguration
 
 	}
 
-
-	public static function exportConfig()
-	{
-		$objConfig = Configuration::model()->findAllByAttributes(array('param'=>'1'),array('order'=>'key_name'));
-
-		$objTheme = Configuration::model()->find('key_name=?', array('THEME'));
-		if ($objTheme instanceof Configuration)
-			$theme = $objTheme->key_value; else $theme = "brooklyn";
-		$objLangCode = Configuration::model()->find('key_name=?', array('LANG_CODE'));
-		if ($objLangCode instanceof Configuration)
-			$lang = $objLangCode->key_value; else $lang = "en";
-
-		//Create temporary file
-		$randName = _xls_seo_url(_xls_truncate(md5(date("YmdHis")),10,'')).".php";
-
-
-		$strConfigArray =
-			"return array(\n".
-			"\t\t'theme'=>'".$theme."',\n".
-			"\t\t'language'=>'".$lang."',\n".
-			"\t\t'params'=>array(\n";
-
-
-		foreach ($objConfig as $oConfig) {
-			$keyvalue = str_replace('"','\"',$oConfig->key_value);
-			$strConfigArray .= "\t\t\t'".$oConfig->key_name."'=>\"".$keyvalue."\",\n";
-		}
-
-		$strConfigArray .= "));";
-
-		$success = false;
-		$x = null;
-		try {
-			@$x = eval($strConfigArray);
-			if(is_array($x)) $success=true;
-		} catch (Exception $objExc) {
-			//our config wasn't successful
-			$success = false;
-		}
-
-		if($success){
-			$str = "<?php"."\n".$strConfigArray;
-			file_put_contents(YiiBase::getPathOfAlias('config')."/".$randName,$str);
-			@unlink(YiiBase::getPathOfAlias('config')."/wsconfig.php");
-			rename(YiiBase::getPathOfAlias('config')."/".$randName,YiiBase::getPathOfAlias('config')."/wsconfig.php");
-			return true;
-		} else {
-			Yii::log('error writing wsconfig.php', 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-			return false;
-		}
-
-	}
-
-	public static function exportLogging()
-	{
-		$objConfig = Configuration::model()->findAllByAttributes(array('param'=>'1'),array('order'=>'key_name'));
-
-		//Write out logging
-		foreach ($objConfig as $oConfig)
-			if ($oConfig->key_name=="DEBUG_LOGGING")
-				switch ($oConfig->key_value)
-				{
-					case 'error';   $level = "error";   $logLevel = "error,warning"; break;
-					case 'info';    $level = "info";    $logLevel = "error,warning,info";break;
-					case 'trace';   $level = "trace";   $logLevel = "error,warning,info,trace";break;
-
-				}
-
-
-		$fp2 = fopen(YiiBase::getPathOfAlias('config')."/wslogging.php","w");
-
-		fwrite($fp2,"<?php
-
-return array(
-	'class'=>'CLogRouter',
-	'routes'=>array(
-		array(
-			'class'=>'CFileLogRoute',
-			'levels'=>'error, warning',
-		),
-		array(
-			'class'=>'CDbLogRoute',
-			'levels'=>'".$logLevel."',
-			'logTableName'=>'xlsws_log',
-			'connectionID'=>'db',
-		),
-	),
-);
-
-");
-		fclose($fp2);
-
-		
-		return true;
-	}
-
-
-	public static function exportEmail()
-	{
-		$fp2 = fopen(YiiBase::getPathOfAlias('config')."/wsemail.php","w");
-		if(!$fp2) die("error writing wsemail");
-
-		fwrite($fp2,"<?php
-
-return array(); //no longer used
-");
-		fclose($fp2);
-
-
-		return true;
-	}
-
 	public static function exportKeys($key,$salt)
 	{
+		if(_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 || _xls_get_conf('LIGHTSPEED_MT',0)>0) return true; //cloud mode doesn't use this
 
 		$fp2 = fopen(YiiBase::getPathOfAlias('config')."/wskeys.php","w");
 
@@ -190,37 +79,6 @@ return array(
 
 
 		return true;
-	}
-
-	public function exportFacebook()
-	{
-		$objAppID = self::LoadByKey('FACEBOOK_APPID');
-		$objSecret = self::LoadByKey('FACEBOOK_SECRET');
-
-		$configtext = file_get_contents(YiiBase::getPathOfAlias('application')."/config/_wsfacebook.php");
-		$fp2 = fopen(YiiBase::getPathOfAlias('config')."/wsfacebook.php","w");
-
-		$configtext = str_replace("FACEBOOK_APPID",$objAppID->key_value,$configtext);
-		$configtext = str_replace("FACEBOOK_SECRET",$objSecret->key_value,$configtext);
-
-		fwrite($fp2,$configtext);
-		fclose($fp2);
-	}
-
-
-	public function updateViewsetSymLink($viewset)
-	{
-		$symfile = YiiBase::getPathOfAlias('application')."/views";
-		$strOriginal = YiiBase::getPathOfAlias('application.views')."-".strtolower($viewset);
-		$current="";
-		if(file_exists($symfile))
-			$current = readlink($symfile);
-		if ($current != $strOriginal)
-		{
-			@unlink($symfile);
-			symlink($strOriginal, $symfile);
-		}
-
 	}
 
 	public static function getAdminDropdownOptions($strId)
@@ -486,25 +344,12 @@ return array(
 
 	protected function afterSave()
 	{
-		$retVal = Configuration::exportConfig();
-		if(!$retVal) return $retVal;
-		if ($this->key_name=="DEBUG_LOGGING")
-			Configuration::exportLogging();
-
-		if (substr($this->key_name,0,10)=="EMAIL_SMTP")
-			Configuration::exportEmail();
 
 		if ($this->key_name=="FEATURED_KEYWORD")
 			Product::SetFeaturedByKeyword($this->key_value);
 
 		if ($this->key_name=="LANGUAGES")
 			$this->updateLanguages($this->key_value);
-
-		if ($this->key_name=="VIEWSET")
-			$this->updateViewsetSymLink($this->key_value);
-
-		if (substr($this->key_name,0,8)=="FACEBOOK")
-			$this->exportFacebook();
 
 		if ($this->key_name=="SEO_URL_CATEGORIES")
 		{

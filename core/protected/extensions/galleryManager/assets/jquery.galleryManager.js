@@ -120,6 +120,20 @@
                     } else alert(t);
                 }});
         }
+        function setPhotos(ids) {
+            var selectedCount = $('.photo.selected', $sorter).length;
+            if(selectedCount!=1) return false;
+            $.ajax({
+                type: 'POST',
+                url: opts.setUrl,
+                data: 'id[]=' + ids.join('&id[]=') + csrfParams,
+                success: function (t) {
+                    if (t == 'OK') {
+                        $("#alert-box").html('Header Image set');
+                        $("#alert-box").dialog("open");
+                    } else alert(t);
+                }});
+        }
 
 
         function deleteClick(e) {
@@ -129,6 +143,16 @@
             // here can be question to confirm delete
             // if (!confirm(deleteConfirmation)) return false;
             removePhotos([id]);
+            return false;
+        }
+
+        function setClick(e) {
+            e.preventDefault();
+            var photo = $(this).closest('.photo');
+            var id = photo.data('id');
+            // here can be question to confirm delete
+            // if (!confirm(deleteConfirmation)) return false;
+            setPhotos([id]);
             return false;
         }
 
@@ -148,6 +172,11 @@
             } else {
                 $('.edit_selected, .remove_selected', $gallery).removeClass('disabled');
             }
+            if (selectedCount == 1) {
+                $('.set_selected', $gallery).removeClass('disabled');
+            } else {
+                $('.set_selected', $gallery).addClass('disabled');
+            }
         }
 
         function selectChanged() {
@@ -161,6 +190,7 @@
 
         $images
             .on('click', '.photo .deletePhoto', deleteClick)
+            .on('click', '.photo .setPhoto', setClick)
             .on('click', '.photo .editPhoto', editClick)
             .on('click', '.photo .photo-select', selectChanged);
 
@@ -346,6 +376,16 @@
                 ids.push($(this).data('id'));
             });
             removePhotos(ids);
+
+        });
+
+        $('.set_selected', $gallery).click(function (e) {
+            e.preventDefault();
+            var ids = [];
+            $('.photo.selected', $sorter).each(function () {
+                ids.push($(this).data('id'));
+            });
+            setPhotos(ids);
 
         });
 

@@ -575,8 +575,9 @@
 		        <div class="span9">
 					<?php echo $form->checkBox($model,'acceptTerms'); ?>
 			        <?php echo Yii::t('checkout',
-				        'I hereby agree to the Terms and Conditions of shopping with {storename}',
-				        array('{storename}'=>_xls_get_conf('STORE_NAME'))) ?>
+				        'I hereby agree to the {terms} of shopping with {storename}',
+				        array('{storename}'=>_xls_get_conf('STORE_NAME'),
+				                '{terms}'=>CHtml::link(Yii::t('global','Terms and Conditions'),$this->createUrl('/terms-and-conditions')))) ?>
 					<?php echo $form->error($model,'acceptTerms'); ?>
 		        </div>
 	        </div>

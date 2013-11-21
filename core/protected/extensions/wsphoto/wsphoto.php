@@ -1,7 +1,7 @@
 <?php
 
 //Default photo processor
-class wsphoto extends CApplicationComponent {
+class wsphoto extends ApplicationComponent {
 
 
 	public $category = "CEventPhoto";
@@ -68,6 +68,7 @@ class wsphoto extends CApplicationComponent {
 				return false;
 			}
 		}
+
 
 		$this->createThumbnails($objProduct,$objImage);
 
@@ -186,7 +187,7 @@ class wsphoto extends CApplicationComponent {
 			if (!($objThumbImage instanceof Images))
 			{
 				$objThumbImage = new Images();
-				Images::model()->deleteAllByAttributes(array('width'=>$intNewHeight,'height'=>$intNewHeight,'parent'=>$objImage->id)); //sanity check to prevent SQL UNIQUE errors
+				Images::model()->deleteAllByAttributes(array('width'=>$intNewWidth,'height'=>$intNewHeight,'parent'=>$objImage->id)); //sanity check to prevent SQL UNIQUE errors
 			}
 
 			$objThumbImage->image_path = $strNewThumbnail;

@@ -8,6 +8,13 @@ class SoapController extends CController
 	const OK = "OK";
 	const UNKNOWN_ERROR = "UNKNOWN_ERROR";
 
+	public function beforeAction($action)
+	{
+		if(YII_DEBUG)
+			ini_set("soap.wsdl_cache_enabled", 0);
+		return parent::beforeAction($action);
+
+	}
 
 	public function actions()
 	{
@@ -118,11 +125,13 @@ class SoapController extends CController
 			case "Images":
 
 				//Because we could have a huge number of Image entries, we need to just use SQL/DAO directly
-				$cmd = Yii::app()->db->createCommand('SELECT image_path FROM xlsws_images WHERE image_path IS NOT NULL');
+				$cmd = Yii::app()->db->createCommand("SELECT image_path FROM xlsws_images WHERE image_path IS NOT NULL AND left(image_path,2)<>'//'");
 				$dataReader=$cmd->query();
 				while(($image=$dataReader->read())!==false)
 					@unlink(Images::GetImagePath($image['image_path']));
 
+				$objEvent = new CEventPhoto('LegacysoapController','onFlushTable',null,null,0);
+				_xls_raise_events('CEventPhoto',$objEvent);
 
 
 				//Yii::app()->db->createCommand()->truncateTable('xlsws_product_image_assn');
@@ -951,7 +960,143 @@ class SoapController extends CController
 		return self::OK;
 
 	}
+	/**
+	 * Add an order for display
+	 *
+	 * @param string $passkey
+	 * @param string $strId
+	 * @param int $intDttDate
+	 * @param int $intDttDue
+	 * @param string $strPrintedNotes
+	 * @param string $strStatus
+	 * @param int $lightspeed_id
+	 * @param int $intTaxcode
+	 * @return string
+	 * @soap
+	 */
+	public function add_order($passkey
+		, $strId
+		, $intDttDate
+		, $intDttDue
+		, $strPrintedNotes
+		, $strStatus
+		, $lightspeed_id
+		, $intTaxcode
+	){
 
+
+		if(!$this->check_passkey($passkey))
+			return self::FAIL_AUTH;
+
+
+		$objDocument = Document::LoadByIdStr($strId);
+
+		if(!($objDocument instanceof Document)) {
+			$objDocument = new Document();
+		} else {          // if cart already exists then delete the items
+
+			foreach($objDocument->documentItems  as $item)
+			{
+				$item->qty = 0;
+				$item->save();
+				$item->product->SetAvailableInventory();
+				$item->delete();
+			}
+
+		}
+
+
+		$objDocument->order_type = CartType::order;
+
+		$objDocument->order_str = $strId;
+		$objDocument->printed_notes = $strPrintedNotes;
+		$objDocument->datetime_cre = date("Y-m-d H:i:s",trim($intDttDate));
+		$objDocument->datetime_due = date("Y-m-d H:i:s",trim($intDttDue));
+		$objDocument->fk_tax_code_id = $intTaxcode ? $intTaxcode : 0;
+
+		$objDocument->status = $strStatus;
+
+		$objCustomer = Customer::model()->findByAttributes(array('lightspeed_id'=>$lightspeed_id));
+		if ($objCustomer instanceof Customer)
+			$objDocument->customer_id = $objCustomer->id;
+
+		$objCart = Cart::LoadByIdStr($strId);
+		if ($objCart instanceof Cart)
+			$objDocument->cart_id = $objCart->id;
+
+		$objDocument->status = $strStatus;
+
+		if (!$objDocument->save())
+		{
+			Yii::log("SOAP ERROR : add_order ".print_r($objDocument->getErrors(),true), 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+			return self::UNKNOWN_ERROR;
+		}
+		if ($objCart instanceof Cart) {
+			$objCart->document_id = $objDocument->id;
+			$objCart->save();
+		}
+
+		if (substr($strId,0,3)=="WO-")
+			Configuration::SetHighestWO();
+
+
+
+		return self::OK;
+	}
+
+
+
+
+	/**
+	 * Add an order item
+	 *
+	 * @param string $passkey
+	 * @param string $strOrder
+	 * @param int $intProductId
+	 * @param float $fltQty
+	 * @param string $strDescription
+	 * @param float $fltSell
+	 * @param float $fltDiscount
+	 * @return string
+	 * @soap
+	 */
+	public function add_order_item($passkey
+		, $strOrder
+		, $intProductId
+		, $fltQty
+		, $strDescription
+		, $fltSell
+		, $fltDiscount
+	){
+
+		if(!$this->check_passkey($passkey))
+			return self::FAIL_AUTH;
+
+		$objDocument = Document::LoadByIdStr($strOrder);
+		if(!$objDocument)
+			return self::UNKNOWN_ERROR;
+
+		$objProduct = Product::model()->findByPk($intProductId);
+		if(!$objProduct)
+			return self::OK; //We could be receiving an old document with an item that no longer exists
+
+
+		$strDescription = trim($strDescription);
+		if (empty($strDescription))
+			$strDescription=$objProduct->title;
+
+
+		$retVal = $objDocument->AddSoapProduct($objDocument->id,$objProduct,
+			$fltQty, $strDescription,
+			$fltSell, $fltDiscount, CartType::order);
+
+		if (!$retVal)
+			return self::UNKNOWN_ERROR;
+
+		$objProduct->SetAvailableInventory();
+
+		return self::OK;
+	}
 
 
 
@@ -1125,72 +1270,6 @@ class SoapController extends CController
 	}
 
 	/**
-	 * Updating Inventory (delta update)
-	 *
-	 * @param string $passkey
-	 * @param UpdateInventory[] $UpdateInventory
-	 * @return string
-	 */
-	public function update_inventory(
-		$passkey,
-		$UpdateInventory
-	){
-
-
-		if(!$this->check_passkey($passkey))
-			return self::FAIL_AUTH;
-
-		foreach($UpdateInventory as $arrProduct) {
-
-			$objProduct = Product::model()->findByPk($arrProduct->productID);
-			if ($objProduct instanceof Product) {
-				$strCode = $objProduct->code;
-				foreach($arrProduct as $key=>$val) {
-					switch ($key) {
-
-						case 'inventory': $objProduct->inventory = (float)$val; break;
-						case 'inventoryTotal': $objProduct->inventory_total = (float)$val; break;
-
-					}
-
-				}
-				// Now save the product
-				try {
-
-					if(!$objProduct->save())
-						Yii::log("Saving Products got errors ".print_r($objProduct->getErrors(),true),
-							'error', 'application.'.__CLASS__.".".__FUNCTION__);
-					else {
-						$objProduct->SetAvailableInventory();
-						//Create event
-						$objEvent = new CEventProduct('LegacysoapController','onUpdateInventory',$objProduct);
-						_xls_raise_events('CEventProduct',$objEvent);
-					}
-
-
-				}
-				catch(Exception $e) {
-
-					Yii::log("Product update failed for $strCode . Error: " . $e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-					return self::UNKNOWN_ERROR . $e;
-				}
-
-
-			} else
-				Yii::log("Sent inventory update for a product we can't find ".$arrProduct->productID, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-
-
-
-		}
-
-
-
-
-		return self::OK;
-	}
-
-
-	/**
 	 * Tax List
 	 *
 	 * @param string $passkey
@@ -1265,9 +1344,25 @@ class SoapController extends CController
 			return self::FAIL_AUTH;
 
 		$obj = Cart::model()->findAllByAttributes(array('id_str'=>$id_str));
-		$modelAttributeNames = 'id, subject, body, someStatisticalRelationName, someRelationName.attribute, someRelationName.someOtherRelationName.attribute';
-
-	$modelAttributeNames = 'id,id_str,customer,billaddress,shipaddress,taxCode,shipping,payment,cart_type,cartItems';
+		$modelAttributeNames = 'id,
+			id_str,
+			customer,
+			billaddress,
+			billaddress.state,
+			billaddress.country,
+			shipaddress,
+			shipaddress.state,
+			shipaddress.country,
+			taxCode,
+			shipping,
+			payment,
+			cart_type,
+			status,
+			currency,
+			printed_notes,
+			tax_inclusive,
+			tax1,tax2,tax2,tax4,tax5,subtotal,total,
+			cartItems';
 
 
 		return json_encode_with_relations($obj,$modelAttributeNames);
@@ -1278,7 +1373,7 @@ class SoapController extends CController
 	 * Update an individual order as downloaded
 	 * @param string $passkey
 	 * @param string $strId
-	 * @param string $intDownloaded
+	 * @param int $intDownloaded
 	 * @return string
 	 * @soap
 	 */
@@ -1291,7 +1386,8 @@ class SoapController extends CController
 			return self::FAIL_AUTH;
 
 		try {
-			Cart::model()->updateByPk($strId,array('downloaded'=>$intDownloaded,'status'=>OrderStatus::Downloaded));
+			$objCart = Cart::LoadByIdStr($strId);
+			Cart::model()->updateByPk($objCart->id,array('downloaded'=>$intDownloaded,'status'=>OrderStatus::Downloaded));
 		} catch(Exception $e) {
 
 			Yii::log("SOAP ERROR : update_order_downloaded_status_by_id " . $e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
@@ -1303,164 +1399,71 @@ class SoapController extends CController
 
 	}
 
-	//OLDER STUFF
+	/* CUSTOMER FUNCTIONS */
+
 	/**
-	 * This function will query for anything in the cart table that has not been marked as previously downloaded,
-	 * and also is of a type order (which means it's been paid and/or should be downloaded)
+	 * Return specified customer
 	 *
 	 * @param string $passkey
-	 * @param string $id_str
+	 * @param int $id
 	 * @return string
 	 * @soap
 	 */
-	public function get_new_web_orders($passkey,$id_str){
+	public function get_customer($passkey,$id)
+	{
 
 		if(!$this->check_passkey($passkey))
 			return self::FAIL_AUTH;
 
-		$objEvent = new CEventOrder('LegacysoapController','onDownloadOrders');
-		_xls_raise_events('CEventOrder',$objEvent);
-
-		$objCarts = Cart::model()->findAll(array(
-			'condition'=>'id_str = :id_str AND downloaded = :code AND cart_type = :type LIMIT 50',
+		$objCustomers = Customer::model()->findAll(array(
+			'condition'=>'id = :id AND record_type = :type',
 			'params'=>array(
-				':id_str'=>$id_str,
-				':code'=>0,
-				':type'=>CartType::order)
+				':id'=>$id,
+				':type'=>Customer::REGISTERED)
 		));
-		$strReturn = "";
-		foreach ($objCarts as $objCart)
-		{
-			$strReturn .= "Rowid:".base64encode($objCart->id).chr(13);
-			$strReturn .= "IdStr:".base64encode($objCart->id_str).chr(13);
-			if ($objCart->billaddress)
-				$strReturn .= "AddressBill:".base64encode($objCart->billaddress->block).chr(13);
-			else
-				$strReturn .= "AddressBill:".chr(13);
-			$strReturn .= "AddressShip:".base64encode($objCart->shipaddress->shipblock).chr(13);
-			if ($objCart->shipaddress->fullname != $objCart->customer->fullname)
-			{
-				$strReturn .= "ShipFirstname:".base64encode($objCart->shipaddress->first_name).chr(13);
-				$strReturn .= "ShipLastname:".base64encode($objCart->shipaddress->last_name).chr(13);
-			} else {
-				$strReturn .= "ShipFirstname:".chr(13);
-				$strReturn .= "ShipLastname:".chr(13);
-			}
-			$strReturn .= "ShipCompany:".base64encode($objCart->shipaddress->company).chr(13);
-			$strReturn .= "ShipAddress1:".base64encode($objCart->shipaddress->address1).chr(13);
-			if (!empty($objCart->shipaddress->company) && !empty($objCart->shipaddress->address2))
-				$strReturn .= "ShipAddress2:".base64encode($objCart->shipaddress->company."/".$objCart->shipaddress->address2).chr(13);
-			elseif (!empty($objCart->shipaddress->company))
-				$strReturn .= "ShipAddress2:".base64encode($objCart->shipaddress->company).chr(13);
-			else
-				$strReturn .= "ShipAddress2:".base64encode($objCart->shipaddress->address2).chr(13);
-			$strReturn .= "ShipCity:".base64encode($objCart->shipaddress->city).chr(13);
-			$strReturn .= "ShipZip:".base64encode($objCart->shipaddress->postal).chr(13);
-			$strReturn .= "ShipState:".base64encode($objCart->shipaddress->state).chr(13);
-			$strReturn .= "ShipCountry:".base64encode($objCart->shipaddress->country).chr(13);
-			$strReturn .= "ShipPhone:".base64encode($objCart->shipaddress->phone).chr(13);
-			if ($objCart->billaddress)
-				$strReturn .= "Zipcode:".base64encode($objCart->billaddress->postal).chr(13);
-			else $strReturn .= "Zipcode:".chr(13);
-			$strReturn .= "Contact:".chr(13);
-			$strReturn .= "Discount:".chr(13);
-			$strReturn .= "Firstname:".base64encode($objCart->customer->first_name).chr(13);
-			$strReturn .= "Lastname:".base64encode($objCart->customer->last_name).chr(13);
-			$strReturn .= "Company:".base64encode($objCart->customer->company).chr(13);
-			$strReturn .= "Name:".base64encode($objCart->customer->fullname).chr(13);
-			$strReturn .= "Phone:".base64encode($objCart->customer->mainphone).chr(13);
-			$strReturn .= "Po:".base64encode($objCart->po).chr(13);
-			$strReturn .= "Type:".base64encode($objCart->cart_type).chr(13);
-			$strReturn .= "Status:".base64encode($objCart->status).chr(13);
-			$strReturn .= "CostTotal:".base64encode($objCart->id).chr(13);
-			$strReturn .= "Currency:".base64encode($objCart->currency).chr(13);
-			$strReturn .= "CurrencyRate:".base64encode($objCart->currency_rate).chr(13);
-			$strReturn .= "DatetimeCre:".base64encode(CDateTimeParser::parse($objCart->datetime_cre,'yyyy-MM-dd HH:mm:ss')).chr(13);
-			$strReturn .= "DatetimeDue:".base64encode(CDateTimeParser::parse($objCart->datetime_due,'yyyy-MM-dd HH:mm:ss')).chr(13);
-			$strReturn .= "DatetimePosted:".base64encode(CDateTimeParser::parse($objCart->payment->datetime_posted,'yyyy-MM-dd HH:mm:ss')).chr(13);
-			$strReturn .= "Email:".base64encode($objCart->customer->email).chr(13);
-			$strReturn .= "SellTotal:".chr(13);
-			$strReturn .= "PrintedNotes:".base64encode($objCart->printed_notes).chr(13);
-			$strReturn .= "ShippingMethod:".base64encode($objCart->shipping->shipping_method).chr(13);
-			$strReturn .= "ShippingModule:".base64encode($objCart->shipping->shipping_module).chr(13);
-			$strReturn .= "ShippingData:".base64encode($objCart->shipping->shipping_data).chr(13);
 
-			$shippingCost = $objCart->shipping->shipping_cost;
-			$shippingSell = $objCart->shipping->shipping_sell;
+		$modelAttributeNames = 'id,
+			first_name,
+			last_name,
+			email,
+			company,
+			currency,
+			lightpeed_id,
+			mainphone,
+			mainphonetype,
+			preferred_language,
+			newsletter_subscribe,
+			allow_login,
+			defaultBilling,
+			defaultBilling.state,
+			defaultShipping,
+			defaultShipping.state,
+			created,
+			modified
+			';
 
-			if(empty($shippingCost)) $shippingCost='0';
-			if(empty($shippingSell)) $shippingSell='0';
 
-			$strReturn .= "ShippingCost:".base64encode($shippingCost).chr(13);
-			$strReturn .= "ShippingSell:".base64encode($shippingSell).chr(13);
-			$strReturn .= "PaymentMethod:".base64encode($objCart->payment->payment_method).chr(13);
-			$strReturn .= "PaymentModule:".base64encode($objCart->payment->payment_module).chr(13);
-			$strReturn .= "PaymentData:".base64encode($objCart->payment->payment_data).chr(13);
-			$strReturn .= "PaymentAmount:".base64encode($objCart->payment->payment_amount).chr(13);
-			$strReturn .= "FkTaxCode:".base64encode($objCart->tax_code_id).chr(13);
-			$strReturn .= "TaxInclusive:".base64encode($objCart->tax_inclusive).chr(13);
-			$strReturn .= "Subtotal:".base64encode($objCart->subtotal).chr(13);
-			$strReturn .= "Tax1:".base64encode($objCart->tax1).chr(13);
-			$strReturn .= "Tax2:".base64encode($objCart->tax2).chr(13);
-			$strReturn .= "Tax3:".base64encode($objCart->tax3).chr(13);
-			$strReturn .= "Tax4:".base64encode($objCart->tax4).chr(13);
-			$strReturn .= "Tax5:".base64encode($objCart->tax4).chr(13);
-			$strReturn .= "Total:".base64encode($objCart->total).chr(13);
-			$strReturn .= "Count:".base64encode($objCart->item_count).chr(13);
-			$strReturn .= "Downloaded:".base64encode($objCart->downloaded).chr(13);
-			$strReturn .= "User:".base64encode($objCart->lightspeed_user).chr(13);
-			$strReturn .= "IpHost:".base64encode($objCart->origin).chr(13);
-			$strReturn .= "Customer:".base64encode($objCart->customer_id).chr(13);
-			$strReturn .= "GiftRegistryObject:".base64encode($objCart->gift_registry).chr(13);
-			$strReturn .= "SendTo:".base64encode($objCart->send_to).chr(13);
-			$strReturn .= "Submitted:".base64encode(CDateTimeParser::parse($objCart->submitted,'yyyy-MM-dd HH:mm:ss')).chr(13);
-			$strReturn .= "Modified:".base64encode(CDateTimeParser::parse($objCart->modified,'yyyy-MM-dd HH:mm:ss')).chr(13);
-			$strReturn .= "Linkid:".base64encode($objCart->linkid).chr(13);
-			$strReturn .= "FkPromoId:".base64encode($objCart->fk_promo_id).chr(13).chr(13);
-		}
+		return json_encode_with_relations($objCustomers,$modelAttributeNames);
 
-		return $strReturn;
 	}
 
 	/**
-	 * Get individual items on a cart (web order). Called by LS download process after getting the web order row ids
+	 * Assign LightSpeed User ID to Customer ID
 	 *
 	 * @param string $passkey
-	 * @param int $intId
+	 * @param int $id
+	 * @param int $lightspeed_id
 	 * @return string
 	 * @soap
 	 */
-	public function get_web_order_items($passkey , $intId){
-
+	public function assign_lightspeed_id($passkey,$id,$lightspeed_id)
+	{
 		if(!$this->check_passkey($passkey))
 			return self::FAIL_AUTH;
 
+		Customer::model()->updateByPk($id,array('lightspeed_id'=>$lightspeed_id));
+		return self::OK;
 
-		$objCart = Cart::model()->findByPk($intId);
-		$strReturn = "";
-
-		foreach ($objCart->cartItems as $objItem)
-		{
-			$strReturn .= "Rowid:".base64encode($objItem->id).chr(13);
-			$strReturn .= "Cart:".base64encode($objItem->cart_id).chr(13);
-			$strReturn .= "CartType:".base64encode($objCart->cart_type).chr(13);
-			$strReturn .= "Product:".base64encode($objItem->product_id).chr(13);
-			$strReturn .= "Code:".base64encode($objItem->code).chr(13);
-			$strReturn .= "Description:".base64encode($objItem->description).chr(13);
-			$strReturn .= "Discount:".base64encode($objItem->discount).chr(13);
-			$strReturn .= "Qty:".base64encode($objItem->qty).chr(13);
-			$strReturn .= "Sell:".base64encode($objItem->sell).chr(13);
-			$strReturn .= "SellBase:".base64encode($objItem->sell_base).chr(13);
-			$strReturn .= "SellDiscount:".base64encode($objItem->sell_discount).chr(13);
-			$strReturn .= "SellTotal:".base64encode($objItem->sell_total).chr(13);
-			$strReturn .= "SerialNumbers:".base64encode($objItem->serial_numbers).chr(13);
-			$strReturn .= "GiftRegistryItemObject:".base64encode($objItem->wishlist_item).chr(13);
-			$strReturn .= "DatetimeAdded:".base64encode(CDateTimeParser::parse($objItem->datetime_added,'yyyy-MM-dd HH:mm:ss')).chr(13);
-			$strReturn .= "DatetimeMod:".base64encode(CDateTimeParser::parse($objItem->datetime_mod,'yyyy-MM-dd HH:mm:ss')).chr(13).chr(13);
-		}
-
-		return $strReturn;
 	}
-
 
 }

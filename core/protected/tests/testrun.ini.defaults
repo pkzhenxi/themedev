@@ -1,0 +1,8 @@
+; Testrun config file
+[MySQL]
+myconnect = "mysql:host=localhost;dbname=copper-unittest"
+[Webstore]
+SERVER_NAME = "localhost"
+HTTP_HOST = "localhost"
+db_user = "root"
+db_pass = "password"

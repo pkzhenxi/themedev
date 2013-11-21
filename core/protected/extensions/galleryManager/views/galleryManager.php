@@ -22,6 +22,9 @@
             </label>
             <span class="btn disabled edit_selected"><i class="icon-pencil"></i> <?php echo Yii::t('galleryManager.main', 'Edit');?></span>
             <span class="btn disabled remove_selected"><i class="icon-remove"></i> <?php echo Yii::t('galleryManager.main', 'Remove');?></span>
+	        <?php if(Yii::app()->getRequest()->getQuery('id')==1): ?>
+	        <span class="btn disabled set_selected"><i class="icon-star"></i> <?php echo Yii::t('galleryManager.main', 'Set as Header Image');?></span>
+	<?php endif; ?>
         </div>
     </div>
     <hr/>

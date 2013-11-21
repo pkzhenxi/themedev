@@ -42,6 +42,7 @@ class InstallForm extends CFormModel
 			array('iagree','required', 'requiredValue'=>1,'message'=>'You must accept Terms and Conditions', 'on'=>'page1'),
 			array('LSKEY,encryptionKey,encryptionSalt,TIMEZONE','required', 'on'=>'page2'),
 			array('loginemail,loginpassword','safe', 'on'=>'page2'),
+			array('loginpassword','checkForemail'),
 			array('STORE_NAME,EMAIL_FROM,STORE_ADDRESS1,STORE_ADDRESS2,STORE_HOURS,STORE_PHONE','required', 'on'=>'page3'),
 			array('EMAIL_SMTP_SERVER,EMAIL_SMTP_PORT,EMAIL_SMTP_USERNAME,EMAIL_SMTP_PASSWORD,EMAIL_SMTP_SECURITY_MODE','required', 'on'=>'page4'),
 			array('STORE_NAME,EMAIL_FROM,STORE_ADDRESS1,STORE_ADDRESS2,STORE_HOURS,STORE_PHONE,LSKEY,encryptionKey,encryptionSalt,TIMEZONE','safe'),
@@ -74,6 +75,13 @@ class InstallForm extends CFormModel
 			'loginpassword'=>'External Admin Login Password',
 
 		);
+	}
+
+	public function checkForemail($lpass,$params)
+	{
+		if (!empty($this->loginemail))
+			if (empty($this->loginpassword))
+				$this->addError($lpass,'Password cannot be blank if Email is entered');
 	}
 
 	public function getPage1()
@@ -322,12 +330,9 @@ class InstallForm extends CFormModel
 				_xls_set_conf('EMAIL_SMTP_USERNAME',$this->EMAIL_SMTP_USERNAME);
 				_xls_set_conf('EMAIL_SMTP_PASSWORD',_xls_encrypt($this->EMAIL_SMTP_PASSWORD));
 				_xls_set_conf('EMAIL_SMTP_SECURITY_MODE',$this->EMAIL_SMTP_SECURITY_MODE);
-				Configuration::exportLogging();
 				break;
 
 		}
-
-		Configuration::exportConfig();
 
 
 	}

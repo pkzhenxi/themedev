@@ -9,6 +9,7 @@
  */
 class Images extends BaseImages
 {
+	public $strImageName;
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return Images the static model class
@@ -58,7 +59,7 @@ class Images extends BaseImages
 
 		//Does original size image exist?
 		$objParentImage = Images::LoadByParent($id);
-		if ($objParentImage && $objParentImage->ImageFileExists()) {
+		if ($objParentImage && $objParentImage->ImageFileExists() && _xls_get_conf('LIGHTSPEED_CLOUD',0)<1) {
 
 			$objProduct = Product::model()->findByPk($objParentImage->product_id);
 			$blbImage = imagecreatefrompng(Images::GetImagePath($objParentImage->image_path));
@@ -161,7 +162,7 @@ class Images extends BaseImages
 	/* Helper function to get full drive path to passed Image file.
 	*/
 	public static function GetImagePath($strFile) {
-		return Yii::getPathOfAlias('webroot') . "/images/${strFile}";
+		return realpath(Yii::getPathOfAlias('webroot')) . "/images/${strFile}";
 	}
 	/* Return full drive path to No Image graphic.
 	*/
@@ -175,6 +176,7 @@ class Images extends BaseImages
 	/* Helper function to get full URL to passed Image file.
 	*/
 	public static function GetImageUri($strFile,$AbsoluteUrl = false) {
+		if(stripos($strFile,'//') !== false) return $strFile; //already URL
 		if ($AbsoluteUrl)
 			return Yii::app()->createAbsoluteUrl("/images/".$strFile);
 		else return Yii::app()->createUrl("images/".$strFile);
@@ -220,7 +222,7 @@ class Images extends BaseImages
 
 	/* Test if actual .jpg/.png file exists on drive */
 	public function ImageFileExists() {
-		if ($this->image_path &&
+		if ($this->image_path && (stripos($this->image_path,'//') !==false) ||
 			file_exists(Images::GetImagePath($this->image_path)))
 			return true;
 		return false;
@@ -282,20 +284,23 @@ class Images extends BaseImages
 			}
 		}
 
+
 		if ($this->SaveImageFolder($strFolder) && $strSaveFunc($blbImage, $strPath))
 		{
 			$this->image_path = $strName;
 			return true;
 		}
-		else {
-			Yii::log("Failed to save file $strName", 'image', __FUNCTION__);
-			return false;
-		}
+
+
+
+		Yii::log("Failed to save file $strName", 'image', __FUNCTION__);
+		return false;
+
 
 
 	}
 
-	protected function check_transparent($im) {
+	public static function check_transparent($im) {
 
 		$width = imagesx($im); // Get the width of the image
 		$height = imagesy($im); // Get the height of the image
@@ -468,22 +473,10 @@ class Images extends BaseImages
 	 * ORM level methods
 	 */
 	public function DeleteImage() {
-		if ($this->ImageFileExists())
+		if ($this->image_path && file_exists(Images::GetImagePath($this->image_path)))
 			unlink($this->GetPath());
 	}
 
-	public function Delete() {
-		if (!$this->id)
-			return;
-
-		if ($this->IsPrimary())
-			foreach (Images::model()->findAllByAttributes(array('parent' => $this->id)) as $objImage)
-				if (!$objImage->IsPrimary())
-					$objImage->Delete();
-
-		$this->DeleteImage();
-		parent::Delete();
-	}
 
 	public static function LoadByRowidSize($id, $intSize) {
 		if ($intSize == ImagesType::normal)
@@ -532,6 +525,23 @@ class Images extends BaseImages
 				'parent' => $intParent
 			)
 		);
+	}
+
+	/**
+	 * Before a delete of an Image record, take appropriate action
+	 * @return bool
+	 */
+	public function beforeDelete()
+	{
+		//In case this delete is pointed to by a product, get rid of that first
+		Product::model()->updateAll(array('image_id'=>null),'image_id ='.$this->id);
+		if ($this->IsPrimary())
+			foreach (Images::model()->findAllByAttributes(array('parent' => $this->id)) as $objImage)
+				if (!$objImage->IsPrimary())
+					$objImage->delete();
+
+		$this->DeleteImage();
+		return parent::beforeDelete();
 	}
 
 	/**

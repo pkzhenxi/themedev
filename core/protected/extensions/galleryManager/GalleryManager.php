@@ -37,7 +37,7 @@ class GalleryManager extends CWidget
             $cs->registerScriptFile($this->assets . '/jquery.galleryManager.js');
         } else {
             $cs->registerScriptFile($this->assets . '/jquery.iframe-transport.min.js');
-            $cs->registerScriptFile($this->assets . '/jquery.galleryManager.min.js');
+            $cs->registerScriptFile($this->assets . '/jquery.galleryManager.js');
         }
 
         if ($this->controllerRoute === null)
@@ -59,6 +59,7 @@ class GalleryManager extends CWidget
             'hasDesc' => $this->gallery->description ? true : false,
             'uploadUrl' => Yii::app()->createUrl($this->controllerRoute . '/ajaxUpload', array('gallery_id' => $this->gallery->id)),
             'deleteUrl' => Yii::app()->createUrl($this->controllerRoute . '/delete'),
+            'setUrl' => Yii::app()->createUrl($this->controllerRoute . '/set'),
             'updateUrl' => Yii::app()->createUrl($this->controllerRoute . '/changeData'),
             'arrangeUrl' => Yii::app()->createUrl($this->controllerRoute . '/order'),
             'nameLabel' => Yii::t('galleryManager.main', 'Name'),

@@ -4,7 +4,7 @@
  * Change the following URL based on your server configuration
  * Make sure the URL ends with a slash so that we can use relative URLs in test cases
  */
-define('TEST_BASE_URL','http://www.copper.site/index-test.php/');
+//define('TEST_BASE_URL','http://'.$_SERVER['testini']['SERVER_NAME'].'/index-test.php/');
 
 
 
@@ -28,11 +28,11 @@ function sendSoap($action,$soap)
 	$ch = curl_init();
 	//error_log("******************************************".date("H:i:s"));
 	//set the url, number of POST vars, POST data
-	curl_setopt($ch,CURLOPT_URL,'http://www.copper.site/xls_soap.php');
+	curl_setopt($ch,CURLOPT_URL,'http://'.$_SERVER['testini']['SERVER_NAME'].'/index-test.php/xls_soap.php');
 	curl_setopt($ch, CURLOPT_POST,           true );
 	curl_setopt($ch, CURLOPT_POSTFIELDS,    $soap);
 	curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8',
-		'Content-Length: '.strlen($soap),'Testdb: true','SOAPAction: '.$action ));
+		'Content-Length: '.strlen($soap),'SOAPAction: '.$action ));
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 	//execute post
@@ -59,7 +59,7 @@ class WebTestCase extends CWebTestCase
 	protected function setUp()
 	{
 		$this->setBrowser('*firefox');
-		$this->setBrowserUrl(TEST_BASE_URL);
+		//$this->setBrowserUrl(TEST_BASE_URL);
 		parent::setUp();
 	}
 

@@ -226,6 +226,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 		$this->objCart->clearCart();
 	}
 
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testForm()
 	{
 
@@ -240,6 +244,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	}
 
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testpurchaseorder()
 	{
 
@@ -268,6 +276,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	}
 
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testphoneorder()
 	{
 		//Should test that our form is being returned with our title element
@@ -287,6 +299,11 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('Phone Order',$arrReturn['result']);
 
 	}
+
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testcheque()
 	{
 		//Should test that our form is being returned with our title element
@@ -308,7 +325,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 	}
 
 
-
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testAuthAIM()
 	{
 		//Should test that our form is being returned with our title element
@@ -321,7 +341,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	}
 
-
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testAuthSIM()
 	{
 
@@ -337,6 +360,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	}
 
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testWorldpaySIM()
 	{
 
@@ -352,6 +379,11 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 
 	}
+
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testBeanstreamSIM()
 	{
 
@@ -367,6 +399,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 	/*
 	 * For beanstream, we can't use our fake CC from our fake profile, we have to use specially provided card numbers
 	 * from https://beanstreamsupport.pbworks.com/w/page/26445759/Test-Card-Numbers
+	 * @group payment
 	 */
 	public function testBeanstreamAIM()
 	{
@@ -399,6 +432,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	/**
 	 * @group taxout
+     * @group payment
 	 */
 	public function testeWayAIM()
 	{
@@ -430,6 +464,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 	}
 	/**
 	 * @group taxin
+     * @group payment
 	 */
 	public function testeWayAIMtx()
 	{
@@ -458,6 +493,10 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	}
 
+    /**
+     * add to the payment group
+     * @group payment
+     */
 	public function testMoneris()
 	{
 		//Should test that our form is being returned with our title element
@@ -484,6 +523,7 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	/**
 	 * @group taxout
+     * @group payment
 	 */
 	public function testMW()
 	{
@@ -506,8 +546,9 @@ class PaymentTest extends PHPUnit_Framework_TestCase
 
 	}
 
-/**
+    /**
 	 * @group taxout
+     * @group payment
 	 */
 	public function testAxia()
 	{

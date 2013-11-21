@@ -57,11 +57,11 @@ a:hover {   color: #000000; }
 #searchentry { border-bottom: 5px solid black;  }
 #searchentry .search_box input { color: #aaaaaa; border: 0px; border-color: transparent; background-color: white; }
 #searchentry .searchTextBox .searched { color: #000000; }
-
+#
 /***** Mini Cart (right side shopping cart) *****/
 #shoppingcarttop .minicart_item { border-top: 1px dotted #bbbbbb; }
 #shoppingcarttop .emptymessage {  color: #000; }
-#shoppingcartbottom { border-bottom: 1px dotted #bbbbbb;}
+#shoppingcartbottom { border-top: 1px dotted #bbbbbb;}
 
     /* checkout button */
 #shoppingcartcheckout { background-color: #262626; color: white; }

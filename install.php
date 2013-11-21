@@ -160,12 +160,9 @@ function runYii($url,$scriptname,$sqlline=1)
 	require_once($yii);
 	$objYii = Yii::createWebApplication($config);
 
-	Configuration::exportConfig();
-	Configuration::exportLogging();
-
 	//Since we're in this same instance, reread the variables we just wrote
 	//Because we've updated the config, rerun
-	Yii::app()->theme='brooklyn';
+	Yii::app()->theme='albany';
 	Yii::app()->language='en';
 	$objConfig = Configuration::model()->findAllByAttributes(array('param'=>'1'),array('order'=>'key_name'));
 	foreach ($objConfig as $oConfig)
@@ -568,8 +565,6 @@ function displayFormTwo()
 						if (online==obj.total) {
 							clearInterval(pinttimer);
 							prunning=0;
-							var exporturl = window.location.href.replace("/install.php", "/install/exportconfig");
-							$.post(exporturl, "", function(data){  if (data[0]!="{") alert(data); });
 							online = 1;
 							pinttimer=self.setInterval(function(){runUpgrade(key)},delay);
 						}else {
@@ -1263,7 +1258,7 @@ function runInstall($db,$sqlline = 0)
 			{
 				makeHtaccess();
 				installMainConfig();
-				$tag = "Downloading Brooklyn template (this is the halfway mark, isn't this exciting?!)...";
+				$tag = "Downloading default template (this is the halfway mark, isn't this exciting?!)...";
 			}
 
 	}
@@ -2894,7 +2889,7 @@ function migrateTwoFiveToThree()
 	update xlsws_configuration set `key_value`='description_short' where `key_name`='PRODUCT_SORT_FIELD' AND `key_value`='DescriptionShort';
 	update xlsws_configuration set `key_value`='' where `key_name`='LSKEY';
 	update xlsws_configuration set `options`='PASSWORD' where `key_name`='EMAIL_SMTP_PASSWORD';
-	update xlsws_configuration set `key_value`='brooklyn' where `key_name`='DEFAULT_TEMPLATE';
+	update xlsws_configuration set `key_value`='albany' where `key_name`='DEFAULT_TEMPLATE';
 	update xlsws_configuration set `title`='Non-inventoried Item Display Message' where `key_name`='INVENTORY_NON_TITLE';
 
 	INSERT IGNORE INTO `xlsws_configuration` (`title`, `key_name`, `key_value`, `helper_text`, `configuration_type_id`, `sort_order`, `modified`, `created`, `options`, `template_specific`, `param`) VALUES ('Photo Processor', 'CEventPhoto', 'wsphoto', 'Component that handles photos', '28', '1', CURRENT_TIMESTAMP, NULL, 'CEventPhoto', '0', '1');
@@ -3004,7 +2999,7 @@ function initialConfigLoad($db)
 
 	$db->add_config_key("STORE_PHONE","Store Phone","555-555-1212","Phone number displayed in email footer.",2,2,NULL);
 	$db->add_config_key("DEFAULT_COUNTRY","Default Country",224,"Default country for shipping or customer registration",15,2,"COUNTRY");
-	$db->add_config_key("DEFAULT_TEMPLATE","Template","brooklyn","The default template from templates directory to be used for Web Store",19,1,"TEMPLATE");
+	$db->add_config_key("DEFAULT_TEMPLATE","Template","albany","The default template from templates directory to be used for Web Store",19,1,"TEMPLATE");
 	$db->add_config_key("QUOTE_EXPIRY","Quote Expiry Days",30,"Number of days before discount in quote will expire.",4,5,"INT");
 	$db->add_config_key("CART_LIFE","Cart Expiry Days",30,"Number of days before ordered/process carts are deleted from the system",4,6,"INT");
 	$db->add_config_key("WEIGHT_UNIT","Weight Unit","lb","What is the weight unit used in Web Store?",25,3,"WEIGHT");
@@ -4311,8 +4306,6 @@ function xls_check_upgrades()
 	$result == "DEFAULT_TEMPLATE_THEME" ? "pass" : "fail");
 	//Have new 2.5 templates been added
 
-	$checked['2.5 Templates added'] = file_exists("templates/brooklyn/index.tpl.php") ? "pass"
-		: "fail";
 
 	$checked['<b>Note: Specific template code changes are not checked.</b>'] = "pass";
 

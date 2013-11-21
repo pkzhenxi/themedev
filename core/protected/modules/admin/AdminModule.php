@@ -5,6 +5,7 @@ class AdminModule extends CWebModule
 
 	public function init()
 	{
+		Controller::initParams();
 		// this method is called when the module is being created
 		// you may place code here to customize the module or the application
 

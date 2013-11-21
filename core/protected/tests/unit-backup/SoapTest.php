@@ -485,7 +485,7 @@ class SoapTest extends PHPUnit_Framework_TestCase
 		public function testSoapTransmissions()
 	{
 
-		$url = 'http://www.copper.site/xls_soap.php';
+		$url = 'http://www.copper.site/index-test.php/xls_soap.php';
 
 		for ($x=1; $x<=5; $x++) {
 			switch($x) {

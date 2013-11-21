@@ -21,7 +21,6 @@ class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 	{
 
 		_xls_set_conf('TAX_INCLUSIVE_PRICING',0);
-		Configuration::exportConfig();
 
 	}
 
@@ -33,7 +32,6 @@ class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 	{
 
 		_xls_set_conf('TAX_INCLUSIVE_PRICING',1);
-		Configuration::exportConfig();
 
 	}
 
@@ -46,7 +44,7 @@ class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 
 		_dbx('update xlsws_modules set configuration=\'a:15:{s:17:"PRODUCTS_PER_PAGE";s:2:"12";s:19:"LISTING_IMAGE_WIDTH";s:3:"180";s:20:"LISTING_IMAGE_HEIGHT";s:3:"190";s:18:"DETAIL_IMAGE_WIDTH";s:3:"256";s:19:"DETAIL_IMAGE_HEIGHT";s:3:"256";s:16:"MINI_IMAGE_WIDTH";s:2:"30";s:17:"MINI_IMAGE_HEIGHT";s:2:"30";s:20:"CATEGORY_IMAGE_WIDTH";s:3:"180";s:21:"CATEGORY_IMAGE_HEIGHT";s:3:"180";s:19:"PREVIEW_IMAGE_WIDTH";s:2:"30";s:20:"PREVIEW_IMAGE_HEIGHT";s:2:"30";s:18:"SLIDER_IMAGE_WIDTH";s:2:"90";s:19:"SLIDER_IMAGE_HEIGHT";s:2:"90";s:11:"CHILD_THEME";s:5:"light";s:16:"IMAGE_BACKGROUND";s:7:"#FFFFFF";}\' where module=\'brooklyn\'');
 
-		$url = 'http://www.copper.site/index-test.php/soap/bronze';
+		$url = 'http://'.$_SERVER['testini']['SERVER_NAME'].'/index-test.php/soap/bronze';
 
 		$dbC = Yii::app()->db->createCommand();
 		$dbC->setFetchMode(PDO::FETCH_OBJ);//fetch each row as Object
@@ -65,7 +63,7 @@ class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 			curl_setopt($ch, CURLOPT_POST,           true );
 			curl_setopt($ch, CURLOPT_POSTFIELDS,    $row->envelope);
 			curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/xml; charset=utf-8',
-				'Content-Length: '.strlen($row->envelope),'Testdb: true','SOAPAction: '.$row->soap_action ));
+				'Content-Length: '.strlen($row->envelope),'SOAPAction: '.$row->soap_action ));
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 			//execute post
@@ -196,7 +194,7 @@ class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 			$pinfo = mb_pathinfo($file);
 			if (is_numeric(($pinfo['filename']))) {
 
-				$url = 'http://www.copper.site/index-test.php/soap/image/product/'.$pinfo['filename'].'/index/0/';
+				$url = 'http://'.$_SERVER['testini']['SERVER_NAME'].'/index-test.php/soap/image/product/'.$pinfo['filename'].'/index/0/';
 				error_log("posting to ".$url);
 				$imageString = file_get_contents('../photos/'.$file);
 
@@ -206,7 +204,7 @@ class SoapNewResetUploadTest extends PHPUnit_Framework_TestCase
 				curl_setopt($ch,CURLOPT_URL,$url);
 				curl_setopt($ch, CURLOPT_POST,           true );
 				curl_setopt($ch, CURLOPT_POSTFIELDS,    $imageString);
-				curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/html; charset=utf-8', 'Content-Length: '.strlen($imageString),'Testdb: true','PassKey: '.'webstore' ));
+				curl_setopt($ch, CURLOPT_HTTPHEADER,     array('Content-Type: text/html; charset=utf-8', 'Content-Length: '.strlen($imageString),'PassKey: '.'webstore' ));
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 				curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
 				$response = curl_exec($ch);

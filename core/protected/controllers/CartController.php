@@ -1738,58 +1738,6 @@ class CartController extends Controller
 
 	}
 
-	/*
-	 * Shared SSL Functionality
-	 */
 
-	protected function verifySharedSSL()
-	{
-		if(_xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL') != '1')
-			throw new CHttpException(404,'The requested page does not exist.');
-
-		if($_SERVER['HTTP_HOST'] != _xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL'))
-		{
-			$userID = Yii::app()->user->id;
-			$cartID = Yii::app()->shoppingcart->id;
-
-			if(empty($userID)) $userID=0;
-			$strIdentity = $userID.",".$cartID;
-
-			$redirString = _xls_encrypt($strIdentity);
-			$strFullUrl = "https://"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').$this->createUrl("cart/sharedsslreceive",array('link'=>$redirString));
-
-			$this->render('redirect',array('url'=>$strFullUrl));
-			Yii::app()->end();
-		}
-
-	}
-
-	public function actionSharedSSLReceive()
-	{
-
-		if(_xls_get_conf('LIGHTSPEED_HOSTING','0') != '1' || _xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL') != '1')
-			throw new CHttpException(404,'The requested page does not exist.');
-
-		$strLink = Yii::app()->getRequest()->getQuery('link');
-
-		$link = _xls_decrypt($strLink);
-		$linka = explode(",",$link);
-		if($linka[0]>0)
-		{
-			//we were logged in on the other URL so re-login here
-			$objCustomer = Customer::model()->findByPk($linka[0]);
-			$identity=new UserIdentity($objCustomer->email,_xls_decrypt($objCustomer->password));
-			$identity->authenticate();
-			if($identity->errorCode==UserIdentity::ERROR_NONE)
-				Yii::app()->user->login($identity,3600*24*30);
-			else
-				Yii::log("Error attempting to switch to shared SSL and logging in, error ".$identity->errorCode, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
-		}
-
-		Yii::app()->user->setState('cartid',$linka[1]);
-		Yii::app()->user->setState('sharedssl','1');
-		$this->redirect($this->createUrl("cart/checkout"));
-
-	}
 
 }

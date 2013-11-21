@@ -9,7 +9,7 @@
 			else
 				echo Yii::t('admin','To upload a new image to add to your collection, click Add and select your file.');
 
-			echo " Provide an optional name and description after uploading.";
+			echo " ".Yii::t('admin',"Provide an optional name and description after uploading.");
 			?>
 		</div>
 		<div class="clearfix spaceafter"></div>

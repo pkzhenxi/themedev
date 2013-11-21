@@ -10,6 +10,7 @@ class CronController extends CController
 
 	public function init()
 	{
+		Controller::initParams();
 		//do nothing so we don't create a cart
 	}
 

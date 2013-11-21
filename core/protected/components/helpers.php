@@ -102,30 +102,35 @@ function getFile($url)
 
 
 /**
- * Download the Brooklyn template. We call this during install and also on the off chance that Brooklyn suddenly
+ * Download latest theme. We call this during install and also on the off chance that the default suddenly
  * goes missing.
  */
-function downloadBrooklyn()
+function downloadTheme($strTheme)
 {
-	$jLatest= getFile("http://updater.lightspeedretail.com/site/latestbrooklyn");
+	$jLatest= getFile("http://updater.lightspeedretail.com/site/latesttheme/".XLSWS_VERSIONBUILD."/".$strTheme);
 	$result = json_decode($jLatest);
+	if(empty($result))
+	{   Yii::log("ERROR attempting to locate latesttheme ".$strTheme." from LightSpeed", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+		return false;
+	}
+
 	$strWebstoreInstall = "http://cdn.lightspeedretail.com/webstore/themes/".$result->latest->filename;
 
 	$data = getFile($strWebstoreInstall);
 	if (stripos($data,"404 - Not Found")>0 || empty($data)){
-		Yii::log("ERROR downloading themes/brooklyn.zip from LightSpeed", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+		Yii::log("ERROR downloading theme ".$strTheme." from LightSpeed CDN", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
 		return false;
 	}
 
-	$f=file_put_contents("themes/brooklyn.zip", $data);
+	$f=file_put_contents("themes/".$result->latest->title.".zip", $data);
 	if ($f)
 	{
 		require_once( YiiBase::getPathOfAlias('application.components'). '/zip.php');
-		extractZip("brooklyn.zip",'',YiiBase::getPathOfAlias('webroot.themes'));
-		@unlink("themes/brooklyn.zip");
+		extractZip($result->latest->title.".zip",'',YiiBase::getPathOfAlias('webroot.themes'));
+		@unlink("themes/".$result->latest->title.".zip");
 	}
 	else {
-		Yii::log("ERROR downloading themes/brooklyn.zip from LightSpeed", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+		Yii::log("ERROR saving themes/".$result->latest->title.".zip", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
 		return false;
 	}
 	return true;
@@ -600,7 +605,8 @@ function _xls_set_conf($strKey, $mixDefault = "") {
 	$conf->key_value = $mixDefault;
 	$conf->modified = new CDbExpression('NOW()');
 	$conf->save();
-	Yii::app()->params[$strKey] = $mixDefault;
+	if($conf->param==1)
+		Yii::app()->params[$strKey] = $mixDefault;
 	return true;
 }
 
@@ -648,7 +654,7 @@ EOS;
 	if (!$conf->save())
 		print_r($conf->getErrors());
 
-	Configuration::exportConfig();
+
 }
 
 /**
@@ -1171,15 +1177,7 @@ function _xls_301($strUrl) {
  *
  */
 function _xls_404() {
-	header('HTTP/1.1 404 Not Found');
-	$strFile = "404.php";
-	if(file_exists(CUSTOM_INCLUDES . $strFile)) {
-		include(CUSTOM_INCLUDES . $strFile);
-		exit(); }
-	elseif(file_exists('xlsws_includes/'.$strFile)) {
-		include('xlsws_includes/'.$strFile);
-	}
-	exit();
+	throw new CHttpException(404,'The requested page does not exist.');
 }
 
 /**

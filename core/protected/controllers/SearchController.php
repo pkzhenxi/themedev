@@ -172,7 +172,7 @@ class SearchController extends Controller
 		$numberOfRecords = Product::model()->count($criteria);
 
 		$pages = new CPagination($numberOfRecords);
-		$pages->setPageSize(Yii::app()->params['listPerPage']);
+		$pages->setPageSize(Yii::app()->params['PRODUCTS_PER_PAGE']);
 		$pages->applyLimit($criteria);  // the trick is here!
 
 		$model = Product::model()->findAll($criteria);
@@ -184,7 +184,7 @@ class SearchController extends Controller
 		$this->render('grid',array(
 		'model'=> $model,
 		'item_count'=>$numberOfRecords,
-		'page_size'=>Yii::app()->params['listPerPage'],
+		'page_size'=>Yii::app()->params['PRODUCTS_PER_PAGE'],
 		'items_count'=>$numberOfRecords,
 		'pages'=>$pages,
 		));
@@ -218,7 +218,7 @@ class SearchController extends Controller
 		$objCommand = $this->BuildCommand($formModel,-1); //passing -1 as the limit triggers a count(*) query
 		$numberOfRecords = $objCommand->queryScalar();
 		$pages=new CPagination(intval($numberOfRecords));
-		$pages->pageSize = Yii::app()->params['listPerPage'];
+		$pages->pageSize = Yii::app()->params['PRODUCTS_PER_PAGE'];
 
 		$objCommand = $this->BuildCommand($formModel,$pages->pageSize, $pages->currentPage*$pages->pageSize);
 		$rows = $objCommand->QueryAll();
@@ -261,7 +261,7 @@ class SearchController extends Controller
 		$this->render('grid',array(
 				'model'=> $model,
 				'item_count'=>$numberOfRecords,
-				'page_size'=>Yii::app()->params['listPerPage'],
+				'page_size'=>Yii::app()->params['PRODUCTS_PER_PAGE'],
 				'items_count'=>$numberOfRecords,
 				'pages'=>$pages,
 		));

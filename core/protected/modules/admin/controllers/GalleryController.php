@@ -25,6 +25,7 @@ class GalleryController extends AdminBaseController
      */
     public function actionDelete()
     {
+	    error_log(print_r($_POST,true));
         $id = $_POST['id'];
         /** @var $photos GalleryPhoto[] */
         $photos = GalleryPhoto::model()->findAllByPk($id);
@@ -32,6 +33,32 @@ class GalleryController extends AdminBaseController
             if ($photo !== null) $photo->delete();
             else throw new CHttpException(400, 'Photo, not found');
         }
+        echo 'OK';
+    }
+
+
+   /**
+     * Removes image with ids specified in post request.
+     * On success returns 'OK'
+     */
+    public function actionSet()
+    {
+
+        $id = $_POST['id'];
+        $photos = GalleryPhoto::model()->findByPk($id);
+
+	    $p = $photos->file_name;
+	    $path = mb_pathinfo($p);
+	    $ext = $path['extension'];
+
+	    if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+		    $prefix = "//lightspeedwebstore.s3.amazonaws.com/" . Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/gallery';
+	    else
+		    $prefix = Yii::app()->request->baseUrl . '/' . 'images/gallery';
+
+	    $file = $prefix . '/'.$photos->gallery_id.'/'.$photos->id.".".$ext;
+	    _xls_set_conf('HEADER_IMAGE',$file);
+
         echo 'OK';
     }
 
@@ -49,7 +76,10 @@ class GalleryController extends AdminBaseController
         $model->file_name = $imageFile->getName();
         $model->save();
 
-        $model->setImage($imageFile->getTempName());
+	    if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+		    $model->setS3Image($imageFile);
+	    else
+		    $model->setImage($imageFile);
         header("Content-Type: application/json");
         echo CJSON::encode(
             array(

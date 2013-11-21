@@ -107,8 +107,8 @@ class GoogleMerchant extends CAction
 				echo chr(9).'<g:age_group>'.$arrGoogle['Age'].'</g:age_group>'.chr(13);
 			}
 
-			echo chr(9).'<g:color>'.$objProduct->product_color.'</g:color>'.chr(13);
-			echo chr(9).'<g:size>'.$objProduct->product_size.'</g:size>'.chr(13);
+			echo chr(9).'<g:color><![CDATA['.$objProduct->product_color.']]></g:color>'.chr(13);
+			echo chr(9).'<g:size><![CDATA['.$objProduct->product_size.']]></g:size>'.chr(13);
 
 			if ($objProduct->parent>0)
 				echo chr(9).'<item_group_id>'.$objProduct->parent.'</item_group_id>'.chr(13);

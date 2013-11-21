@@ -31,14 +31,13 @@ function searchForComponents()
 	$arrCustom = glob($path.'/*', GLOB_ONLYDIR);
 	if($arrCustom !== false && !empty($arrCustom))
 		foreach ($arrCustom as $moduleDirectory)
-			$arr[basename($moduleDirectory)] = array('class'=>'custom.extensions.shipping.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
+			$arr[basename($moduleDirectory)] = array(
+				'class'=>'custom.extensions.shipping.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
 
 	$arr['Smtpmail'] = array('class'=>'application.extensions.smtpmail.PHPMailer');
 
-	if (file_exists(dirname(__FILE__).'/../../../config/wslogging.php'))
-		$arr['log']=require(dirname(__FILE__).'/../../../config/wslogging.php');
-	else
-		$arr['log']=array(
+
+	$arr['log']=array(
 		'class'=>'CLogRouter',
 		'routes'=>array(
 			array(
@@ -47,7 +46,7 @@ function searchForComponents()
 			),
 			array(
 				'class'=>'CDbLogRoute',
-				'levels'=>'error,warning,info',
+				'levels'=>'error, warning',
 				'logTableName'=>'xlsws_log',
 				'connectionID'=>'db',
 			),

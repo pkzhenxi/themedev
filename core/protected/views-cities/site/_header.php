@@ -7,9 +7,7 @@
 	<div class="span3">
 		<div id="login">
 			<?php if(Yii::app()->user->isGuest): ?>
-				<?php echo CHtml::ajaxLink(Yii::t('global','Login'),array('site/login'),
-					array('onClick'=>'js:jQuery($("#LoginForm")).dialog("open")'),
-					array('id'=>'btnLogin')); ?>
+				<?php echo CHtml::link(Yii::t('global', 'Login'), array("site/login")); ?>
 				&nbsp;/&nbsp;
 				<a href="<?= _xls_site_url('myaccount/edit'); ?>"><?php echo Yii::t('global', 'Register'); ?></a>
 			<?php else: ?>

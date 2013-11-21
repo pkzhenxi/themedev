@@ -259,10 +259,7 @@ class Product extends BaseProduct
 			$a['image_alt']=$this->Title;
 			$a['image_desc']='';
 			$a['image_large']=Images::GetLink($obj->id,ImagesType::normal,$absolute);
-			$webroot = Yii::getPathOfAlias('webroot');
-			if (strlen(Yii::app()->baseUrl)>2)
-				$webroot = substr($webroot,0,-(strlen(Yii::app()->baseUrl)));
-			list($wt, $ht, $type, $attr) = getimagesize($webroot.$a['image']);
+			list($wt, $ht) = ImagesType::GetSize(ImagesType::pdetail);
 			if($obj->width<=$wt && $obj->height<=$ht)
 				$a['image_large']=$a['image'];
 

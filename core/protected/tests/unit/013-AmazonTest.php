@@ -66,7 +66,8 @@ class AmazonTest extends PHPUnit_Framework_TestCase
 		$objProduct = Product::model()->findByPk(88);
 
 		$feed = $this->controller->getUploadPhotoFeed($objProduct);
-		$feed = str_replace("www.copper.site","kris1.4004.lightspeedwebstore.com",$feed);
+		echo $feed;
+		$feed = str_replace($_SERVER['testini']['SERVER_NAME'],"kris1.4004.lightspeedwebstore.com",$feed);
 
 		$this->assertContains("7up-soda-12-ounce-can.png</ImageLocation>",$feed);
 

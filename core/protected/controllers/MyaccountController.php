@@ -23,8 +23,11 @@ class MyaccountController extends Controller
 	public function beforeAction($action)
 	{
 
-		if ($action->Id=="edit" && _xls_get_conf('ENABLE_SSL')==1)
+		if (_xls_get_conf('ENABLE_SSL')==1)
 		{
+			if(_xls_get_conf('LIGHTSPEED_HOSTING','0') == '1' && _xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL','0') == '1')
+				$this->verifySharedSSL();
+
 			if(!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != 'on') {
 				$this->redirect(Yii::app()->createAbsoluteUrl('myaccount/'.$action->Id,array(),'https'));
 				Yii::app()->end();
@@ -34,7 +37,6 @@ class MyaccountController extends Controller
 		return parent::beforeAction($action);
 
 	}
-
 	public function actionIndex()
 	{
 

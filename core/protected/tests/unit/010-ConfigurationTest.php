@@ -7,20 +7,6 @@ require_once "PHPUnit/Autoload.php";
 class ConfigurationTest extends PHPUnit_Framework_TestCase
 {
 
-	public function testConfiguration()
-	{
-
-		$retVal = Configuration::exportConfig();
-		$this->assertTrue($retVal);
-
-		$filename = Yii::app()->basepath."/../../config/wsconfig.php";
-		$handle = fopen($filename, "r");
-		$contents = fread($handle, filesize($filename));
-		$this->assertContains('theme',$contents);
-		fclose($handle);
-
-
-	}
 
 	public function testNextIdKey()
 	{

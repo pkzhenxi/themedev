@@ -14,6 +14,31 @@ class SiteController extends Controller
 {
 	public $layout='//layouts/column2';
 
+	public function beforeAction($action)
+	{
+
+		if ($action->Id=="login" && _xls_get_conf('ENABLE_SSL')==1)
+		{
+			if(_xls_get_conf('LIGHTSPEED_HOSTING','0') == '1' && _xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL','0') == '1')
+				$this->verifySharedSSL();
+
+			if(!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != 'on') {
+				$this->redirect(Yii::app()->createAbsoluteUrl('site/'.$action->Id,array(),'https'));
+				Yii::app()->end();
+			}
+		} else if(
+			$action->Id != "login" &&
+			$action->Id != "forgotpassword" &&
+			$action->Id != "sendemail" &&
+			_xls_get_conf('LIGHTSPEED_HOSTING','0') == '1' &&
+			_xls_get_conf('LIGHTSPEED_HOSTING_SHARED_SSL','0') == '1'
+		)
+			$this->verifyNoSharedSSL();
+
+		return parent::beforeAction($action);
+
+	}
+
 	/**
 	 * This is the default 'index' action that is invoked
 	 * when an action is not explicitly requested by users.
@@ -96,6 +121,9 @@ class SiteController extends Controller
 	 */
 	public function actionLogin()
 	{
+		if(!Yii::app()->user->isGuest)
+			$this->redirect($this->createAbsoluteUrl("/site"));
+
 		$model=new LoginForm();
 
 		$response_array = array();
@@ -108,14 +136,21 @@ class SiteController extends Controller
 			// validate user input and redirect to the previous page if valid
 			if($model->validate() && $model->login()) {
 				$response_array['status'] = 'success';
+				if(!Yii::app()->request->isAjaxRequest)
+					$this->redirect($this->createUrl("/site"));
 			}
 			else {
 				$response_array['status'] = 'error';
 				$response_array['errormsg'] = _xls_convert_errors($model->getErrors());
 			}
 			Yii::log("Login results ".print_r($response_array,true), 'info', 'application.'.__CLASS__.".".__FUNCTION__);
-			echo json_encode($response_array);
+
 		}
+
+		if(Yii::app()->request->isAjaxRequest)
+			echo json_encode($response_array);
+		else
+			$this->render('login', array('model'=>$model));
 
 	}
 
@@ -149,7 +184,7 @@ class SiteController extends Controller
 		$item_count = Category::model()->count($criteria);
 
 		$pages = new CPagination($item_count);
-		$pages->setPageSize(Yii::app()->params['listPerPage']);
+		$pages->setPageSize(Yii::app()->params['PRODUCTS_PER_PAGE']);
 		$pages->applyLimit($criteria);  // the trick is here!
 
 		$model = Category::model()->findAll($criteria);
@@ -160,7 +195,7 @@ class SiteController extends Controller
 		$this->render('category',array(
 				'arrmodel'=> $arrModel, // must be the same as $item_count
 				'item_count'=>$item_count,
-				'page_size'=>Yii::app()->params['listPerPage'],
+				'page_size'=>Yii::app()->params['PRODUCTS_PER_PAGE'],
 				'items_count'=>$item_count,
 				'pages'=>$pages,
 			));
@@ -173,9 +208,17 @@ class SiteController extends Controller
 	
 		if(isset($_POST['LoginForm']))
 		{
-
+			Yii::log(print_r($_POST['LoginForm'],true), 'error', 'application.'.__CLASS__.".".__FUNCTION__);
 			$model->attributes=$_POST['LoginForm'];
 
+			if(empty($model->email))
+			{
+				$response_array = array(
+					'status'=>"failure",
+					'message'=> Yii::t('global','Please enter your email before clicking this link.'));
+				echo json_encode($response_array);
+				Yii::app()->end();
+			}
 
 			$objCustomer = Customer::model()->findByAttributes(array('record_type'=>Customer::REGISTERED,'email'=>$model->email));
 			if($objCustomer instanceof Customer)
