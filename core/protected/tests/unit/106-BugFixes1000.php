@@ -84,4 +84,73 @@ class BugFix1000Test extends PHPUnit_Framework_TestCase
 		_xls_set_conf('ENABLE_WISH_LIST',$orig);
 	}
 
+	/**
+	 * WS-1030 - Modify install wizard for cloud customer to hide irrelevant field prompts
+	 * @group taxout
+	 */
+
+	public function testWS1030()
+	{
+		// get original value from db to put it back later
+		$orig = _xls_get_conf('LIGHTSPEED_MT',0);
+
+		// we just test the relevant code from our controller
+
+		$_POST['InstallForm']['page']=2;
+
+		$model = new InstallForm();
+		$model->iagree = 1;
+		$model->scenario = "page".$_POST['InstallForm']['page'];
+
+		if (_xls_get_conf('LIGHTSPEED_MT',0)>0 && $_POST['InstallForm']['page']==2)
+			$model->scenario = "page".$_POST['InstallForm']['page']."-mt";
+
+		$model->validate();
+		$arr = $model->getErrors();
+
+		$this->assertEquals(4,count($arr));
+		$this->assertArrayHasKey('TIMEZONE',$arr);
+		$this->assertArrayHasKey('LSKEY',$arr);
+		$this->assertArrayHasKey('encryptionKey',$arr);
+		$this->assertArrayHasKey('encryptionSalt',$arr);
+		$this->assertArrayNotHasKey('loginemail',$arr);
+		$this->assertArrayNotHasKey('loginpassword',$arr);
+
+		$arr1 = $model->getPage2();
+		$this->assertContains('Enter a store password',$arr1['title']);
+		$this->assertContains('The encryption keys',$arr1['title']);
+		$this->assertTrue($arr1['elements']['LSKEY']['visible']);
+		$this->assertTrue($arr1['elements']['encryptionKey']['visible']);
+		$this->assertTrue($arr1['elements']['encryptionSalt']['visible']);
+
+		// turn on MT
+		_xls_set_conf('LIGHTSPEED_MT',1);
+
+		// does it affect our scenario?
+		if (_xls_get_conf('LIGHTSPEED_MT',0)>0 && $_POST['InstallForm']['page']==2)
+			$model->scenario = "page".$_POST['InstallForm']['page']."-mt";
+
+		// re-validate
+		$model->validate();
+		$arr = $model->getErrors();
+
+		$this->assertEquals(3,count($arr));
+		$this->assertArrayHasKey('TIMEZONE',$arr);
+		$this->assertArrayNotHasKey('LSKEY',$arr);
+		$this->assertArrayNotHasKey('encryptionKey',$arr);
+		$this->assertArrayNotHasKey('encryptionSalt',$arr);
+		$this->assertArrayHasKey('loginemail',$arr);
+		$this->assertArrayHasKey('loginpassword',$arr);
+
+		$arr1 = $model->getPage2();
+		$this->assertNotContains('Enter a store password',$arr1['title']);
+		$this->assertNotContains('The encryption keys',$arr1['title']);
+		$this->assertFalse($arr1['elements']['LSKEY']['visible']);
+		$this->assertFalse($arr1['elements']['encryptionKey']['visible']);
+		$this->assertFalse($arr1['elements']['encryptionSalt']['visible']);
+
+		 // undo db changes
+		_xls_set_conf('LIGHTSPEED_MT',$orig);
+
+	}
 }

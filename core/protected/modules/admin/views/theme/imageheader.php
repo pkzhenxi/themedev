@@ -11,8 +11,7 @@
 
 			echo " ".Yii::t('admin',"Provide an optional name and description after uploading.");
 
-			if(_xls_get_conf('IMAGE_FORMAT')=="jpg")
-				echo " ".Yii::t('admin','If your header image has transparency, it may show with an odd background here but will be correct on your home page.');
+			echo " ".Yii::t('admin','Click the green star to set the image as your header image.');
 			?>
 		</div>
 		<div class="clearfix spaceafter"></div>

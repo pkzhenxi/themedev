@@ -303,6 +303,11 @@ class UpgradeController extends CController
 
 		switch($oXML->changetype)
 		{
+			case 'run_task':
+
+				$this->runTask($oXML->schema);
+				break;
+
 			case 'add_column':
 				$elements = explode(".",$oXML->elementname);
 				$res = Yii::app()->db->createCommand("SHOW COLUMNS FROM ".$elements[0]." WHERE Field='".$elements[1]."'")->execute();
@@ -441,5 +446,71 @@ class UpgradeController extends CController
 
 	}
 
+
+	/**
+	 * Triggers to perform upgrade tasks using a special key from the db upgrade routine
+	 * If we have to move files or remove something specifically during an upgrade
+	 * @param $id
+	 */
+	protected function runTask($id)
+	{
+		Yii::log("Running upgrade task $id.", 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+		switch($id)
+		{
+			case 416:
+				//Place any header images in our new gallery library
+				Gallery::LoadGallery(1);
+				$d = dir(YiiBase::getPathOfAlias('webroot')."/images/header");
+				while (false!== ($filename = $d->read()))
+					if ($filename[0] != ".")
+					{
+						$model = new GalleryPhoto();
+						$model->gallery_id = 1;
+						$model->file_name = $filename;
+						$model->name = '';
+						$model->description = '';
+						$model->save();
+						$arrImages["/images/header/".$filename] =
+							CHtml::image(Yii::app()->request->baseUrl."/images/header/".$filename);
+
+						$src = YiiBase::getPathOfAlias('webroot')."/images/header/".$filename;
+
+						$fileinfo = mb_pathinfo($filename);
+
+						$imageFile = new CUploadedFile($filename,
+							$src,
+							"image/".$fileinfo['extension'],
+							getimagesize($src),
+							null
+						);
+
+						if(Yii::app()->params['LIGHTSPEED_MT']=='1')
+							$model->setS3Image($imageFile);
+						else
+							$model->setImage($imageFile);
+
+					}
+
+				break;
+
+
+			case 417:
+				//Remove wsconfig.php reference from /config/main.php
+
+				if(Yii::app()->params['LIGHTSPEED_MT']==1) return;	//only applies to single tenant
+				$maincontents = file_get_contents(YiiBase::getPathOfAlias('webroot')."/config/main.php");
+
+				$maincontents=str_replace('if (file_exists(dirname(__FILE__).\'/wsconfig.php\'))
+	$wsconfig = require(dirname(__FILE__).\'/wsconfig.php\');
+else $wsconfig = array();','$wsconfig = array();',$maincontents);
+
+				//We actually catch this in two places, the second will make the first irrelevant anyway
+				$maincontents = str_replace('),$wsconfig);','),array());',$maincontents);
+
+				file_put_contents(YiiBase::getPathOfAlias('webroot')."/config/main.php",$maincontents);
+				break;
+
+		}
+	}
 
 }

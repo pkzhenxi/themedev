@@ -8,6 +8,7 @@
  * @property string $versions_data
  * @property integer $name
  * @property integer $description
+ * @property string $type
  *
  * The followings are the available model relations:
  * @property GalleryPhoto[] $galleryPhotos

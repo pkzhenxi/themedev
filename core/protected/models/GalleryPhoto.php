@@ -133,11 +133,12 @@ class GalleryPhoto extends BaseGalleryPhoto
 			$this->_galleryDir = "gallery";
 
 		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
-			$prefix = "//lightspeedwebstore.s3.amazonaws.com/" . Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/'.$this->galleryDir;
+			$prefix = "//lightspeedwebstore.s3.amazonaws.com/" .
+				Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/'.$this->galleryDir;
 		else
 			$prefix = Yii::app()->request->baseUrl . '/' . $this->galleryDir;
 
-		return $prefix . '/_' . $this->getFileName('') . '.' . $this->galleryExt;
+		return $prefix . '/_' . $this->getFileName('') . '.' . 'png';
 	}
 
 	private function getFileName($version = '')
@@ -151,7 +152,8 @@ class GalleryPhoto extends BaseGalleryPhoto
 			$this->_galleryDir = "gallery";
 
 		if(Yii::app()->params['LIGHTSPEED_MT']=='1')
-			$prefix = "//lightspeedwebstore.s3.amazonaws.com/" . Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/'.$this->galleryDir;
+			$prefix = "//lightspeedwebstore.s3.amazonaws.com/" .
+				Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'].'/'.$this->galleryDir;
 		else
 			$prefix = Yii::app()->request->baseUrl . '/' . $this->galleryDir;
 
@@ -173,14 +175,14 @@ class GalleryPhoto extends BaseGalleryPhoto
 		//save image in original size
 		Yii::app()->image->load($path)->save($this->galleryDir . '/' . $this->getFileName('') . '.' . $strExt);
 		//create image preview for gallery manager
-		Yii::app()->image->load($path)->resize(300, null)->save($this->galleryDir . '/_' . $this->getFileName('') . '.' . $this->galleryExt);
+		Yii::app()->image->load($path)->resize(300, null)->save($this->galleryDir . '/_' . $this->getFileName('') . '.' . 'png');
 
 		foreach ($this->gallery->versions as $version => $actions) {
 			$image = Yii::app()->image->load($path);
 			foreach ($actions as $method => $args) {
 				call_user_func_array(array($image, $method), is_array($args) ? $args : array($args));
 			}
-			$image->save($this->galleryDir . '/' . $this->getFileName($version) . '.' . $this->galleryExt);
+			$image->save($this->galleryDir . '/' . $this->getFileName($version) . '.' . 'png');
 		}
 	}
 

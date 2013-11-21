@@ -25,7 +25,6 @@ class GalleryController extends AdminBaseController
      */
     public function actionDelete()
     {
-	    error_log(print_r($_POST,true));
         $id = $_POST['id'];
         /** @var $photos GalleryPhoto[] */
         $photos = GalleryPhoto::model()->findAllByPk($id);

@@ -142,10 +142,11 @@ h3 { margin-top: 2px; }
 #btnCopy { display: hidden;}
 #btnClean { display: hidden;}
 #btnUpgrade { margin-left: 53px;}
-
+.setPhoto { margin-left: 5px;}
 .hero-unit  legend { font-size: 0.7em; border: none; line-height: 18px; padding-bottom: 16px; }
 .maxhint { max-height: 20px; overflow: hidden; }
 .caret { display: none; }
+
 @media only screen and (max-width: 1001px) { /* through LightSpeed */
     body { font-size: 13px;}
     input[type="text"] {  width: 200px; }

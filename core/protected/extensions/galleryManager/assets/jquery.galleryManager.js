@@ -74,6 +74,7 @@
         photoTemplate += '</div><div class="actions">';
         if (opts.hasName || opts.hasDesc)photoTemplate += '<span class="editPhoto btn btn-primary btn-mini"><i class="icon-pencil icon-white"></i></span> ';
         photoTemplate += '<span class="deletePhoto btn btn-danger btn-mini"><i class="icon-remove icon-white"></i></span>' +
+            '<span class="setPhoto btn btn-success btn-mini"><i class="icon-star icon-white"></i></span>' +
             '</div><input type="checkbox" class="photo-select"/></div>';
 
 
@@ -121,7 +122,7 @@
                 }});
         }
         function setPhotos(ids) {
-            var selectedCount = $('.photo.selected', $sorter).length;
+            var selectedCount = ids.length;
             if(selectedCount!=1) return false;
             $.ajax({
                 type: 'POST',
@@ -129,8 +130,7 @@
                 data: 'id[]=' + ids.join('&id[]=') + csrfParams,
                 success: function (t) {
                     if (t == 'OK') {
-                        $("#alert-box").html('Header Image set');
-                        $("#alert-box").dialog("open");
+                        bootbox.alert("Header Image set");
                     } else alert(t);
                 }});
         }
