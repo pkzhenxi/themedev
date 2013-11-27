@@ -63,6 +63,7 @@
 	</fieldset>
 
 
+	<?php if(_xls_get_conf('ENABLE_WISH_LIST')):   ?>
 	<fieldset class="span12">
 	    <div class="row-fluid">
 	        <div class="span8"><h2><?= CHtml::link(Yii::t('global','My Wish Lists'),Yii::app()->createUrl('/wishlist')); ?></h2></div>
@@ -81,6 +82,7 @@
 			<?php endif; ?>
 	    </div>
 	</fieldset>
+	<?php endif;  ?>
 
 	<?php if(_xls_get_conf('ENABLE_SRO')):   ?>
 	<fieldset class="span12">

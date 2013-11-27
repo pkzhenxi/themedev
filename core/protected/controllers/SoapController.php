@@ -63,7 +63,7 @@ class SoapController extends CController
 	 * @soap
 	 */
 	public function db_flush($passkey, $strObj) {
-		error_log("got $strObj");
+
 		if (!$this->check_passkey($passkey))
 			return self::FAIL_AUTH;
 
@@ -1436,8 +1436,10 @@ class SoapController extends CController
 			allow_login,
 			defaultBilling,
 			defaultBilling.state,
+			defaultBilling.country,
 			defaultShipping,
 			defaultShipping.state,
+			defaultShipping.country,
 			created,
 			modified
 			';

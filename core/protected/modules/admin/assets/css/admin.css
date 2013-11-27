@@ -138,6 +138,12 @@ h3 { margin-top: 2px; }
 .photo-editor label { text-align: left; }
 #CustomPage_page { width: 720px; height: 600px;}
 .langedit { margin-bottom: -1px; }
+.langedit li.active a { background-color: #EEEEEE; }
+
+#editcss .redactor_editor {  background: none !important; border: 0px !important; font-size: 0.9em !important; font-family: 'Courier New', Courier, monospace !important;}
+#editcss .redactor_editor pre {  background: none !important; border: 0px !important; font-size: 0.7em !important;}
+#editcss .choosedefault {background: linear-gradient(to bottom, #FAFAFA 0%, #E5E5E5 94%, #D3D3D3 94%, #D3D3D3 100%) repeat scroll 0 0 rgba(0, 0, 0, 0); padding-top: 5px; padding-bottom: 5px;}
+.choosedefault input[type="radio"],.choosedefault label { margin-left: 10px; display: inline;}
 
 #btnCopy { display: hidden;}
 #btnClean { display: hidden;}

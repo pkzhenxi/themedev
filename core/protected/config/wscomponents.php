@@ -20,14 +20,14 @@ function searchForComponents()
 	$arr['wstheme'] = array('class'=>'ext.wstheme.WsTheme');
 	$arr['themeManager']=array('themeClass'=>'Theme');
 	//Load any custom payment components
-	$path = realpath(dirname(__FILE__).'/../../../custom/extensions/payment');
+	$path = realpath(YiiBase::getPathOfAlias('webroot')."custom/extensions/payment");
 	$arrCustom = glob($path.'/*', GLOB_ONLYDIR);
 	if($arrCustom !== false && !empty($arrCustom))
 		foreach ($arrCustom as $moduleDirectory)
 			$arr[basename($moduleDirectory)] = array('class'=>'custom.extensions.payment.'.basename($moduleDirectory).'.'.basename($moduleDirectory));
 
 	//Load any custom shipping components
-	$path = realpath(dirname(__FILE__).'/../../../custom/extensions/shipping');
+	$path = realpath(YiiBase::getPathOfAlias('webroot')."custom/extensions/shipping");
 	$arrCustom = glob($path.'/*', GLOB_ONLYDIR);
 	if($arrCustom !== false && !empty($arrCustom))
 		foreach ($arrCustom as $moduleDirectory)

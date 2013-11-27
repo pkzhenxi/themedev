@@ -11,7 +11,7 @@ class ThemeForm extends CFormModel
 	protected $parent; //Used when a theme is a copy of another theme to control inheritance
 	protected $versionCheckUrl = ""; //for future use
 	protected $GoogleFonts; // use this value to load Google Fonts for your design, i.e. $GoogleFonts = "Tangerine|Inconsolata|Droid+Sans"
-	protected $bootstrap = null; // use this value to load Google Fonts for your design, i.e. $GoogleFonts = "Tangerine|Inconsolata|Droid+Sans"
+	protected $bootstrap = null; // use this value to load new bootstrap i.e. $bootstrap = "bootstrap3";
 
 	//Public options (config keys)
 	public $CHILD_THEME = "light";
@@ -34,6 +34,8 @@ class ThemeForm extends CFormModel
 	public $SLIDER_IMAGE_HEIGHT = 90;
 	public $SLIDER_IMAGE_WIDTH = 90;
 	public $PRODUCTS_PER_PAGE = 12;
+
+	public $customcss = array();
 
 	public $menuposition = "left";
 

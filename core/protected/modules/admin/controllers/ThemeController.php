@@ -18,7 +18,7 @@ class ThemeController extends AdminBaseController
 		return array(
 			array('allow',
 				'actions'=>array('index','edit','gallery','image','header',
-					'customcss','favicon','manage','upload','upgrade','module'),
+					'customcss','editcss','favicon','manage','upload','upgrade','module'),
 				'roles'=>array('admin'),
 			),
 		);
@@ -52,15 +52,19 @@ class ThemeController extends AdminBaseController
 				),
 				array('label'=>'Edit custom.css for '.ucfirst($this->currentTheme),
 					'url'=>array('theme/customcss'),
-					'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)
+					'visible'=>!(Yii::app()->params['LIGHTSPEED_MT']>0)
+				),
+				array('label'=>'Edit CSS for '.ucfirst($this->currentTheme),
+					'url'=>array('theme/editcss'),
+					'visible'=>(Yii::app()->params['LIGHTSPEED_MT']>0)
 				),
 				array('label'=>'View Theme Gallery',
 					'url'=>array('theme/gallery'),
-					'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)
+					'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0 || Yii::app()->params['LIGHTSPEED_MT']>0)
 				),
 				array('label'=>'Upload Theme .Zip',
 					'url'=>array('theme/upload'),
-					'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0)
+					'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0 || Yii::app()->params['LIGHTSPEED_MT']>0)
 				),
 				array('label'=>'View My Image Gallery',
 					'url'=>array('theme/image','id'=>2)
@@ -69,7 +73,8 @@ class ThemeController extends AdminBaseController
 					'url'=>array('theme/image','id'=>1),
 				),
 				array('label'=>'Upload FavIcon',
-					'url'=>array('theme/favicon')
+					'url'=>array('theme/favicon'),
+					'visible'=>!(_xls_get_conf("LIGHTSPEED_CLOUD")>0 || Yii::app()->params['LIGHTSPEED_MT']>0)
 				)
 
 
@@ -85,7 +90,6 @@ class ThemeController extends AdminBaseController
 	{
 		switch($id)
 		{
-
 			case self::THEME_PHOTOS:
 				return "Note that these settings are used as photos are uploaded from LightSpeed. These sizes are saved for each theme.";
 		}
@@ -192,6 +196,99 @@ class ThemeController extends AdminBaseController
 		 }
 
 		$this->render('customcss',array('model'=>$model));
+
+	}
+
+	public function actionEditcss()
+	{
+		//Right now this just works in multitenant mode
+		if(Yii::app()->params['LIGHTSPEED_MT']==0)
+			throw new CHttpException(404,'The requested page does not exist.');
+
+		Yii::import('ext.imperavi-redactor-widget.ImperaviRedactorWidget');
+
+		$this->editSectionInstructions = "The css files below are part of your currently chosen theme. <b>The order of the tabs reflects the hierarchy of the files.</b> For example, custom.css is first because it's loaded last. Any items here will override any other files. Style.css and Base.css are last because they are foundation files that others build upon. <b>Simple customizations can be made by simply adding to custom.css.</b> You may also edit other files which will then be used instead of the default. You can restore the default of any file by choosing the appropriate button.";
+
+
+
+
+		if(isset(Yii::app()->theme))
+			$strTheme = Yii::app()->theme->name;
+		else $this->redirect($this->createUrl("themes/manage"));
+
+		$d = dir(YiiBase::getPathOfAlias('webroot')."/themes/".$strTheme."/css");
+		while (false!== ($filename = $d->read()))
+			if ($filename[0] != "." && substr($filename,-4)==".css")
+			{
+				$arr = array();
+				$arr['filename'] = $filename;
+				$parts = mb_pathinfo($filename);
+				$arr['tab'] = $parts['filename'];
+				$arr['path']=$d->path."/".$filename;
+
+				//Are we using custom or regular
+				$url = Yii::app()->theme->CssUrl($arr['filename']);
+				if(stripos($url,"amazonaws.com")!==false)
+					$arr['usecustom']=1;
+				else $arr['usecustom']=0;
+
+				//See if we have a custom one already, if not, copy the original
+				$s3Url = "//lightspeedwebstore.s3.amazonaws.com/".
+					Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL']."/".
+					"themes/".Yii::app()->theme->name.'/css/'.$arr['tab'].".css";
+				$contents = @file_get_contents("http:".$s3Url); //since our paths start with //
+				if(empty($contents))
+				{
+					$arr['usecustom']=0;
+					$contents = file_get_contents($arr['path']);
+				}
+
+
+				$contents = nl2br($contents);
+				$arr['contents']=$contents;
+
+				$files[]=$arr;
+			}
+		$files = $this->setCssOrder($files);
+
+		//We do our submit test way down here after we've loaded up the array
+		if (isset($_POST) && !empty($_POST))
+		{
+			$customCss=array();
+			$objComponent=Yii::createComponent('ext.wscloud.wscloud');
+			foreach($files as $file)
+			{
+
+				$arr = $file;
+				$originalFile = file_get_contents($arr['path']);
+				$customFile = $_POST['content-'.$arr['tab']];
+				$file['usecustom'] = $_POST['radio'.$arr['tab']];
+
+				if($originalFile==$customFile)
+					$file['usecustom']=0;
+				else
+				{
+					$file['contents']=trim(strip_tags($customFile));
+					if($file['usecustom']==1)
+						$customCss[]=$file['tab'];
+
+					$d = YiiBase::getPathOfAlias('webroot')."/runtime/cloudimages/".
+						_xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL');
+					@mkdir($d,0777,true);
+					$tmpOriginal = tempnam($d,"css");
+					file_put_contents($tmpOriginal,$file['contents']);
+					$path="themes/".Yii::app()->theme->name."/css/".$file['tab'].".css";
+
+					$objComponent->SaveToS3($path,$tmpOriginal);
+				}
+			}
+
+			Yii::app()->theme->config->customcss = $customCss;
+			Yii::app()->user->setFlash('success',Yii::t('admin','CSS files saved'));
+			$this->redirect($this->createUrl("theme/editcss"));
+		}
+
+		$this->render('editcss',array('files'=>$files));
 
 	}
 
@@ -970,6 +1067,38 @@ class ThemeController extends AdminBaseController
 		}
 
 		return $tmp;
+	}
+
+
+	protected function setCssOrder($files)
+	{
+
+
+		/*
+		 * We need to order these from bottom to top. We only care about base, style and custom,
+		 * everything else is sandwiched in the middle
+		 * base.css
+	     * custom.css
+	     * dark.css
+	     * light.css
+	     * style.css
+		*/
+
+		$newFiles = array();
+		$baseFile=null; $customFile=null; $styleFile=null;
+		foreach($files as $key=>$file)
+		{
+			if($file['filename']=="base.css") { $baseFile=$file; unset($files[$key]); }
+			if($file['filename']=="style.css") { $styleFile=$file; unset($files[$key]); }
+			if($file['filename']=="custom.css") { $customFile=$file; unset($files[$key]); }
+		}
+		if(!is_null($baseFile)) $newFiles[] = $baseFile;
+		if(!is_null($styleFile)) $newFiles[] = $styleFile;
+		$newFiles += $files;
+		if(!is_null($customFile)) $newFiles[] = $customFile;
+
+		$newFiles = array_reverse($newFiles,true);
+		return $newFiles;
 	}
 
 }

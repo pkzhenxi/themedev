@@ -165,7 +165,7 @@ class wscloud extends ApplicationComponent {
 			imagesavealpha($blbImage, true);
 		}
 		imagepng($blbImage,$tmpOriginal);
-		$url = $this->SaveToS3($objImage,$tmpOriginal);
+		$url = $this->SaveToS3($objImage->strImageName,$tmpOriginal);
 
 		if($url != false)
 		{
@@ -220,24 +220,34 @@ class wscloud extends ApplicationComponent {
 	}
 
 
-	public function SaveToS3($objImage,$pathToFile)
+	public function SaveToS3($keyPath,$pathToFile)
 	{
 		$this->init();
-		Yii::log("Uploading /"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$objImage->strImageName,
+
+		Yii::log("Uploading /"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$keyPath,
 			'info', 'application.'.__CLASS__.".".__FUNCTION__);
 
+		$mimeType="text/html";
+		if(substr($keyPath,-4)==".css")
+			$mimeType="text/css";
+		if(substr($keyPath,-4)==".jpg")
+			$mimeType="image/jpeg";
+		if(substr($keyPath,-4)==".png")
+			$mimeType="image/png";
 		$s3 = new S3($_SERVER['amazon_key'], $_SERVER['amazon_secret']);
 		$result = $s3->putObjectFile($pathToFile,
 			"lightspeedwebstore",
-			_xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$objImage->strImageName,
-			S3::ACL_PUBLIC_READ
+			_xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$keyPath,
+			S3::ACL_PUBLIC_READ,
+			array(),
+			$mimeType
 		);
 
 		if($result)
-			return '//lightspeedwebstore.s3.amazonaws.com/'._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$objImage->strImageName;
+			return '//lightspeedwebstore.s3.amazonaws.com/'._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$keyPath;
 		else
 		{
-			Yii::log("Error saving to cloud "._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$objImage->strImageName,
+			Yii::log("Error saving to cloud "._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$keyPath,
 				'error', 'application.'.__CLASS__.".".__FUNCTION__);
 			return false;
 		}
@@ -305,9 +315,7 @@ class wscloud extends ApplicationComponent {
 			}
 
 		$image->save($strNewThumbnailWithPath); //just save normally with no special effects
-		$objI = new Images();
-		$objI->strImageName = $strNewThumbnail;
-		$S3path = $this->SaveToS3($objI,$strNewThumbnailWithPath);
+		$S3path = $this->SaveToS3($strNewThumbnail,$strNewThumbnailWithPath);
 		if ($S3path != false)
 		{
 			//See if we have a thumbnail record in our Images table, create or update

@@ -28,7 +28,7 @@
 			<?= $this->renderPartial('/site/_topcart',null, true); ?>
 		</div>
 		<div class="shoppingnavigation">
-			<?php if(!Yii::app()->user->isGuest) echo CHtml::link(Yii::t('cart','Wish Lists'),array('/wishlist')) ?>
+			<?php if(_xls_get_conf('ENABLE_WISH_LIST',0)) echo CHtml::link(Yii::t('cart','Wish Lists'),array('/wishlist')) ?>
 			<?php echo CHtml::link(Yii::t('cart','Checkout'),array('cart/checkout')) ?>
 
 		</div>

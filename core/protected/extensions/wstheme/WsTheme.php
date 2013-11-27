@@ -58,4 +58,65 @@ class WsTheme extends WsExtension
 		return $className;
 	}
 
+
+	/**
+	 * Set configuration for selected theme
+	 * @param $arr
+	 * @return bool
+	 */
+	public function setConfigValues($arr) {
+
+		$strClass = Yii::app()->theme->name;
+
+
+		$objModule = Modules::model()->findByAttributes(array(
+			'module'=>$strClass,
+			'category'=>'theme',
+			)
+		);
+		if ($objModule instanceof Modules) {
+
+			try{
+				$objModule->configuration = serialize($arr);
+				$objModule->save();
+				return true;
+			}catch(Exception $e){
+				Yii::log("Could not save " . $strClass. " . Error : " . $e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+				return false;
+			}
+		}
+
+	}
+
+
+	/**
+	 * Returns theme configuration
+	 * @param null $strClass
+	 * @return array|mixed
+	 */
+	public function getConfigValues($strClass = null) {
+
+		$strClass = Yii::app()->theme->name;
+		$arr = array();
+
+		$objModule = Modules::model()->findByAttributes(array(
+				'module'=>$strClass,
+				'category'=>'theme'
+			)
+		);
+		if ($objModule instanceof Modules) {
+
+			try
+			{
+				$arr = unserialize($objModule->configuration);
+			}catch(Exception $e){
+				Yii::log("Could not unserialize " . $strClass. " . Error : " . $e, 'error', 'application.'.__CLASS__.".".__FUNCTION__);
+				return array();
+			}
+		}
+
+		return $arr;
+	}
+
+
 }

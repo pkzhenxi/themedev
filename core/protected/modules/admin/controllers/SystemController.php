@@ -24,7 +24,7 @@ class SystemController extends AdminBaseController
 	{
 		return array(
 			array('allow',
-				'actions'=>array('index','edit','erasecarts','log','purge'),
+				'actions'=>array('index','edit','erasecarts','log','purge','info'),
 				'roles'=>array('admin'),
 			),
 		);
@@ -49,6 +49,8 @@ class SystemController extends AdminBaseController
 				array('label'=>'System Log', 'linkOptions'=>array('class'=>'nav-header')),
 					array('label'=>'View Log', 'url'=>array('system/log')),
 					array('label'=>'Latest Release Notes', 'url'=>array('default/releasenotes')),
+				array('label'=>'About', 'linkOptions'=>array('class'=>'nav-header')),
+					array('label'=>'System Information', 'url'=>array('system/info')),
 
 		);
 
@@ -62,6 +64,10 @@ class SystemController extends AdminBaseController
 		$this->render("index");
 	}
 
+	public function actionInfo()
+	{
+		$this->render("info");
+	}
 
 
 	/**

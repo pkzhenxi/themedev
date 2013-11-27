@@ -2,4 +2,4 @@
 
 define('XLSWS_VERSION', '3.1.0');
 define('XLSWS_VERSIONBUILD', 3100);
-define('XLSWS_BUILDDATE', '2013-11-21 12:40:08');
+define('XLSWS_BUILDDATE', '2013-11-27 10:17:50');

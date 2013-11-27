@@ -254,7 +254,7 @@ class WsExtension extends CComponent
 
 		$objModule = Modules::model()->findByAttributes(array('module'=>$strClass));
 		if ($objModule instanceof Modules) {
-
+			Yii::log("Writing config " . print_r($arr,true), 'info', 'application.'.__CLASS__.".".__FUNCTION__);
 			try{
 				$objModule->configuration = serialize($arr);
 				$objModule->save();

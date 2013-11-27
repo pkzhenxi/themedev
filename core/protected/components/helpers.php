@@ -75,28 +75,25 @@ function _xls_theme_config($strThemeName)
 
 
 /**
- * Get a file from our CDN network.
+ * Get a file via cURL.
  * @param $url
  * @return bool|mixed
  */
 function getFile($url)
 {
-	if(stripos($url,".lightspeedretail.com")>0)
-	{
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_VERBOSE, 0);
 
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_VERBOSE, 0);
 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 
-		$resp = curl_exec($ch);
-		curl_close($ch);
-		return $resp;
-	} else return false;
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
+	$resp = curl_exec($ch);
+	curl_close($ch);
+	return $resp;
 
 }
 

@@ -19,8 +19,10 @@
 
 	<link rel="shortcut icon" href="<?=Yii::app()->baseUrl."/images/favicon.ico" ?>" />
 
-	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/style.css'); ?>
-	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/'.Yii::app()->theme->config->CHILD_THEME.'.css'); ?>
-	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->baseUrl.'/css/custom.css'); ?>
+	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->cssUrl('base')); ?>
+	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->cssUrl('style')); ?>
+	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->cssUrl(Yii::app()->theme->config->CHILD_THEME)); ?>
+	<?php Yii::app()->getClientScript()->registerCssFile(Yii::app()->theme->cssUrl('custom')); ?>
+
 	<?php echo $this->renderPartial("/site/_google",null,true); ?>
 </head>

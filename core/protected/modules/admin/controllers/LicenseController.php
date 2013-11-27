@@ -38,7 +38,7 @@ class LicenseController extends AdminBaseController
 			$model->scenario = "page".$_POST['InstallForm']['page'];
 			if (isset($_POST['buttonSkip']) && $_POST['InstallForm']['page']==4)
 				$model->scenario = "page-skip".$_POST['InstallForm']['page'];
-			if (_xls_get_conf('LIGHTSPEED_MT',0)>0 && $_POST['InstallForm']['page']==2)
+			if (_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 && $_POST['InstallForm']['page']==2)
 				$model->scenario = "page".$_POST['InstallForm']['page']."-mt";
 
 			$model->attributes = $_POST['InstallForm'];

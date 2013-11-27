@@ -199,7 +199,7 @@ class GalleryPhoto extends BaseGalleryPhoto
 		$objImage->strImageName = $this->galleryDir . '/' . $this->getFileName('') . '.' . $strExt;
 
 		//save image in original size
-		$objComponent->SaveToS3($objImage,$path);
+		$objComponent->SaveToS3($objImage->strImageName,$path);
 
 		$d = YiiBase::getPathOfAlias('webroot')."/runtime/cloudimages/"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL');
 		@mkdir($d,0777,true);
@@ -210,7 +210,7 @@ class GalleryPhoto extends BaseGalleryPhoto
 		//create image preview for gallery manager
 		Yii::app()->image->load($path)->resize(300, null)->save($tmpOriginal);
 		$objImage->strImageName = $this->galleryDir . '/_' . $this->getFileName('') . '.' . $this->galleryExt;
-		$objComponent->SaveToS3($objImage,$tmpOriginal);
+		$objComponent->SaveToS3($objImage->strImageName,$tmpOriginal);
 		@unlink($tmpOriginal);
 
 		foreach ($this->gallery->versions as $version => $actions) {
@@ -223,7 +223,7 @@ class GalleryPhoto extends BaseGalleryPhoto
 			$tmpOriginal .= '.' . $this->galleryExt;
 			$objImage->strImageName = $this->galleryDir . '/' . $this->getFileName($version) . '.' . $this->galleryExt;
 			$image->save($tmpOriginal);
-			$objComponent->SaveToS3($objImage,$tmpOriginal);
+			$objComponent->SaveToS3($objImage->strImageName,$tmpOriginal);
 			@unlink($tmpOriginal);
 		}
 	}
