@@ -70,6 +70,14 @@ class AdminBaseController extends CController
 
 	}
 
+	public function validateEmail($obj)
+	{
+		$objV = new CEmailValidator();
+		if (!empty($obj->key_value))
+			return $objV->validateValue($obj->key_value);
+		return true;
+	}
+
 	public function beforeAction($action)
 	{
 		$this->verifySSL();
@@ -119,11 +127,20 @@ class AdminBaseController extends CController
 			{
 				if(isset($_POST['Configuration'][$i]))
 					$item->attributes=$_POST['Configuration'][$i];
-				$valid=$item->validate() && $valid;
+
+				if ($item->options=="EMAIL")
+					$valid = $this->validateEmail($item) && $valid;
+				else
+					$valid=$item->validate() && $valid;
 				if (!$valid)
 				{
-					$err = $item->getErrors();
-					Yii::app()->user->setFlash('error',$item->title." -- ".print_r($err['key_value'][0],true));
+					if ($item->options=="EMAIL")
+						Yii::app()->user->setFlash('error',$item->title." is not a valid email address");
+					else {
+						$err = $item->getErrors();
+						Yii::app()->user->setFlash('error',$item->title." -- ".print_r($err['key_value'][0],true));
+					}
+
 					break;
 				}
 			}

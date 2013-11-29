@@ -119,6 +119,12 @@ class Controller extends CController
 	{
 		self::initParams();
 
+		if(Yii::app()->params['ENABLE_SSL']=="1" && Yii::app()->params['LIGHTSPEED_HOSTING']=="1")
+			$this->checkSNIIncompatible();
+
+		if(isset($_GET['nosni']))
+			Yii::app()->user->setFlash('warning',Yii::t('global','NOTE: Your older operating system does not support certain security features this site uses. You have been redirected to {link} for your session which will ensure your information is properly protected.',array('{link}'=>"<b>".Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL']."</b>")));
+
 		$filename = Yii::getPathOfAlias('webroot.themes').DIRECTORY_SEPARATOR.DEFAULT_THEME;
 		if(!file_exists($filename) && _xls_get_conf('LIGHTSPEED_MT',0)=='0')
 		{
@@ -603,5 +609,24 @@ class Controller extends CController
 			$this->redirect($this->createUrl($linka[2]));
 
 	}
+
+	/**
+	 * Send old OSs like WinXP to our common *.lightspeedwebstore.com domain when active
+	 */
+	public function checkSNIIncompatible()
+	{
+
+		if(empty(Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'])
+			|| $_SERVER['HTTP_HOST']==Yii::app()->params['LIGHTSPEED_HOSTING_SSL_URL'])
+			return;
+
+		$badVersions=array('WindowsNT5.1','WindowsNT5.0','WindowsNT4.0','WindowsXP');
+		$userAgent=explode(";",str_replace(" ","",Yii::app()->request->userAgent));
+		if(count(array_intersect($badVersions,$userAgent)))
+			$this->redirect("http://"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL')."?nosni");
+
+	}
+
+
 
 }

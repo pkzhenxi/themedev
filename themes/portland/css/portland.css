@@ -216,7 +216,7 @@ input:-ms-input-placeholder { /* Internet Explorer 10+ */
 }
 
 #shoppingcartbottom {
-    padding: 10px 16px; 20px; 50px;
+    padding: 10px 16px 20px 50px;
     margin-top: 10px;
     line-height: 25px;
     border-top: 1px dotted #aaaaaa;

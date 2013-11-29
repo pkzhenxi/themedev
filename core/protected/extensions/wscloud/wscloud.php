@@ -224,6 +224,8 @@ class wscloud extends ApplicationComponent {
 	{
 		$this->init();
 
+		if(!isset($_SERVER['amazon_key']) || !isset($_SERVER['amazon_secret'])) return false;
+
 		Yii::log("Uploading /"._xls_get_conf('LIGHTSPEED_HOSTING_SSL_URL').'/'.$keyPath,
 			'info', 'application.'.__CLASS__.".".__FUNCTION__);
 

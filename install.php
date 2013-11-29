@@ -46,9 +46,12 @@ if(count($arg))
 	if(isset($arg['help'])) showCommandLine();
 	if(isset($arg['dbupdate']) && $arg['dbupdate']==1)
 	{
+		if(empty($arg['url']))
+			die("dbupdate requires url key as well, such as --url=store.example.com\n\n");
+
 		//This is command line for applying any database updates
 		echo "\n**Applying latest database changes**\n\n";
-		runYii('www.example.com','/install.php',49);
+		runYii($arg['url'],'/install.php',49);
 		die();
 	}
 	if(file_exists("config/main.php")) die("\nENTER 1 OR 2 FOR INSTRUCTIONS (ENTER 2 TO PAGE)\n\nENTER SEED NUMBER
@@ -154,6 +157,19 @@ function showCommandLine()
 }
 function runYii($url,$scriptname,$sqlline=1)
 {
+	global $arg;
+	$_SERVER=array(
+		'REQUEST_URI'=>'/index.php',
+		'SERVER_NAME'=>$url,
+		'SCRIPT_FILENAME'=>realpath(dirname(__FILE__)."/".$scriptname),
+		'SCRIPT_NAME'=>$scriptname,
+		'PHP_SELF'=>$scriptname,
+		'HTTP_USER_AGENT'=>'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/536.30.1 (KHTML, like Gecko)',
+		'HTTP_HOST'=>$url,
+		'QUERY_STRING'=>'',
+
+	);
+	$_SESSION['DUMMY']="nothing"; //force creation of session just in case
 	//This is the halfway point, we have to switch to the Yii framework now, so let's bootstrap it
 	$yii=dirname(__FILE__).'/core/framework/yii.php';
 	$config=dirname(__FILE__).'/config/main.php';
@@ -170,18 +186,7 @@ function runYii($url,$scriptname,$sqlline=1)
 	Yii::app()->params['OFFLINE']=0;
 	Yii::app()->params['INSTALLED']=1;
 
-	$_SERVER=array(
-		'REQUEST_URI'=>'/index.php',
-		'SERVER_NAME'=>$url,
-		'SCRIPT_FILENAME'=>realpath(dirname(__FILE__)."/".$scriptname),
-		'SCRIPT_NAME'=>$scriptname,
-		'PHP_SELF'=>$scriptname,
-		'HTTP_USER_AGENT'=>'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/536.30.1 (KHTML, like Gecko)',
-		'HTTP_HOST'=>$url,
-		'QUERY_STRING'=>'',
 
-	);
-	$_SESSION['DUMMY']="nothing"; //force creation of session just in case
 
 
 	do
@@ -207,7 +212,7 @@ function runYii($url,$scriptname,$sqlline=1)
 
 	} while ($sqlline<50);
 
-	if($url!= "www.example.com") //IOW only command line db updates
+	if(!isset($arg['dbupdate'])) //IOW only command line db updates
 		echo "\n** finished **\n\nCustomer needs to go to http://".$url."/admin/license to complete installation.\n\n";
 
 }

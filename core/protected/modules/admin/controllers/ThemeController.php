@@ -834,7 +834,7 @@ class ThemeController extends AdminBaseController
 		$d = dir($strThemePath);
 		while (false !== ($filename = $d->read()))
 		{
-			if (is_dir($strThemePath."/".$filename) && $filename[0] != "." && $filename != "trash")
+			if (is_dir($strThemePath."/".$filename) && $filename[0] != "." && $filename != "trash" && $filename != "_customcss")
 				$arr[$filename] = $this->loadConfiguration($filename);
 
 		}
@@ -848,6 +848,7 @@ class ThemeController extends AdminBaseController
 		{
 			$hold[$strTheme] = $arr[$strTheme];
 			unset($arr[$strTheme]);
+			ksort($arr);
 			$newarray = $hold + $arr;
 			$arr = $newarray;
 

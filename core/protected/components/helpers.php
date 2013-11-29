@@ -592,9 +592,9 @@ function _xls_values_as_keys($arr) {
 
 /**
  * Set existing configuration value
- * @param string $key
+ * @param $strKey
  * @param string $mixDefault
- * @return bool success
+ * @return bool
  */
 function _xls_set_conf($strKey, $mixDefault = "") {
 	$conf = Configuration::LoadByKey($strKey);

@@ -41,7 +41,8 @@ class InstallForm extends CFormModel
 			//array('label,login,trans_key,live,ccv,restrictcountry,ls_payment_method','required'),
 			array('iagree','required', 'requiredValue'=>1,'message'=>'You must accept Terms and Conditions', 'on'=>'page1'),
 			array('LSKEY,encryptionKey,encryptionSalt,TIMEZONE','required', 'on'=>'page2'),
-			array('TIMEZONE,loginemail,loginpassword','required', 'on'=>'page2-mt'),
+			array('TIMEZONE,loginemail,loginpassword','required', 'on'=>'page2-cld'),
+			array('LSKEY,TIMEZONE,','required', 'on'=>'page2-mt'),
 			array('loginemail,loginpassword','safe', 'on'=>'page2'),
 			array('loginpassword','checkForemail'),
 			array('STORE_NAME,EMAIL_FROM,STORE_ADDRESS1,STORE_ADDRESS2,STORE_HOURS,STORE_PHONE','required', 'on'=>'page3'),
@@ -148,8 +149,9 @@ class InstallForm extends CFormModel
 	public function getPage2()
 	{
 		return array(
-			'title'=>_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 ? '<p>Please verify the server timezone.</p><p>You can enter an email address and password which will be granted admin access when logging into <strong>'.Yii::app()->createAbsoluteUrl('admin').'</strong> in any web browser. If this email already exists in Web Store, the password will be updated and admin access granted.</p></b>' : '<p>Enter a store password and verify the server timezone. The encryption keys are used to encrypt all passwords, you can generally accept the randomly generated ones below. <strong>Type in your store password even if this is an upgrade. Your new store password will be reset to what is entered here.</strong></p><p>You can enter an email address and password which will be granted admin access when logging into <strong>'.Yii::app()->createAbsoluteUrl('admin').'</strong> in any web browser. If this email already exists in Web Store, the password will be updated and admin access granted.</p></b>',
-
+			'title'=>_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 ? '<p>Please verify the server timezone.</p><p>You must also enter an email address and password which will be granted admin access when logging into <strong>'.Yii::app()->createAbsoluteUrl('admin').'</strong> in any web browser. If this email already exists in Web Store, the password will be updated and admin access granted.</p></b>'
+				: (_xls_get_conf('LIGHTSPEED_MT',0)>0 ? '<p>Enter a store password and verify the server timezone. <strong>You must type in your store password even if this is an upgrade. Your new store password will be reset to what is entered here.</strong></p><p>You can enter an email address and password which will be granted admin access when logging into <strong>'.Yii::app()->createAbsoluteUrl('admin').'</strong> in any web browser. If this email already exists in Web Store, the password will be updated and admin access granted.</p></b>'
+					: '<p>Enter a store password and verify the server timezone. The encryption keys are used to encrypt all passwords, you can generally accept the randomly generated ones below. <strong>Type in your store password even if this is an upgrade. Your new store password will be reset to what is entered here.</strong></p><p>You can enter an email address and password which will be granted admin access when logging into <strong>'.Yii::app()->createAbsoluteUrl('admin').'</strong> in any web browser. If this email already exists in Web Store, the password will be updated and admin access granted.</p></b>'),
 
 			'elements'=>array(
 				'LSKEY'=>array(
@@ -164,13 +166,13 @@ class InstallForm extends CFormModel
 				'encryptionKey'=>array(
 					'type'=>'text',
 					'maxlength'=>64,
-					'visible'=>_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 ? false : true,
+					'visible'=>_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 || _xls_get_conf('LIGHTSPEED_MT',0)>0 ? false : true,
 				),
 				'encryptionSalt'=>array(
 					'type'=>'text',
 					'maxlength'=>64,
 					'size'=>60,
-					'visible'=>_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 ? false : true,
+					'visible'=>_xls_get_conf('LIGHTSPEED_CLOUD',0)>0 || _xls_get_conf('LIGHTSPEED_MT',0)>0 ? false : true,
 				),
 				'loginemail'=>array(
 					'type'=>'email',
