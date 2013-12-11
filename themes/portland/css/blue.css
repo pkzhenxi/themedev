@@ -1,0 +1,10 @@
+.index-header {
+    background:  url('images/blue/header.jpg');
+    height: 400px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-origin: content-box;
+}
+.subpage-header {
+    background:  url('images/blue/headershort.jpg') no-repeat top left;
+}

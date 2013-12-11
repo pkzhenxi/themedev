@@ -1,0 +1,409 @@
+html {
+    height: 100%;
+}
+
+body {
+    font-family: Lato;
+    color: #4B5362;
+    height:100%;
+}
+
+ul.nav li.dropdown:hover > ul.dropdown-menu {
+    display: block;
+}
+
+.container {
+    max-width: 1280px;
+}
+
+.carousel-caption a, h1,h2,h3,h4,h5, .h1, .h2,
+.product_cell_label > a, .product_cell_price,
+#pagination > li > a, .subcategories a, .nav-pills > li > a, #footer a  {
+    color: #878787;
+    font-family: 'antonioregular', "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+}
+
+.product_cell_price_slash {
+    color: #ca7d42;
+    text-decoration: line-through;
+}
+
+.btn-primary, a, .btn-link, .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus, .nav-pills > li.active > a, .nav-pills > li.active > a:hover, #footer a:hover{
+    background-color: #ca7d42,
+}
+
+.btn-primary {
+    border-color: #ca7d42;
+}
+
+.btn-primary:hover,  {
+    background-color: #4B5362;
+    color: #FFFFFF;
+}
+
+h1,h2,h3,h4,h5, .h1, .h2, .h3 {
+    font-family: 'antoniolight', "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+}
+
+h1, .h1 {
+    font-size: 200%;
+}
+
+h2, .h2 {
+    font-size: 150%
+}
+
+h3, .h3 {
+    font-size: 125%;
+}
+
+#wrap {
+    /*min-height: 100%;*/
+    /*height: auto !important;*/
+    /*height: 100%;*/
+    /* Negative indent footer by it's height */
+    /*margin: 0 auto 0; */
+    }
+
+/*   _navbar    */
+
+#navigation-main {
+    margin-top: 1.5em;
+}
+
+.nav-tabs.nav-justified > li > a {
+    border:none;
+}
+
+.nav-justified > li > a {
+    font-size: large;
+    color: #4B5362;
+}
+
+.nav li li {
+    list-style: none;
+}
+
+
+/*  _header */
+
+#login-header {
+    min-height: 4em;
+    margin-top: 2em;
+}
+
+#headerimage img {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -.75em;
+}
+
+
+
+/*  Breadcrumbs */
+.breadcrumb {
+    background-color: #FFFFFF;
+}
+
+#breadcrumb-bar .form-group {
+    margin: 0;
+}
+
+/*  grid    */
+
+.product-row {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+/*  product/index   */
+
+#product-index {
+    margin-top: 2em;
+}
+
+
+#regular-price {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+#Product_code {
+    font-style: italic;
+}
+
+#Product_FormattedPrice {
+    color: #898989;
+}
+
+#Product_FormattedRegularPrice_wrap {
+
+}
+
+#Product_FormattedRegularPrice {
+    text-decoration:line-through;
+}
+
+#web-long-description {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+#Product_description_short {
+    margin-top: 0.5em;
+}
+
+#Product_description_short li {
+    text-transform: none;
+}
+
+#Product_InventoryDisplay, #qty-row {
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+}
+
+#SelectSize, #SelectColor {
+    line-height: 1.7em;
+    -webkit-appearance:listbox;
+    -moz-appearance:listbox;
+    -ms-appearance:listbox;
+}
+
+#qty-row {
+    margin-bottom: 2em;
+}
+
+#addToCart {
+    margin-left: 15px;
+}
+
+.thumbs {
+    margin-top: 2em;
+}
+
+
+.product_cell_label > a, .product_cell_price {
+    text-decoration: none;
+}
+
+.product_cell_label > a{
+    font-size: 1em;
+}
+.product_cell_price, .product_cell_price {
+    font-size: 1em;
+    font-family: 'antoniolight',cursive;
+}
+
+
+#keepshopping {
+    margin-top: 1em;
+}
+
+#pagination > li > a {
+    border: none;
+}
+
+#pagination > li > a:hover {
+    background: none;
+    color: #000000;
+}
+
+#page-line {
+    margin-top: 1em;
+}
+
+a:hover, .btn-link:hover, .btn-link:focus {
+    text-decoration: none;
+}
+
+.btn-primary a, .btn-primary {
+    color: #FFFFFF;
+}
+
+.btn, .form-control, .nav-pills > li > a {
+    border-radius: 0;
+}
+
+.close {
+    font-size: 36px;
+}
+
+.modal-dialog {
+    max-width: 400px;
+}
+
+#order-dialog {
+    margin-right: 40px;
+}
+
+.navbar-default {
+    background-color: #FFFFFF;
+    border-top: none;
+}
+
+.checkbox {
+    display: inline-block;
+    margin-left: 1em;
+}
+
+input[type="checkbox"] {
+    margin-left: 1em;
+}
+
+#cart-quantity {
+    width:  4em;
+}
+
+.cart-price {
+    text-align: right;
+}
+
+.lead {
+    font-size: 18px;
+}
+
+#order-summary {
+    display: inline-block;
+}
+
+.table tbody > tr > td {
+    vertical-align: middle;
+}
+
+cart-checkout {
+    min-height: 2em;
+}
+
+/*  _footer */
+
+#footer {
+    /*position: absolute;*/
+    /*bottom: 0;*/
+    /*height: 12em;*/
+    width: 100%;
+    margin-top: 2em;
+    padding-top: 2em;
+    padding-bottom: 2em;
+    font-size: large;
+    color: #FFFFFF;
+    background-color: #4B5362;
+
+}
+
+#footer a, .bottomtabs .btn-link  {
+    color: #FFFFFF;
+    font-size: large;
+}
+
+#order-lookup, #wishlist-link {
+    border-bottom: dashed;
+    padding-bottom: 0.5em;
+    padding-top: 0.5em;
+}
+
+
+
+#wsborderlookup label{
+    color: #4B5362;
+}
+
+/*  carousel    */
+#relatedCarousel {
+    width:  256px;
+}
+
+#upsell-row {
+    margin-top: 2em;
+}
+
+.carousel .item {
+    /*height: 278px;*/
+}
+.carousel-caption {
+    /*background-color: transparent;*/
+    /*position: relative;*/
+    /*max-width: 550px;*/
+    /*padding: 0;*/
+    /*margin:0;*/
+    /*top: 20px;*/
+    /*text-align:center;*/
+    /*color: black*/
+}
+
+#contact-page-content {
+    margin-top: 2em;
+}
+
+
+/*  checkout    */
+
+select {
+    line-height: 1.7em;
+    -webkit-appearance:listbox;
+    -moz-appearance:listbox;
+    -ms-appearance:listbox;
+}
+
+/*  buttons */
+
+#orderLookupBtn {
+    vertical-align: middle;
+}
+
+#xs-login-btn {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+@media (max-width: 480px) {
+
+    .btn-block {
+        padding: auto;
+        min-height: 2.5em;
+    }
+}
+
+
+/* Generated by Font Squirrel (http://www.fontsquirrel.com) on October 17, 2013 */
+
+
+
+@font-face {
+    font-family: 'antoniobold';
+    src: url('antonio/antonio-bold-webfont.eot');
+    src: url('antonio/antonio-bold-webfont.eot?#iefix') format('embedded-opentype'),
+    url('antonio/antonio-bold-webfont.woff') format('woff'),
+    url('antonio/antonio-bold-webfont.ttf') format('truetype'),
+    url('antonio/antonio-bold-webfont.svg#antoniobold') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
+@font-face {
+    font-family: 'antoniolight';
+    src: url('antonio/antonio-light-webfont.eot');
+    src: url('antonio/antonio-light-webfont.eot?#iefix') format('embedded-opentype'),
+    url('antonio/antonio-light-webfont.woff') format('woff'),
+    url('antonio/antonio-light-webfont.ttf') format('truetype'),
+    url('antonio/antonio-light-webfont.svg#antoniolight') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'antonioregular';
+    src: url('antonio/antonio-regular-webfont.eot');
+    src: url('antonio/antonio-regular-webfont.eot?#iefix') format('embedded-opentype'),
+    url('antonio/antonio-regular-webfont.woff') format('woff'),
+    url('antonio/antonio-regular-webfont.ttf') format('truetype'),
+    url('antonio/antonio-regular-webfont.svg#antonioregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+

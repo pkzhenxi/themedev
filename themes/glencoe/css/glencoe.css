@@ -1,0 +1,694 @@
+/*@import "../../../core/protected/extensions/bootstrap3/assets/css/bootstrap.min.css";*/
+/*@import "../../../core/framework/web/js/source/jui/css/base/jquery-ui.css";*/
+/*@import "../../../assets/4e673d5b/jui/css/base/jquery-ui.css";*/
+
+@font-face {
+    font-family: NexusLight;
+    src: url(../fonts/Nexa%20Light.otf);
+}
+
+@font-face {
+    font-family: NexusBold;
+    src: url(../fonts/Nexa%20Bold.otf);
+}
+
+@font-face {
+    font-family: AlteHaasGroteskBold;
+    src: url(../fonts/AlteHaasGroteskBold.ttf);
+}
+
+@font-face {
+    font-family: AlteHaasGrotesk;
+    src: url(../fonts/AlteHaasGroteskRegular.ttf);
+}
+
+.container {
+    width: 1280px;
+}
+
+.btncart {
+    text-align: left;
+    font-family: NexusLight;
+    background: transparent;
+    border: 0;
+    outline: none;
+}
+
+.emboss {
+    border-top:1px solid #dadada;
+    border-bottom:1px solid #ffffff;
+    margin-left: -10px;
+}
+
+.social {
+    margin-bottom: 5px;
+}
+
+#fbbtn
+{
+    float: left;
+    width: 25px;
+    height: 25px;
+    background: url("images/fb.png") no-repeat 0 0;
+    padding: 0px 15px;
+    margin-top: 5px;
+}
+
+#twbtn
+{
+    float: left;
+    width: 25px;
+    height: 25px;
+    background: url("images/tw.png") no-repeat 0 0;
+    padding: 0px 15px;
+    margin-top: 5px;
+}
+
+#gpbtn
+{
+    float: left;
+    width: 25px;
+    height: 25px;
+    background: url("images/gp.png") no-repeat 0 0;
+    padding: 0px 15px;
+    margin-top: 5px;
+}
+
+#pibtn
+{
+    float: left;
+    width: 25px;
+    height: 25px;
+    background: url("images/pi.png") no-repeat 0 0;
+    padding: 0px 15px;
+    margin-top: 5px;
+}
+
+#libtn
+{
+    float: left;
+    width: 25px;
+    height: 25px;
+    background: url("images/li.png") no-repeat 0 0;
+    padding: 0px 15px;
+    margin-top: 5px;
+}
+
+#igbtn
+{
+    float: left;
+    width: 25px;
+    height: 25px;
+    background: url("images/ig.png") no-repeat 0 0;
+    padding: 0px 15px;
+    margin-top: 5px;
+}
+
+#fbbtn:hover { background-position: 0 -25px; }
+#twbtn:hover { background-position: 0 -25px; }
+#gpbtn:hover { background-position: 0 -25px; }
+#pibtn:hover { background-position: 0 -25px; }
+#libtn:hover { background-position: 0 -25px; }
+#igbtn:hover { background-position: 0 -25px; }
+
+.maincontent {
+    background-color: #ffffff;
+    font-family: NexusLight;
+    color: #000000;
+}
+
+#langdrop select {
+    border: 0px;
+    border-radius: 4px;
+    height: 20px;
+    width: 100px;
+    text-transform: uppercase;
+}
+
+.panel {
+    background: transparent;
+    border: 0;
+    outline: none;
+}
+
+.panel-default {
+    background: transparent;
+    border: 0;
+}
+
+.panel-group {
+    background: transparent;
+    border: 0;
+}
+
+.panel-body {
+    background: transparent;
+    padding: 5px 0px 5px 20px;
+    border: 0;
+}
+
+.panel-heading {
+    outline: none;
+    border: 0;
+    padding: 5px 0px 5px 20px;
+}
+
+
+.list-group-item {
+    font-family: NexusLight;
+    margin: -10px 0px 0px 0px;
+    border: 0;
+    padding: 0px;
+}
+
+.list-group-item-heading {
+    font-family: NexusBold;
+    margin: -10px 0px 0px 0px;
+    padding: 0px;
+}
+
+.cat1 { padding-left: 10px; }
+.cat2 { padding-left: 20px; }
+
+.breadcrumb {
+    margin-right: 0px;
+    max-width: 862px;
+}
+
+.breadcrumbs {
+    font-family: NexusLight;
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+#xlsSearch {
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    margin-top: 2px;
+    padding: 8px;
+    width: 90%;
+    font-size: 0.9em;
+}
+
+#myaccount label {padding-top: 10px;}
+#myaccount input[type="text"],
+#myaccount input[type="text"]:active,
+#myaccount input[type="text"]:focus { font-size: 1.0em; padding: 5px; }
+
+.nav li a {
+    text-decoration: none;
+    color: #000000;
+    padding-left: 5px;
+}
+.nav li a:hover,
+.nav li a:focus {
+    text-decoration: none;
+    background-color: transparent;
+}
+
+.nav-pills > li {
+    font-family: NexusLight;
+}
+
+.nav-pills > li > a {
+    padding-left: 15px;
+}
+
+.nav-pills > li > a:hover {
+    background-color: #f5f5f5;
+}
+
+#orl {
+    overflow: hidden;
+}
+
+.clickbar {
+    /*color: transparent;*/
+    padding: 10px 5px 5px 5px;
+}
+
+#wsborderlookup label[for=LookupForm_emailPhone],
+#wsborderlookup label[for=LookupForm_orderId] {
+    font-weight: lighter;
+    margin-top: 15px;
+}
+
+#LookupForm_emailPhone,
+#LookupForm_orderId {
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+}
+
+#orl .containers {
+    display: none;
+}
+
+.containers {
+    margin-left: 20px;
+    padding-bottom: 30px;
+}
+
+.containers input[type=submit] {
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    padding: 5px;
+    margin-top: 15px;
+}
+
+.containers input[type=text] {
+    font-family: sans-serif;
+    font-size: 12px;
+    padding: 3px;
+}
+
+.thumbnail {
+    display: inline-block;
+}
+
+.thumbnail:hover,
+.thumbnail:focus,
+.thumbnail.active {
+    border-color: #428bca;
+}
+
+.product_cell {
+    min-height: 300px !important;;
+    vertical-align: baseline;
+    margin-bottom: 0px;
+    padding-bottom: 3px;
+    padding-left: 0px;
+}
+
+.product_cell_graphic {
+    height: 225px;
+    margin: auto;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.product_cell_label {
+    font-family: NexusBold;
+    font-size: 1em;
+    text-transform: none;
+}
+
+.product_cell_label a {
+    padding: 8px 5px 3px 5px;
+    font-weight: normal;
+}
+
+.product_cell_price_slash {
+    text-decoration: line-through;
+}
+
+#pagination {
+    margin-left: 25px;
+}
+
+#pagination a {
+    border: 1px solid #d3d3d3;
+}
+
+#pagination li {
+    padding: 0px;
+    display: inline;
+}
+
+#pagination li.page.selected a {
+    border: 1px solid #d3d3d3;
+    color: #ffffff;
+    background-color: #428bca;
+}
+
+#Product_title {
+    /*font-family: AlteHaasGrotesk;*/
+    font-family: NexusBold;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e5e5e5;
+    padding-left: 10px;
+    padding-bottom: 5px;
+    max-width: 862px;
+}
+
+#product_details .price {
+    margin-top: 0px;
+    font-size: 2em;
+    padding-left: 20px;
+    padding-top: 15px;
+    font-weight: bold;
+}
+
+#product_details .price_reg {
+    font-family: NexusLight;
+    padding-left: 20px;
+    padding-top: 5px;
+}
+
+#product_details .wishlist,
+#product_details .addcart {
+    margin: 5px 8px 10px 8px;
+    width: 180px;
+    padding: 5px 8px 8px 0px;
+    border-radius: 5px;
+}
+
+#product_details .wishlist {
+    background-color: #333230;
+}
+
+#product_details .addcart {
+    background-color: #428bca;
+}
+
+#product_details .wishlist a,
+#product_details .addcart a {
+    text-transform: none;
+    line-height: 2em;
+    color: #ffffff;
+}
+
+#product_details .wishlist img {
+    vertical-align: top;
+    margin-top: 4px;
+}
+
+#product_details .addcart img {
+    vertical-align: top;
+    margin-top: 6px;
+}
+
+#product_details .description {
+    margin: 0px 10px 0px 15px;
+    font-family: NexusLight;
+}
+
+#product_details .stock {
+    margin-top: 0px;
+}
+
+#product_details h2 {
+    margin-top: 0px;
+    font-size: 1.5em;
+    font-family: NexusBold;
+}
+
+#SelectSize, #SelectColor {
+    font-family: NexusLight;
+    border: 1px solid #d0d0d0;
+    height: 30px;
+    border-radius: 5px;
+    padding: 8px;
+    line-height: normal;
+}
+
+#sharingtools {
+    margin-left: 25px;
+}
+
+.codelabel {
+    font-family: NexusBold;
+    padding-left: 20px;
+    padding-top: 8px;
+}
+
+.code {
+    font-family: NexusLight;
+    padding-top: 8px;
+}
+
+.container .jumbotron {
+    font-size: 14px;
+    padding: 8px 23px;
+    line-height: normal;
+}
+
+#genericcart .cart_header,
+.cart_label, .cart_price {
+    font-weight: normal;
+    font-family: NexusBold;
+}
+
+#genericcart a {
+    font-family: NexusLight;
+}
+
+#genericcart input[type="text"],
+#genericcart input[type="text"]:active {
+    background-color: #f5f5f5;
+    width: 100px;
+    /*padding: 5px;*/
+    min-height: 20px;
+}
+
+.remove-bottom {
+    line-height: 2;
+}
+
+.login {
+    margin-top: 30px;
+}
+
+.login input[type="checkbox"] {
+    vertical-align: middle;
+}
+
+
+.submitblock input[type="submit"],
+.submitblock input[type="submit"]:active,
+.login input[type="submit"],
+.login input[type="submit"]:active {
+    margin-top: 27px;
+    border: 0;
+    border-radius: 5px;
+    background-color: #D0D0D0;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    font-size: 1.0em;
+}
+
+.login input[type="submit"]:focus,
+.login input[type="submit"]:hover {
+    background-color: #A0A0A0;
+}
+
+.login input[type="text"],
+.login input[type="text"]:focus {
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    padding: 5px;
+    width: 220px;
+}
+
+.login input[type="password"],
+.login input[type="password"]:focus {
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    padding: 5px;
+    width: 220px;
+}
+
+
+.login label {
+    font-family: NexusBold;
+    text-transform: none;
+    font-size: 1.1em;
+    margin-left: 3px;
+    display: block;
+}
+
+.forgotpassword {
+    margin-left: 3px;
+}
+
+/*.login label[for="WishlistAddForm_gift_code"] { display: block; margin-top: 0px; }*/
+
+.login label[for="LoginForm_rememberMe"] {
+    font-family: NexusLight;
+    font-size: 0.9em;
+    padding-top: 10px;
+    display: inline;
+    vertical-align: middle;
+}
+
+.login a {
+    font-size: 0.9em;
+}
+
+.errorMessage {
+    font-size: 0.8em;
+    color: red;
+}
+
+.footer {
+    background-color: #333230;
+    margin-top: 45px;
+}
+
+.footer a,
+.footer li a {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.footer a:hover,
+.footer li a:hover {
+    font-family: NexusBold;
+}
+
+.cpages li a {
+    font-family: NexusBold;
+}
+
+.cpages li a:hover,
+.cpages li a:active {
+    background-color: #d3d3d3;
+}
+
+.dropdown-menu {
+    width: 260px;
+    float: right;
+}
+
+.cartdropdown {
+    padding: 0px 5px;
+    vertical-align: top;
+}
+.rememberMe {font-family: NexusLight}
+.note { padding-bottom: 15px; font-family: NexusLight }
+#checkout legend, h1 { font-family: NexusBold; }
+#orderdisplay h2,
+#orderdisplay a,
+#orderdisplay fieldset { font-family: NexusLight; text-decoration: none; }
+#createaccount, #promocode, #checkout label  { font-family: NexusLight; padding-left: 3px; }
+#createaccount input[type="checkbox"] { margin: 12px 0px 0px 12px; }
+#createaccount label[for="Customer_newsletter_subscribe"] { padding-top: -8px}
+#checkout input[type="text"], #checkout input[type="password"] { border: 1px solid #d0d0d0; border-radius: 5px; }
+#checkout input[type="button"] {border: 0; border-radius: 5px; padding: 8px; font-family: NexusLight;}
+#checkout input[type="text"]:focus, #checkout input[type="password"]:focus {
+    border: 1px solid #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+#checkout label[for="CheckoutForm_shippingResidential"],
+#checkout label[for="CheckoutForm_billingResidential"] {display: inline}
+#checkout select { border: 1px solid #d0d0d0;; border-radius: 5px; font-family: NexusBold; height: 28px; padding: 5px }
+#CheckoutForm_promoCode {height: 30px;}
+#checkoutSubmitButton  {border: 0; border-radius: 5px; padding: 8px; font-family: NexusBold;}
+
+#wishlistdisplay label {padding-top: 10px;}
+#wishlistdisplay label[for="CustomerAddress_makeDefaultBilling"],
+#wishlistdisplay label[for="CustomerAddress_makeDefaultShipping"] {display: inline; padding-top: 0px;}
+#wishlistdisplay select[id="CustomerAddress_state_id"] {width: 100px}
+#wishlistdisplay input[type="text"],
+#wishlistdisplay input[type="text"]:focus { font-size: 1.0em; padding: 5px; }
+
+#ShoppingCart input[type="button"],
+button[type="button"]
+{
+    font-family: NexusLight;
+    border: 0;
+    border-radius: 4px;
+    padding: 10px;
+    height: 35px;
+}
+
+
+#shoppingcart {
+    text-transform: none;
+}
+
+#shoppingcartcontinue {
+    font-family: NexusBold;
+    background-color: #428bca;
+    border: 0px;
+    border-radius: 4px;
+    color: #ffffff;
+    height: 35px;
+    padding-top: 10px;
+}
+
+#cartlabel-dropdown {
+    font-family: NexusBold;
+    padding-right: 15px;
+    text-align: right;
+}
+
+#cartsubtotal-dropdown {
+    font-family: NexusBold;
+}
+
+#cartlink-dropdown {
+    font-family: NexusBold;
+}
+
+#paginator {
+    font-family: NexusLight;
+    font-weight: normal;
+    text-align: center;
+    margin-left: -20px;
+}
+
+#gridbox {
+    position: relative;
+    padding-bottom: 3px;
+    padding-left: 0px;
+    margin-right: 23px;
+}
+
+#grid {
+    max-width: 970px;
+    margin-left: -15px;
+}
+
+/*.js #main .accordion {visibility:hidden}*/
+
+/*.js #side .accordion {display:none}*/
+
+/*.accordion {margin:0; padding:0 10px}*/
+
+/*.accordion li {list-style-type:none}*/
+
+/*.accordion li.last-child {*/
+    /*margin-left:19px; */
+    /*list-style-type: none;*/
+/*}*/
+
+/*#side ul.accordion ul {margin:0; padding:0 0 0 20px;}*/
+
+/*.accordion .outer {border:1px solid #dadada; border-width:0 1px 1px; background: #fff}*/
+
+/*.accordion .inner {margin-bottom:0; padding:.5em 20px 1em; position:relative; overflow:hidden}*/
+
+/*.accordion .inner .inner {padding-bottom:0}*/
+
+/*.accordion .h {padding-top:.3em} *//* vertical padding instead of vertical margin (ie8) */
+
+/*.accordion p {margin:.5em 1px 1em}*/
+
+/*
+  Add styles for all links in the 'accordion':
+.accordion a {...}
+*/
+
+/*a.trigger {*/
+    /*display:block;*/
+    /*padding-left:20px;*/
+    /*background-image: url(../style/img/plus.gif);*/
+    /*background-repeat: no-repeat;*/
+    /*background-position: 1px 50%;*/
+    /*font-weight:700;*/
+/*}*/
+
+/*a.trigger.open {background-image: url(../style/img/minus.gif)}*/
+
+/*.last-child a.trigger{padding-left:1px; background-image:none; font-weight:normal}*/
+
+/*#main a.trigger {background-color:#f0f0f0}*/
+
+/*#main a.trigger.open {border-color:#dadada; background-color:#e7e7e7}*/
+
+/*#main a:hover.trigger.open, #main a:focus.trigger.open, #main a:active.trigger.open {border-color:#bcd}*/
+
+/*#side a.active{font-weight:700; color:#f72; text-decoration:none}*/
