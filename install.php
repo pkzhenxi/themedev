@@ -4268,7 +4268,7 @@ function xls_check_server_environment()
 		$checked['short_open_tag in Php.ini must be turned On'] = ($phpinfo['Core']['short_open_tag'] == "On" ? "pass" : "fail");
 	}
 
-	if (version_compare(PHP_VERSION, '5.4.0', '>'))
+	if (version_compare(PHP_VERSION, '5.3.27', '>='))
 		$checked['Default timezone'] = ($phpinfo['date']['date.timezone'] == "no value" ? "fail" : "pass");
 
 
